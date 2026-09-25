@@ -58,6 +58,29 @@ Starting revision `1c44c8d` (main). Commands above; Python 3.12, Node 24.13.0, g
 
 No checkpoints yet.
 
+### 2026-09-25 22:28:18 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["GitHub branch protection + auto-merge are post-push API operations; ci cannot report on any PR until the workflow exists on default branch or as head check \u2014 will verify checks on this PR head after push, then apply protection. PR #2 (other task, #1) will need branch refresh to inherit ci; not owned here."],"changed":[".github/workflows/ci.yml (new), AGENTS.md, HANDOFF.md, .github/pull_request_template.md, .github/ISSUE_TEMPLATE/task.md (marker block only), tasks/TASK-ACS-0002-ci-gates.md (new), checkpoints/CURRENT.md"],"completed":["ACS-0002 product delivered on task/ACS-0002-ci-gates: ci.yml (pinned continuity 0.5.0@743d50e validate+preflight, tracked secret scan, YAML/JSON template parse, node --check TS), issue-log-format 1.1.0 marker block appended to AGENTS/HANDOFF/PR template/issue template, TASK-ACS-0002 projection, CURRENT repointed. All gate steps pass locally (0.4.0 and 0.5.0 validate VALID; preflight TARGET_VALID; scan clean; 4 templates parse; jev-court.ts node --check exit 0)."],"decisions":["CI pins public commit 743d50e (0.5.0) \u2014 local 0.4.0 is an editable install of the source repo whose tree already declares 0.5.0; the published marker-block requirement originates from PCM 0.5.0, so validate/preflight run against the pinned public revision, not a floating version. Branch protection keeps required_approving_review_count=0 (solo author cannot self-approve; GitHub rejects >0 without at least one eligible reviewer) \u2014 machine gate ci is the enforcement; owner can raise later."],"evidence":["Product commit ef7c8cf; live issue #5 (leaf, parent none, deps none); #3 receipt published for docs head c3f7f91 (comment 5840410656); pip git-install of Pukujan/project-continuity-modules@743d50e verified in clean target (continuity 0.5.0)."],"next_action":"Push checkpoint; publish #5 receipt keyed to request id + pushed SHA; open PR to main with Refs #5; enable repo auto-merge and wait for ci; apply main protection (required check ci, restrict pushes); record merge SHA on #5.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0002","timestamp":"2026-09-25T22:28:18Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"3bbab76ddb1a9b8d9c93672b663c5ac392188316c7889170d22de6f8881dc5bb","request_id":"acs-0002-cigates-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0002"} -->
+
+Completed:
+- ACS-0002 product delivered on task/ACS-0002-ci-gates: ci.yml (pinned continuity 0.5.0@743d50e validate+preflight, tracked secret scan, YAML/JSON template parse, node --check TS), issue-log-format 1.1.0 marker block appended to AGENTS/HANDOFF/PR template/issue template, TASK-ACS-0002 projection, CURRENT repointed. All gate steps pass locally (0.4.0 and 0.5.0 validate VALID; preflight TARGET_VALID; scan clean; 4 templates parse; jev-court.ts node --check exit 0).
+
+Evidence:
+- Product commit ef7c8cf; live issue #5 (leaf, parent none, deps none); #3 receipt published for docs head c3f7f91 (comment 5840410656); pip git-install of Pukujan/project-continuity-modules@743d50e verified in clean target (continuity 0.5.0).
+
+Decisions:
+- CI pins public commit 743d50e (0.5.0) — local 0.4.0 is an editable install of the source repo whose tree already declares 0.5.0; the published marker-block requirement originates from PCM 0.5.0, so validate/preflight run against the pinned public revision, not a floating version. Branch protection keeps required_approving_review_count=0 (solo author cannot self-approve; GitHub rejects >0 without at least one eligible reviewer) — machine gate ci is the enforcement; owner can raise later.
+
+Changed:
+- .github/workflows/ci.yml (new), AGENTS.md, HANDOFF.md, .github/pull_request_template.md, .github/ISSUE_TEMPLATE/task.md (marker block only), tasks/TASK-ACS-0002-ci-gates.md (new), checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- GitHub branch protection + auto-merge are post-push API operations; ci cannot report on any PR until the workflow exists on default branch or as head check — will verify checks on this PR head after push, then apply protection. PR #2 (other task, #1) will need branch refresh to inherit ci; not owned here.
+
+Next:
+- Push checkpoint; publish #5 receipt keyed to request id + pushed SHA; open PR to main with Refs #5; enable repo auto-merge and wait for ci; apply main protection (required check ci, restrict pushes); record merge SHA on #5.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
