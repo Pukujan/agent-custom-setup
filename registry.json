@@ -1,0 +1,29 @@
+{
+  "system": "agent-custom-setup",
+  "version": "0.1.0",
+  "recorded_at": "2026-09-25T20:39:29Z",
+  "valid_time": {
+    "start": "2026-09-25T20:39:29Z",
+    "end": null
+  },
+  "status": "draft",
+  "description": "Modular registry of custom agent setups with temporal and version metadata. First module: Claude Code InferHub launcher.",
+  "modules": [
+    {
+      "id": "claude-code",
+      "version": "0.1.0",
+      "path": "modules/claude-code/",
+      "recorded_at": "2026-09-25T20:39:29Z",
+      "valid_time": {
+        "start": "2026-09-25T20:39:29Z",
+        "end": null
+      },
+      "source_paths": [
+        "C:\\Users\\pujan\\OneDrive\\Desktop\\configs\\claude-code\\launch-claude-inferhub.ps1",
+        "C:\\Users\\pujan\\OneDrive\\Desktop\\configs\\claude-code\\launch-claude-inferhub.cmd"
+      ],
+      "status": "active",
+      "summary": "Sanitized Claude Code launcher that seats InferHub Top-20 models through the local LiteLLM proxy at 127.0.0.1:4000."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": "content-generation.brand-language.v1",
+  "name": "agent-custom-setup",
+  "personality": [
+    "clear",
+    "careful",
+    "operator-practical",
+    "secrets-aware"
+  ],
+  "audience_feeling": "The reader should feel that messy Desktop launchers can become a versioned registry without putting secrets into git.",
+  "promise": "Register sanitized agent setups with explicit versions and temporal metadata.",
+  "preferred_terms": {
+    "custom setup": "a launcher and notes package for one agent tool",
+    "registry": "the index of modules with temporal metadata",
+    "sanitized": "secrets remain outside the repository"
+  },
+  "avoid": [
+    "revolutionary agent platform",
+    "stores credentials in the repo",
+    "works everywhere automatically",
+    "AI magic setup"
+  ],
+  "good_examples": [
+    "Your Claude Code InferHub launcher lives on Desktop. This registry keeps a sanitized, versioned copy.",
+    "Secrets stay in Desktop configs/.env and InferHub .env — never in this repository."
+  ],
+  "bad_examples": [
+    "A seamless AI-powered launcher platform that securely stores all your keys.",
+    "One repo to rule every agent setup forever."
+  ]
+}

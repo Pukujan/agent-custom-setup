@@ -1,0 +1,80 @@
+{
+  "schema_version": "content-generation.project-brief.v2",
+  "project": "agent-custom-setup",
+  "audience": [
+    "operators who keep customized agent launchers on a personal machine",
+    "agents that need a versioned, sanitized copy of those setups",
+    "future module authors adding Claude Code alternatives or other agent stacks"
+  ],
+  "problem": "Custom agent launchers live as one-off Desktop scripts. Without a registry, versions drift, secrets risk being copied into git, and another agent cannot tell which setup is current or where secrets are supposed to stay.",
+  "solution": "A private modular registry that stores sanitized setup modules with temporal metadata (version, recorded_at, optional valid_time, source paths, status), starting with the Claude Code InferHub launcher.",
+  "mechanism": [
+    "Index modules in registry.json with version and temporal fields",
+    "Keep each module under modules/<id>/ with module.json, files, and NOTES.md",
+    "Copy sanitized launchers only; document external .env locations for secrets",
+    "Adopt PCM for continuity and CGM for an evidence-bound README"
+  ],
+  "evidence": [
+    {
+      "claim": "The repository is designed as a modular registry of custom agent setups with temporal and version metadata.",
+      "source": "Alex design brief for agent-custom-setup scaffolding (2026-09-25).",
+      "status": "shipped",
+      "supports": "Establishes intended product shape: registry.json plus modules with version/recorded_at/status.",
+      "limits": "Does not prove long-term adoption by other tools; only this scaffold exists so far.",
+      "recorded_at": "2026-09-25T20:39:29Z",
+      "source_revision": {
+        "kind": "owner_decision",
+        "reference": "Alex scaffolding request for Pukujan/agent-custom-setup on 2026-09-25",
+        "observed_at": "2026-09-25"
+      },
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The first module is a sanitized Claude Code InferHub launcher copied from Desktop configs.",
+      "source": "modules/claude-code/launch-claude-inferhub.ps1 and launch-claude-inferhub.cmd; Desktop source paths recorded in module.json.",
+      "status": "shipped",
+      "supports": "The module directory contains the launcher files and documents that secrets stay in Desktop/InferHub .env files.",
+      "limits": "Does not claim the Desktop originals will stay identical; refresh requires a new module version bump.",
+      "recorded_at": "2026-09-25T20:39:29Z",
+      "source_revision": {
+        "kind": "owner_decision",
+        "reference": "modules/claude-code/module.json secrets_policy and NOTES.md",
+        "observed_at": "2026-09-25"
+      },
+      "cite_in_readme": true
+    },
+    {
+      "claim": "Narrative README marketing images are not generated on this machine yet.",
+      "source": "assets/IMAGE_NOTES.md",
+      "status": "planned",
+      "supports": "Documents that text-first README ships first and visuals are TBD.",
+      "limits": "Does not provide hero/problem raster assets for the first-screen visual test.",
+      "recorded_at": "2026-09-25T20:39:29Z",
+      "source_revision": {
+        "kind": "owner_decision",
+        "reference": "assets/IMAGE_NOTES.md",
+        "observed_at": "2026-09-25"
+      },
+      "cite_in_readme": true
+    }
+  ],
+  "boundaries": [
+    "This repository never stores API keys, tokens, cookies, or .env contents.",
+    "Desktop configs remain the live personal source; this repo holds sanitized, versioned copies.",
+    "Narrative marketing images are TBD; the first README is text-first.",
+    "Do not call paid InferHub APIs from documentation or CI for this scaffold."
+  ],
+  "terminology": {
+    "preferred": {
+      "module": "a versioned custom agent setup package",
+      "recorded_at": "transaction time when the metadata was written",
+      "valid_time": "optional period when the setup claim applies",
+      "sanitized launcher": "script copy without embedded secrets"
+    },
+    "avoid": [
+      "guaranteed working on every machine",
+      "seamless one-click AI setup",
+      "stores your API keys safely in git"
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "id": "claude-code",
+  "title": "Claude Code via InferHub + local LiteLLM",
+  "version": "0.1.0",
+  "recorded_at": "2026-09-25T20:39:29Z",
+  "valid_time": {
+    "start": "2026-09-25T20:39:29Z",
+    "end": null
+  },
+  "status": "active",
+  "source_paths": [
+    "C:\\Users\\pujan\\OneDrive\\Desktop\\configs\\claude-code\\launch-claude-inferhub.ps1",
+    "C:\\Users\\pujan\\OneDrive\\Desktop\\configs\\claude-code\\launch-claude-inferhub.cmd"
+  ],
+  "files": [
+    {
+      "path": "launch-claude-inferhub.ps1",
+      "role": "launcher",
+      "notes": "Interactive model picker + seat apply + Claude Code start"
+    },
+    {
+      "path": "launch-claude-inferhub.cmd",
+      "role": "launcher-wrapper",
+      "notes": "Windows double-click entry that invokes the .ps1"
+    },
+    {
+      "path": "NOTES.md",
+      "role": "operator-notes"
+    }
+  ],
+  "secrets_policy": {
+    "never_commit": [
+      "API keys",
+      "tokens",
+      "cookies",
+      ".env file contents",
+      "LITELLM_MASTER_KEY values",
+      "InferHub credentials"
+    ],
+    "runtime_secret_locations": [
+      "C:\\Users\\pujan\\OneDrive\\Desktop\\configs\\.env",
+      "D:\\claude\\inferhub\\.env"
+    ],
+    "repo_rule": "This module only stores sanitized launchers and docs. Secrets stay outside the repo."
+  },
+  "dependencies": [
+    "Local LiteLLM workbench at D:\\claude\\litellm (repo Pukujan/litellm-ckff-ops)",
+    "Claude Code CLI available as `claude` on PATH",
+    "Desktop configs/.env providing LITELLM_MASTER_KEY or LITELLM_PROXY_KEY"
+  ],
+  "summary": "Pick a main and optional advisor model from the InferHub Top 20 list, apply seating aliases through the unified local LiteLLM proxy, then launch Claude Code against http://127.0.0.1:4000."
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.4.0",
+  "assets": [
+    {
+      "path": "assets/registry-icon.svg",
+      "role": "registry icon",
+      "orientation": "svg",
+      "dimensions": "64x64 viewBox",
+      "text_policy": "none",
+      "review": "accepted as non-narrative placeholder; narrative rasters TBD"
+    }
+  ]
+}
