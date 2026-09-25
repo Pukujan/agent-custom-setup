@@ -1,0 +1,36 @@
+{
+  "schema_version": "content-generation.review-rubric.v1",
+  "dimensions": [
+    {
+      "id": "human_comprehension",
+      "question": "Can a first-time reader explain in twenty seconds what this repo is for and what is real versus pending?",
+      "weight": 2
+    },
+    {
+      "id": "specificity",
+      "question": "Does the README use this repository's concrete situations, mechanisms, and files rather than generic agent-platform language?",
+      "weight": 2
+    },
+    {
+      "id": "claim_safety",
+      "question": "Is every material claim tied to an immutable source, and are open-pull-request increments labeled pending rather than shipped to main?",
+      "weight": 3
+    },
+    {
+      "id": "skimmability",
+      "question": "Can a reader recover the problem, promise, mechanism, and next action from headings, bold anchors, and link text alone?",
+      "weight": 1
+    },
+    {
+      "id": "visual_clarity",
+      "question": "Does the shipped asset carry one clear idea, and does the visual section state honestly that narrative rasters are not generated yet?",
+      "weight": 2
+    },
+    {
+      "id": "responsive_fit",
+      "question": "Does the README stay useful and readable when rendered narrow (phone) without wide code blocks dominating the first screen?",
+      "weight": 1
+    }
+  ],
+  "decision_rule": "Accept only when claim_safety passes and no weighted dimension is below 3/5; human review may override a model score with a recorded reason."
+}

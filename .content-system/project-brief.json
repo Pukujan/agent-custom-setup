@@ -1,0 +1,127 @@
+{
+  "schema_version": "content-generation.project-brief.v2",
+  "project": "agent-custom-setup",
+  "audience": [
+    "operators who keep customized agent setups on a personal machine and want them versioned and reviewable",
+    "fresh agent sessions that must resume project state without relying on prior chat history",
+    "future module authors adding other agent stacks alongside oh-my-pi and Claude Code"
+  ],
+  "problem": "Agent setups and their operating discipline usually live only inside one working session or one person's home folder. When the session ends, the next reader cannot tell what is actually shipped, which copy is current, whether a secret was pasted into a file, or what the agreed next step is.",
+  "solution": "A PCM-governed repository that versions custom agent setups as reviewable modules, keeps secrets out of git, and holds durable project state (PROJECT / CURRENT / TASK / checkpoint) so any fresh session can resume from repository state alone.",
+  "mechanism": [
+    "Adopt the Project Continuity Protocol so GitHub issues own task state and the repo holds versioned projections",
+    "Ship each agent setup as a module (config templates plus an extension) under its own directory, e.g. oh-my-pi/",
+    "Reference provider keys only by environment-variable name; keep real secrets in gitignored .env files outside the repo",
+    "Bind every README promise to a pinned Content Generation Modules adapter with immutable source citations",
+    "Deliver each change through a checkpoint, pull request, required CI, and merge before calling it done"
+  ],
+  "evidence": [
+    {
+      "claim": "The repository has adopted the Project Continuity Protocol, so live GitHub issues own task state and the checked-in PROJECT/CURRENT/TASK files are versioned projections a fresh session can resume from.",
+      "source": "checkpoints/CURRENT.md and the PCM policy block in PROJECT.md on the default branch.",
+      "status": "shipped",
+      "supports": "Establishes that continuity bookkeeping and the cold-start read order exist as committed files, not just chat.",
+      "limits": "Shows the protocol scaffold; it does not prove every future task will follow it, only that the discipline is in place.",
+      "recorded_at": "2026-09-25T22:57:00Z",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "checkpoints/CURRENT.md",
+        "observed_at": "2026-09-25",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "1c44c8d2f25cb71e8acb20253e2cc26cd682af81",
+        "path": "checkpoints/CURRENT.md",
+        "locator": "heading: Program state",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/1c44c8d2f25cb71e8acb20253e2cc26cd682af81/checkpoints/CURRENT.md"
+      },
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The oh-my-pi module ships advisor/JEV config templates and the jev-court adjudication extension as installable, reviewable files.",
+      "source": "oh-my-pi/README.md at product commit 0b29fdc on task/ACS-0001-oh-my-pi-module (open pull request #4).",
+      "status": "shipped",
+      "supports": "Demonstrates a concrete first module with the JEV judge wiring, advisor roster, and extension the README promises.",
+      "limits": "This increment lives on a task branch behind open pull request #4 and is not yet on the default branch; the claim is the module content, not a merged main state.",
+      "recorded_at": "2026-09-25T22:57:00Z",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "oh-my-pi/README.md",
+        "observed_at": "2026-09-25",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "0b29fdccda48c875fac07b7f087b59609cbbfb99",
+        "path": "oh-my-pi/README.md",
+        "locator": "lead paragraph: Install instructions",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/0b29fdccda48c875fac07b7f087b59609cbbfb99/oh-my-pi/README.md"
+      },
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The judge role was re-pointed to a working OpenRouter decisions provider after the previous selector returned 401 for every candidate; live advisor notes were adjudicated.",
+      "source": "Issue #3 checkpoint evidence: three real advisor notes returned act at confidence 0.92/0.94/0.96 and trivia was ignored at 0.98.",
+      "status": "shipped",
+      "supports": "Shows the JEV path was exercised end to end and produced concrete, costed decisions rather than an untested claim.",
+      "limits": "Confidence figures are from a small sample on 2026-09-25 against one provider; they do not establish long-run accuracy or provider stability.",
+      "recorded_at": "2026-09-25T22:57:00Z",
+      "source_revision": {
+        "kind": "user_observation",
+        "reference": "Issue #3 live JEV adjudication evidence",
+        "observed_at": "2026-09-25",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/issues/3"
+      },
+      "cite_in_readme": true
+    },
+    {
+      "claim": "A planned registry/index and a Claude Code module scaffold with sanitized launchers are being developed as a separate module.",
+      "source": "modules/claude-code/module.json at commit 8420b78 on the feat/scaffold-pcm-cgm-1 branch (open pull request #2), and issue #1 design scope.",
+      "status": "planned",
+      "supports": "Records the intended shape of a secrets-safe registry for other agent stacks.",
+      "limits": "This work sits on an unmerged open pull request and is not part of the default branch; treat it as proposed, not delivered.",
+      "recorded_at": "2026-09-25T22:57:00Z",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "modules/claude-code/module.json",
+        "observed_at": "2026-09-25",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "8420b7876a77b38985b652541071e8cca72288ca",
+        "path": "modules/claude-code/module.json",
+        "locator": "field: secrets_policy",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/8420b7876a77b38985b652541071e8cca72288ca/modules/claude-code/module.json"
+      },
+      "cite_in_readme": true
+    },
+    {
+      "claim": "This repository owns only its own project state and does not claim to be a hosted agent platform or a secrets store.",
+      "source": "Issue #1 scaffolding scope captured on the GitHub issue tracker.",
+      "status": "planned",
+      "supports": "States the product boundary so the README makes no platform or credential-vault promises.",
+      "limits": "It is a scope decision on an open issue, not measured behavior; multi-module adoption is still unproven.",
+      "recorded_at": "2026-09-25T22:57:00Z",
+      "source_revision": {
+        "kind": "owner_decision",
+        "reference": "Registry scope captured in issue #1",
+        "observed_at": "2026-09-25",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/issues/1"
+      },
+      "cite_in_readme": true
+    }
+  ],
+  "boundaries": [
+    "This repository never stores API keys, tokens, cookies, or .env contents; config templates reference environment-variable names only.",
+    "Provider key values live outside the repository in gitignored files on the operator's machine.",
+    "Claims tied to work on open pull requests are labeled as pending or planned, never as shipped to the default branch.",
+    "Narrative marketing images are not generated yet; the README is text-first and says so.",
+    "This repository is not a hosted agent platform and does not guarantee a setup works on every machine."
+  ],
+  "terminology": {
+    "preferred": {
+      "module": "a versioned custom agent setup package with its own config and notes",
+      "sanitized": "a copy that keeps secret values out of the repository",
+      "projection": "a checked-in, versioned reflection of state whose authority lives on GitHub issues",
+      "as-of": "the revision or date a claim was verified against"
+    },
+    "avoid": [
+      "guaranteed to work everywhere",
+      "seamless one-click AI setup",
+      "stores your API keys safely in git"
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": "content-generation.brand-language.v1",
+  "name": "agent-custom-setup",
+  "personality": [
+    "clear",
+    "careful",
+    "operator-practical",
+    "secrets-aware",
+    "evidence-bound"
+  ],
+  "audience_feeling": "The reader should feel that a messy personal agent setup can become a versioned, reviewable project without putting secrets into git and without depending on one chat session's memory.",
+  "promise": "Version custom agent setups as reviewable modules and keep project state durable, so a fresh session can resume from the repository alone.",
+  "preferred_terms": {
+    "module": "a versioned custom agent setup package with its own config and notes",
+    "registry": "the index of modules with temporal metadata",
+    "sanitized": "secret values stay outside the repository",
+    "projection": "a checked-in reflection of state whose authority lives on GitHub issues"
+  },
+  "avoid": [
+    "revolutionary agent platform",
+    "stores credentials in the repo",
+    "works everywhere automatically",
+    "AI magic setup",
+    "seamless one-click"
+  ],
+  "good_examples": [
+    "Your advisor and judge wiring lives in one chat session today. This repository keeps it as a versioned module another session can install.",
+    "Secrets stay in gitignored .env files outside this repository; templates name the variables only."
+  ],
+  "bad_examples": [
+    "A seamless AI-powered launcher platform that securely stores all your keys.",
+    "One repo to rule every agent setup forever."
+  ]
+}

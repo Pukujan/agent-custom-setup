@@ -1,0 +1,32 @@
+{
+  "schema_version": "content-generation.adapter.v1",
+  "system": "content-generation-modules",
+  "helper_repository": "https://github.com/Pukujan/content-generation-modules",
+  "helper_version": "0.4.0",
+  "helper_commit": "f85e88bc00362c53061d95ac7811bd9c6ada8e32",
+  "modules": [
+    "brand-foundation",
+    "content-context",
+    "writing-direction",
+    "visual-direction",
+    "image-generation",
+    "html-demo"
+  ],
+  "authoritative_project_files": [
+    "PROJECT.md",
+    "checkpoints/CURRENT.md",
+    "README.md"
+  ],
+  "planned_project_files": [
+    "registry.json",
+    "modules/claude-code/module.json",
+    "modules/claude-code/NOTES.md",
+    "oh-my-pi/extensions/jev-court.ts",
+    "oh-my-pi/config/models.yml",
+    "oh-my-pi/config/WATCHDOG.yml"
+  ],
+  "review_outputs": [
+    ".content-system/project-brief.json",
+    ".content-system/review-rubric.json"
+  ]
+}
