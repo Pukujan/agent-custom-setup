@@ -151,6 +151,29 @@ Blocked/uncertain:
 Next:
 - Publish #5 correction receipt + #3 linked progression update for c9ae9f8/this checkpoint SHA; then owner unblocks Actions; then gh run rerun 36196958507 --failed, require context 'gates' (or add job name: ci and re-check), enforce_admins=true, auto-merge #6.
 
+### 2026-09-25 23:57:43 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["Unchanged root: private-repo runner allocation (plan/spend state unobservable without user scope). NEW verified constraint: even with capacity, branch protection on private requires Pro+."],"changed":["checkpoints/CURRENT.md, tasks/TASK-ACS-0002-ci-gates.md (provenance + sync wording)"],"completed":["Verified external research replaces inference in ACS-0002 records: docs.github.com billing + protected-branches pages fetched and cited (Free=2,000 private min/mo account-wide, Pro=3,000, public standard runners free; private-repo protected branches need Pro/Team/Enterprise). Consequence recorded: acceptance items 2-3 are plan-gated, owner options = public conversion / upgrade / record plan-blocked. Merge-not-rebase sync decision recorded (advisor-caught contradiction: bodies promised no-history-rewrite while plans said rebase). Closing-keyword surfaces confirmed at source (PR body + commit messages; comments not in scope) -> hazard narrative consolidated on issue comments, PR #4 body kept minimal."],"decisions":["Owner direction (this session): use spec-driven external research with provenance, and omp -p headless sessions for differential/iterative README evaluation (see #7) \u2014 gates must be machine-checked against primary specs, not advisor summaries."],"evidence":["web_search fetch 2026-09-25T23:5Z: docs.github.com/en/billing/concepts/product-billing/github-actions; docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches; docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue. Live body audits: PR4/6/8 zero keyword-adjacent-number hits (colon-aware grep). PR4 live grep 'rebase' = none. continuity validate VALID pre-commit."],"next_action":"On ACS-0003 branch: build hidden-holdout + metamorphic + baseline-vs-current differential eval per CGM HOLDOUT_EVALUATION/TDD docs using omp -p --no-tools --no-session arms; iterate README on failures; checkpoint + #7 receipt.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0002","timestamp":"2026-09-25T23:57:43Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a013fbc44bd8e8a7191540e9e71e122ed97eef22d18066ef172696c810df5aba","request_id":"acs-0002-plangate-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0002"} -->
+
+Completed:
+- Verified external research replaces inference in ACS-0002 records: docs.github.com billing + protected-branches pages fetched and cited (Free=2,000 private min/mo account-wide, Pro=3,000, public standard runners free; private-repo protected branches need Pro/Team/Enterprise). Consequence recorded: acceptance items 2-3 are plan-gated, owner options = public conversion / upgrade / record plan-blocked. Merge-not-rebase sync decision recorded (advisor-caught contradiction: bodies promised no-history-rewrite while plans said rebase). Closing-keyword surfaces confirmed at source (PR body + commit messages; comments not in scope) -> hazard narrative consolidated on issue comments, PR #4 body kept minimal.
+
+Evidence:
+- web_search fetch 2026-09-25T23:5Z: docs.github.com/en/billing/concepts/product-billing/github-actions; docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches; docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue. Live body audits: PR4/6/8 zero keyword-adjacent-number hits (colon-aware grep). PR4 live grep 'rebase' = none. continuity validate VALID pre-commit.
+
+Decisions:
+- Owner direction (this session): use spec-driven external research with provenance, and omp -p headless sessions for differential/iterative README evaluation (see #7) — gates must be machine-checked against primary specs, not advisor summaries.
+
+Changed:
+- checkpoints/CURRENT.md, tasks/TASK-ACS-0002-ci-gates.md (provenance + sync wording)
+
+Blocked/uncertain:
+- Unchanged root: private-repo runner allocation (plan/spend state unobservable without user scope). NEW verified constraint: even with capacity, branch protection on private requires Pro+.
+
+Next:
+- On ACS-0003 branch: build hidden-holdout + metamorphic + baseline-vs-current differential eval per CGM HOLDOUT_EVALUATION/TDD docs using omp -p --no-tools --no-session arms; iterate README on failures; checkpoint + #7 receipt.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
