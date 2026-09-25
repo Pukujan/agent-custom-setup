@@ -33,16 +33,17 @@ A fresh session resuming any task here can trust that "delivered" means machine-
 
 ## Acceptance criteria
 
-- [ ] `gh pr checks` on this PR head shows `ci` pass.
-- [ ] `main` protection reports required status check `ci` + push restriction; direct push rejected.
-- [ ] This PR merges via auto-merge once `ci` is green (merge SHA recorded on #5).
-- [ ] After rebase, `gh pr checks 4` shows `ci` green on ACS-0001 head.
+- [ ] `gh pr checks` on this PR head shows the check (context `gates` — job id; add `name: ci` to the job if a stable `ci` context is wanted) pass.
+- [ ] `main` protection requires status check `gates` and rejects direct pushes (`enforce_admins=true`; `restrict_pushes` availability on this plan = observe at apply time).
+- [ ] This PR merges via auto-merge once the check is green (merge SHA recorded on #5).
+- [ ] After rebase, `gh pr checks 4` shows the check green on ACS-0001 head.
 - [ ] Pinned 0.5.0 `continuity validate` exits VALID with zero marker warnings.
 
 ## Evidence and sources
 
 - Observed 2026-09-25 (local): `pip install git+https://github.com/Pukujan/project-continuity-modules.git@743d50e` → continuity 0.5.0; `validate --root .` → VALID + 4 marker warnings (AGENTS.md, HANDOFF.md, PR template, issue template); `preflight --root .` → TARGET_VALID exit 0. `node --check oh-my-pi/extensions/jev-court.ts` exit 0 (Node 24). Secret-scan regex clean. YAML/JSON config templates parse.
 - Observed: `gh api .../branches/main/protection` → 404 "Branch not protected"; `gh pr checks 4` → "no checks reported" (2026-09-25, before this task).
+- Observed 2026-09-25 (correction/supersession for the checkpoint-log wording "public gives 2000 free Linux min/mo" in request `acs-0002-blocker-b-20260925` — figures were inverted): public sibling `Pukujan/project-continuity-modules` Actions = 387 runs, latest push run success 22:59Z → Actions healthy account-wide; this failure is private-repo runner allocation. Per GitHub billing docs (reported): Free = 2,000 private Linux min/month **account-wide**; public repos unmetered on standard runners. Plan eligibility for private-repo protection/rulesets also reportedly requires Pro/Team/Enterprise — unverified at source; observe at apply time.
 
 ## Reproduction details (only when needed)
 
