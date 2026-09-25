@@ -81,6 +81,52 @@ Blocked/uncertain:
 Next:
 - Push checkpoint; publish #5 receipt keyed to request id + pushed SHA; open PR to main with Refs #5; enable repo auto-merge and wait for ci; apply main protection (required check ci, restrict pushes); record merge SHA on #5.
 
+### 2026-09-25 22:39:33 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["GitHub-hosted runner allocation for private-repo Actions on this account. Owner unblock options: add payment method / raise Actions spend limit, wait for monthly reset, attach a self-hosted runner, or make the repo public (2000 free Linux min/mo). Until then acceptance items 1-4 for ACS-0002 are unverifiable and ACS-0001 (PR #4) remains owner-review-only."],"changed":["checkpoints/CURRENT.md (blocker + next-action only)"],"completed":["CI runner blocker diagnosed and recorded (CURRENT Blockers row). Observed twice on PR #6 head d78486b: run 36196958507 jobs 108274881569 + rerun 108275962556 fail in ~2s with steps=[] and billable.total_ms=0; gh run view --log -> 'log not found'; actions/permissions enabled/all; runners 0; repo private. => job never gets a runner (Actions minutes/eligibility), not a workflow-content defect: identical gate commands pass locally on 0.4.0 and pinned 0.5.0."],"decisions":["Deliberately DEFER main branch protection + auto-merge until ci can actually pass: a required check that fails for capacity reasons freezes every merge (fail-closed discipline cuts both ways). Product (workflow + marker sync) stays pushed and reviewable at #6. *Inferred:* free private repos here have no included Linux minutes (or spend limit 0 / trial expired); owner must verify at github.com/settings/billing (gh token lacks user scope, endpoint 404)."],"evidence":["https://github.com/Pukujan/agent-custom-setup/actions/runs/36196958507 (conclusion failure x2 attempts, zero steps); gh api repos/Pukujan/agent-custom-setup/actions/runs/36196958507/timing -> billable UBUNTU total_ms 0; PR #6 head d78486ba2e7f406aa797d428a626ce11a073e658."],"next_action":"Owner: fix Actions capacity/eligibility, then re-run PR #6 checks (gh run rerun 36196958507 --failed) \u2014 expect ci green within minutes; then apply main protection (required check ci, enforce_admins=false, restrict_pushes=true, required_approving_review_count=0) and enable auto-merge on #6; after merge, rebase task/ACS-0001 onto gated main, confirm ci on #4, owner merges, close #3.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0002","timestamp":"2026-09-25T22:39:33Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"96f6605b9a1cc22623c8fdf3834faad1dd231c7b3f40a4bd156bf2cd3c7474b1","request_id":"acs-0002-blocker-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0002"} -->
+
+Completed:
+- CI runner blocker diagnosed and recorded (CURRENT Blockers row). Observed twice on PR #6 head d78486b: run 36196958507 jobs 108274881569 + rerun 108275962556 fail in ~2s with steps=[] and billable.total_ms=0; gh run view --log -> 'log not found'; actions/permissions enabled/all; runners 0; repo private. => job never gets a runner (Actions minutes/eligibility), not a workflow-content defect: identical gate commands pass locally on 0.4.0 and pinned 0.5.0.
+
+Evidence:
+- https://github.com/Pukujan/agent-custom-setup/actions/runs/36196958507 (conclusion failure x2 attempts, zero steps); gh api repos/Pukujan/agent-custom-setup/actions/runs/36196958507/timing -> billable UBUNTU total_ms 0; PR #6 head d78486ba2e7f406aa797d428a626ce11a073e658.
+
+Decisions:
+- Deliberately DEFER main branch protection + auto-merge until ci can actually pass: a required check that fails for capacity reasons freezes every merge (fail-closed discipline cuts both ways). Product (workflow + marker sync) stays pushed and reviewable at #6. *Inferred:* free private repos here have no included Linux minutes (or spend limit 0 / trial expired); owner must verify at github.com/settings/billing (gh token lacks user scope, endpoint 404).
+
+Changed:
+- checkpoints/CURRENT.md (blocker + next-action only)
+
+Blocked/uncertain:
+- GitHub-hosted runner allocation for private-repo Actions on this account. Owner unblock options: add payment method / raise Actions spend limit, wait for monthly reset, attach a self-hosted runner, or make the repo public (2000 free Linux min/mo). Until then acceptance items 1-4 for ACS-0002 are unverifiable and ACS-0001 (PR #4) remains owner-review-only.
+
+Next:
+- Owner: fix Actions capacity/eligibility, then re-run PR #6 checks (gh run rerun 36196958507 --failed) — expect ci green within minutes; then apply main protection (required check ci, enforce_admins=false, restrict_pushes=true, required_approving_review_count=0) and enable auto-merge on #6; after merge, rebase task/ACS-0001 onto gated main, confirm ci on #4, owner merges, close #3.
+
+### 2026-09-25 22:40:31 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["GitHub-hosted runner allocation for private-repo Actions on this account. Owner unblock options: add payment method / raise Actions spend limit, wait for monthly reset, attach a self-hosted runner, or make the repo public (2000 free Linux min/mo). Until then ACS-0002 acceptance items 1-4 are unverifiable and ACS-0001 (PR #4) remains owner-review-only."],"changed":["checkpoints/CURRENT.md (blocker + next-action rows only); docs commit 9a4c1cf or current head"],"completed":["CI runner blocker diagnosed and recorded in CURRENT. Observed twice on PR #6 head d78486b: run 36196958507 jobs 108274881569 + rerun 108275962556 fail in ~2s with steps=[] and billable.total_ms=0; gh run view --log -> 'log not found'; actions/permissions enabled/all; runners 0; repo private. => job never gets a runner (Actions minutes/eligibility), not a workflow-content defect: identical gate commands pass locally on 0.4.0 and pinned 0.5.0."],"decisions":["Deliberately DEFER main branch protection + auto-merge until ci can actually pass: a required check that fails for capacity reasons freezes every merge (fail-closed discipline cuts both ways). Product (workflow + marker sync) stays pushed and reviewable at #6. *Inferred:* this private repo has no included Linux minutes (spend limit 0 or expired trial); owner verifies at github.com/settings/billing (gh token lacks user scope; billing endpoint 404)."],"evidence":["https://github.com/Pukujan/agent-custom-setup/actions/runs/36196958507 (conclusion failure x2 attempts, zero steps); gh api repos/Pukujan/agent-custom-setup/actions/runs/36196958507/timing -> billable UBUNTU total_ms 0; PR #6 head d78486ba2e7f406aa797d428a626ce11a073e658."],"next_action":"Owner fixes Actions capacity/eligibility; then gh run rerun 36196958507 --failed (expect ci green on #6); then apply main protection (required check ci, enforce_admins=false, restrict_pushes=true, required_approving_review_count=0) + auto-merge #6; after merge, rebase task/ACS-0001 onto gated main, confirm ci on #4, owner merges, close #3.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0002","timestamp":"2026-09-25T22:40:31Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a492609ce04cb8b78e0b3b9e626bcb1df11632442bc56282ad2cf8a949783420","request_id":"acs-0002-blocker-b-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0002"} -->
+
+Completed:
+- CI runner blocker diagnosed and recorded in CURRENT. Observed twice on PR #6 head d78486b: run 36196958507 jobs 108274881569 + rerun 108275962556 fail in ~2s with steps=[] and billable.total_ms=0; gh run view --log -> 'log not found'; actions/permissions enabled/all; runners 0; repo private. => job never gets a runner (Actions minutes/eligibility), not a workflow-content defect: identical gate commands pass locally on 0.4.0 and pinned 0.5.0.
+
+Evidence:
+- https://github.com/Pukujan/agent-custom-setup/actions/runs/36196958507 (conclusion failure x2 attempts, zero steps); gh api repos/Pukujan/agent-custom-setup/actions/runs/36196958507/timing -> billable UBUNTU total_ms 0; PR #6 head d78486ba2e7f406aa797d428a626ce11a073e658.
+
+Decisions:
+- Deliberately DEFER main branch protection + auto-merge until ci can actually pass: a required check that fails for capacity reasons freezes every merge (fail-closed discipline cuts both ways). Product (workflow + marker sync) stays pushed and reviewable at #6. *Inferred:* this private repo has no included Linux minutes (spend limit 0 or expired trial); owner verifies at github.com/settings/billing (gh token lacks user scope; billing endpoint 404).
+
+Changed:
+- checkpoints/CURRENT.md (blocker + next-action rows only); docs commit 9a4c1cf or current head
+
+Blocked/uncertain:
+- GitHub-hosted runner allocation for private-repo Actions on this account. Owner unblock options: add payment method / raise Actions spend limit, wait for monthly reset, attach a self-hosted runner, or make the repo public (2000 free Linux min/mo). Until then ACS-0002 acceptance items 1-4 are unverifiable and ACS-0001 (PR #4) remains owner-review-only.
+
+Next:
+- Owner fixes Actions capacity/eligibility; then gh run rerun 36196958507 --failed (expect ci green on #6); then apply main protection (required check ci, enforce_admins=false, restrict_pushes=true, required_approving_review_count=0) + auto-merge #6; after merge, rebase task/ACS-0001 onto gated main, confirm ci on #4, owner merges, close #3.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
