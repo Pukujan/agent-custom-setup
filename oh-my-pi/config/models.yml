@@ -1,0 +1,73 @@
+# OMP providers (module: oh-my-pi) — copy to ~/.omp/agent/models.yml
+# `apiKey` values below are VARIABLE NAMES, resolved from ~/.omp/agent/.env.
+providers:
+  inferhub:
+    baseUrl: https://api.inferhub.dev/v1
+    api: openai-completions
+    apiKey: inferhub_key
+    models:
+      - id: qwen3.8-flash
+        name: Qwen3.8 Flash via InferHub
+        reasoning: true
+        input: [text, image]
+        contextWindow: 1000000
+        maxTokens: 131072
+      - id: deepseek-v4.1-flash
+        name: DeepSeek V4.1 Flash via InferHub
+        reasoning: true
+        input: [text, image]
+        contextWindow: 1048576
+        maxTokens: 393216
+
+  # JEV as the native judge: OpenRouter's decisions API speaks the
+  # `openrouter-decisions` api (POST {baseUrl}/decisions, body
+  # {model, state, questions} -> typed choice + probability + confidence).
+  # Verified live 2026-09-25: typesafe/jev-1.13 -> act@0.99 / ignore@0.98,
+  # ~$0.00002 per adjudication. The old selector `openrouter/~typesafe/jev-latest`
+  # resolved to provider `openrouter-jev` with source:none and returned
+  # 401 "Missing Authentication header" on every candidate (log evidence in
+  # tasks/TASK-ACS-0001 checkpoint) — JEV contributed nothing until this fix.
+  openrouter-jev:
+    baseUrl: https://openrouter.ai/api/alpha
+    api: openrouter-decisions
+    apiKey: openrouter_key
+    models:
+      - id: typesafe/jev-1.13
+        name: TypeSafe Jev 1.13 (OpenRouter decisions)
+        reasoning: false
+        input: [text]
+        contextWindow: 128000
+        maxTokens: 8192
+
+  ckff-astra:
+    baseUrl: https://ckffai.com/v1
+    api: openai-completions
+    apiKey: ckff_astra
+    models:
+      - id: gpt-6-astra
+        name: GPT-6 Astra via CKFF
+        reasoning: true
+        input: [text, image]
+        contextWindow: 200000
+        maxTokens: 32768
+
+  ckff-image:
+    baseUrl: https://ckffai.com/v1
+    api: openai-completions
+    apiKey: ckff_image
+    models:
+      - id: gpt-image-2.5
+        name: GPT Image 2.5 via CKFF
+        reasoning: false
+        input: [text, image]
+        contextWindow: 128000
+        maxTokens: 4096
+
+modelRoles:
+  default: inferhub/qwen3.8-flash
+  advisor: inferhub/deepseek-v4.1-flash
+  task: inferhub/deepseek-v4.1-flash
+  plan: ckff-astra/gpt-6-astra
+  vision: inferhub/qwen3.8-flash
+  image: ckff-image/gpt-image-2.5
+  judge: openrouter-jev/typesafe/jev-1.13
