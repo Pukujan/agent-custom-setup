@@ -23,7 +23,7 @@ Phase: bootstrap; delivery discipline (CI gates) in flight.
 
 ## Blockers
 
-None known.
+- ACS-0002 gate is machine-failing at the infrastructure layer: every `ci` run fails in ~2–5s with **zero steps and no logs** (observed twice: run 36196958507, job 108274881569 and rerun job 108275962556; `timing.billable.total_ms: 0`; `gh api actions/runners` → 0; Actions settings enabled/all). Repo is private; Actions minutes/plan not readable with current gh scopes (billing endpoint needs `user` scope). *Inferred:* no GitHub-hosted runner was ever allocated (minutes/eligibility), not a workflow-content error — the job never started. Consequence: `main` protection + auto-merge are deliberately NOT applied yet; a required check that cannot pass would freeze every merge (fail closed). Owner decision needed: add a payment method / check Actions spend limit at github.com/settings/billing, or wait for the Actions reset, or run a self-hosted runner, or make the repo public (2000 free Linux min/mo).
 
 ## Next atomic action
 
