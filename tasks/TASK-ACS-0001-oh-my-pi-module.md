@@ -51,6 +51,29 @@ Starting revision, material inputs/configuration, runtime, exact command or prom
 
 No checkpoints yet.
 
+### 2026-09-25 22:01:25 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["Repo has no CI workflow yet; PR gates = owner review only. PCM required-check discipline for this repo pending a small ci.yml follow-up (candidate ACS-0002)."],"changed":["none"],"completed":["Module delivered on task branch: oh-my-pi config templates (judge=JEV via openrouter-jev decisions provider, syncBacklog=1, roster tool fix), jev-court extension, module README, .gitignore/no-secrets policy, task projection. PCM adoption commit already on main (1c44c8d); continuity validate VALID."],"decisions":["Secrets never enter this repo (.env/agent.db/sessions gitignored); models.yml carries env-var NAMES only. Judge provider registered explicitly (openrouter-jev, api openrouter-decisions) instead of the broken ~typesafe pseudo-path."],"evidence":["Live JEV: 3 real advisor notes -> act@0.92/0.94/0.96, trivia -> ignore@0.98, ~0.00005USD/call (openrouter.ai/api/alpha/decisions, 2026-09-25); 401 root cause in ~/.omp/logs judgment-candidate-failed entries; product commit 0b29fdc pushed to task/ACS-0001-oh-my-pi-module."],"next_action":"Open PR for task/ACS-0001-oh-my-pi-module -> main, post #3 receipt comment with pushed SHA, merge after owner check, then close #3 and mark CURRENT delivered.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0001","timestamp":"2026-09-25T22:01:25Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"d2a12014b61fc97cebb2920ebe489ae933caf25242b516536ff5809408da1cce","request_id":"acs-0001-bootstrap-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0001"} -->
+
+Completed:
+- Module delivered on task branch: oh-my-pi config templates (judge=JEV via openrouter-jev decisions provider, syncBacklog=1, roster tool fix), jev-court extension, module README, .gitignore/no-secrets policy, task projection. PCM adoption commit already on main (1c44c8d); continuity validate VALID.
+
+Evidence:
+- Live JEV: 3 real advisor notes -> act@0.92/0.94/0.96, trivia -> ignore@0.98, ~0.00005USD/call (openrouter.ai/api/alpha/decisions, 2026-09-25); 401 root cause in ~/.omp/logs judgment-candidate-failed entries; product commit 0b29fdc pushed to task/ACS-0001-oh-my-pi-module.
+
+Decisions:
+- Secrets never enter this repo (.env/agent.db/sessions gitignored); models.yml carries env-var NAMES only. Judge provider registered explicitly (openrouter-jev, api openrouter-decisions) instead of the broken ~typesafe pseudo-path.
+
+Changed:
+- none
+
+Blocked/uncertain:
+- Repo has no CI workflow yet; PR gates = owner review only. PCM required-check discipline for this repo pending a small ci.yml follow-up (candidate ACS-0002).
+
+Next:
+- Open PR for task/ACS-0001-oh-my-pi-module -> main, post #3 receipt comment with pushed SHA, merge after owner check, then close #3 and mark CURRENT delivered.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
