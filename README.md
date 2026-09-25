@@ -38,11 +38,12 @@ The Claude Code module seats InferHub Top-20 models through the local LiteLLM pr
 
 | Claim | What the evidence supports | What it does not establish | Source |
 | --- | --- | --- | --- |
-| Modular registry with temporal metadata | Scaffold includes `registry.json`, schemas, and module metadata fields | Long-term multi-module adoption | Owner design + `registry.json` |
-| First module is sanitized Claude Code launcher | `modules/claude-code/` holds `.ps1`/`.cmd` plus secrets policy | Desktop originals will never change | `modules/claude-code/module.json`, `NOTES.md` |
-| Narrative README images TBD | `assets/IMAGE_NOTES.md` records text-first shipping | First-screen marketing visuals exist | `assets/IMAGE_NOTES.md` |
+| Modular registry with temporal metadata | Scaffold includes `registry.json`, schemas, and module metadata fields | Long-term multi-module adoption | [https://github.com/Pukujan/agent-custom-setup/issues/1](https://github.com/Pukujan/agent-custom-setup/issues/1) |
+| First module is sanitized Claude Code launcher | `modules/claude-code/` holds `.ps1`/`.cmd` plus secrets policy | Desktop originals will never change | [`module.json` @ `804f9e3`](https://github.com/Pukujan/agent-custom-setup/blob/804f9e350320af49e7c66811144a91600b185844/modules/claude-code/module.json) |
+| Narrative README images TBD | `assets/IMAGE_NOTES.md` records text-first shipping | First-screen marketing visuals exist | [`IMAGE_NOTES.md` @ `804f9e3`](https://github.com/Pukujan/agent-custom-setup/blob/804f9e350320af49e7c66811144a91600b185844/assets/IMAGE_NOTES.md) |
 
 **Boundaries:** never commit API keys, tokens, cookies, or `.env` contents. Do not treat this repo as a substitute for Desktop configs. Narrative raster images are planned, not shipped.
+
 
 ## Image generation and use
 

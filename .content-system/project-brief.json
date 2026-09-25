@@ -17,29 +17,35 @@
   "evidence": [
     {
       "claim": "The repository is designed as a modular registry of custom agent setups with temporal and version metadata.",
-      "source": "Alex design brief for agent-custom-setup scaffolding (2026-09-25).",
+      "source": "GitHub issue #1 design scope; registry.json and schemas in this repository.",
       "status": "shipped",
       "supports": "Establishes intended product shape: registry.json plus modules with version/recorded_at/status.",
       "limits": "Does not prove long-term adoption by other tools; only this scaffold exists so far.",
-      "recorded_at": "2026-09-25T20:39:29Z",
+      "recorded_at": "2026-09-25T20:40:45Z",
       "source_revision": {
         "kind": "owner_decision",
-        "reference": "Alex scaffolding request for Pukujan/agent-custom-setup on 2026-09-25",
-        "observed_at": "2026-09-25"
+        "reference": "Alex scaffolding request captured in issue #1",
+        "observed_at": "2026-09-25",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/issues/1"
       },
       "cite_in_readme": true
     },
     {
       "claim": "The first module is a sanitized Claude Code InferHub launcher copied from Desktop configs.",
-      "source": "modules/claude-code/launch-claude-inferhub.ps1 and launch-claude-inferhub.cmd; Desktop source paths recorded in module.json.",
+      "source": "modules/claude-code/module.json secrets_policy and NOTES.md",
       "status": "shipped",
       "supports": "The module directory contains the launcher files and documents that secrets stay in Desktop/InferHub .env files.",
       "limits": "Does not claim the Desktop originals will stay identical; refresh requires a new module version bump.",
-      "recorded_at": "2026-09-25T20:39:29Z",
+      "recorded_at": "2026-09-25T20:40:45Z",
       "source_revision": {
-        "kind": "owner_decision",
-        "reference": "modules/claude-code/module.json secrets_policy and NOTES.md",
-        "observed_at": "2026-09-25"
+        "kind": "repository_artifact",
+        "reference": "modules/claude-code/module.json",
+        "observed_at": "2026-09-25",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "804f9e350320af49e7c66811144a91600b185844",
+        "path": "modules/claude-code/module.json",
+        "locator": "secrets_policy",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/804f9e350320af49e7c66811144a91600b185844/modules/claude-code/module.json"
       },
       "cite_in_readme": true
     },
@@ -49,11 +55,16 @@
       "status": "planned",
       "supports": "Documents that text-first README ships first and visuals are TBD.",
       "limits": "Does not provide hero/problem raster assets for the first-screen visual test.",
-      "recorded_at": "2026-09-25T20:39:29Z",
+      "recorded_at": "2026-09-25T20:40:45Z",
       "source_revision": {
-        "kind": "owner_decision",
+        "kind": "repository_artifact",
         "reference": "assets/IMAGE_NOTES.md",
-        "observed_at": "2026-09-25"
+        "observed_at": "2026-09-25",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "804f9e350320af49e7c66811144a91600b185844",
+        "path": "assets/IMAGE_NOTES.md",
+        "locator": "heading: Image notes",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/804f9e350320af49e7c66811144a91600b185844/assets/IMAGE_NOTES.md"
       },
       "cite_in_readme": true
     }
