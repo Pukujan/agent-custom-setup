@@ -53,6 +53,29 @@ A newcomer understands within a minute: this is a PCM-governed registry of agent
 
 No checkpoints yet.
 
+### 2026-09-25 23:09:55 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["None for this task. Note: repo-wide ci enforcement still blocked by Actions runner capacity (ACS-0002/#5); PR #7 for this increment will show a failing/absent ci until #6 lands \u2014 merge of this docs increment must not be labeled gated by required checks."],"changed":["README.md, .content-system/*.json (6 new), assets/registry-icon.svg, assets/IMAGE_NOTES.md, tasks/TASK-ACS-0003-readme-docs.md, checkpoints/CURRENT.md"],"completed":["ACS-0003 delivered on task/ACS-0003-readme-docs: story-first README.md per CGM readme-contract v2 (9 sections incl. Evidence and boundaries with shipped/pending honesty, 15 pinned references, worked example from issue #3, bold scan anchors, code fences after story) + .content-system/ adapter (system-version.v1 pinned helper 0.4.0@f85e88b, project-brief.v2 with 5 evidence items all cite_in_readme:true, brand-language, visual-style with generation_workflow built-in image_gen, asset-manifest with single non-narrative SVG, review-rubric) + assets (icon, IMAGE_NOTES) + projection + CURRENT repoint."],"decisions":["Sequential canonical-checkout work, not a managed worktree: an in-repo worktree for ACS-0003 broke continuity validate in both trees (validate_managed_worktrees requires the ACS-0003 projection in the canonical tasks/), observed INVALID x2 -> tree removed, work moved here. Claims re-pinned to today's reality vs the 8420b78 draft: claude-code registry downgraded shipped->planned (PR #2 unmerged), oh-my-pi marked shipped-on-task-branch behind PR #4, issue #3 JEV evidence cited as user_observation, all D:\\ paths removed."],"evidence":["Validator: python3 <cgm@f85e88b>/scripts/validate_content_system.py --root <cgm> --adapter .content-system --project-root . -> 'VALID: content-generation-modules contract and target adapter' exit 0 (observed 2026-09-25). Audit script: 0 missing sections, 0 missing references, 23 bold anchors, why-before-how true, code-after-story true. grep D:\\|C:\\|/Users/|secret-patterns -> clean; every cite_in_readme URI substring present in README. continuity validate VALID; preflight TARGET_VALID. Product 12db50f on task/ACS-0003-readme-docs."],"next_action":"Publish #7 receipt keyed to request id + pushed SHA; open PR task/ACS-0003-readme-docs -> main with Refs #7; owner reviews/merges (no required checks exist yet); after merge close #7 and mark CURRENT.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0003","timestamp":"2026-09-25T23:09:55Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"daa9f5c7526c6bf551a7c46c4ee1ee88fb89fbdcaffdaaf6818909ad06fcb698","request_id":"acs-0003-docs-20260925","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0003"} -->
+
+Completed:
+- ACS-0003 delivered on task/ACS-0003-readme-docs: story-first README.md per CGM readme-contract v2 (9 sections incl. Evidence and boundaries with shipped/pending honesty, 15 pinned references, worked example from issue #3, bold scan anchors, code fences after story) + .content-system/ adapter (system-version.v1 pinned helper 0.4.0@f85e88b, project-brief.v2 with 5 evidence items all cite_in_readme:true, brand-language, visual-style with generation_workflow built-in image_gen, asset-manifest with single non-narrative SVG, review-rubric) + assets (icon, IMAGE_NOTES) + projection + CURRENT repoint.
+
+Evidence:
+- Validator: python3 <cgm@f85e88b>/scripts/validate_content_system.py --root <cgm> --adapter .content-system --project-root . -> 'VALID: content-generation-modules contract and target adapter' exit 0 (observed 2026-09-25). Audit script: 0 missing sections, 0 missing references, 23 bold anchors, why-before-how true, code-after-story true. grep D:\|C:\|/Users/|secret-patterns -> clean; every cite_in_readme URI substring present in README. continuity validate VALID; preflight TARGET_VALID. Product 12db50f on task/ACS-0003-readme-docs.
+
+Decisions:
+- Sequential canonical-checkout work, not a managed worktree: an in-repo worktree for ACS-0003 broke continuity validate in both trees (validate_managed_worktrees requires the ACS-0003 projection in the canonical tasks/), observed INVALID x2 -> tree removed, work moved here. Claims re-pinned to today's reality vs the 8420b78 draft: claude-code registry downgraded shipped->planned (PR #2 unmerged), oh-my-pi marked shipped-on-task-branch behind PR #4, issue #3 JEV evidence cited as user_observation, all D:\ paths removed.
+
+Changed:
+- README.md, .content-system/*.json (6 new), assets/registry-icon.svg, assets/IMAGE_NOTES.md, tasks/TASK-ACS-0003-readme-docs.md, checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- None for this task. Note: repo-wide ci enforcement still blocked by Actions runner capacity (ACS-0002/#5); PR #7 for this increment will show a failing/absent ci until #6 lands — merge of this docs increment must not be labeled gated by required checks.
+
+Next:
+- Publish #7 receipt keyed to request id + pushed SHA; open PR task/ACS-0003-readme-docs -> main with Refs #7; owner reviews/merges (no required checks exist yet); after merge close #7 and mark CURRENT.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
