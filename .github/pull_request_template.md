@@ -1,14 +1,39 @@
-# Agent Custom Setup
+When a GitHub issue reference appears in a pull-request description or commit message, use a supported issue-closing keyword only when merging should complete that issue. GitHub treats `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference as a close directive; negation does not cancel it. For progress-only work, link with `Refs #<number>` or the GitHub sidebar. After each merge, verify the live issue state before changing task status. See [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 
-Modular registry of custom agent setups with temporal and version metadata.
+## Human outcome
 
-Modules:
-- `oh-my-pi/` — oh-my-pi (OMP) agent config: advisor roster, JEV judge wiring, jev-court adjudication extension.
-- Claude Code custom setup — planned, not yet contributed.
+What changed for the person or project?
 
-## Continuity
+## Change and scope
 
-Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.
+Summarize the change and important boundaries.
+
+## Verification
+
+List focused commands and observed results. Link the CI run; do not paste full logs.
+
+## Evidence and provenance (when relevant)
+
+- Task ID and leaf owning issue, parent ancestry and dependencies (or explicitly none):
+- Starting revision, inputs, or source:
+- Direct citations or reproducible artifact:
+- What remains unknown:
+
+<details>
+<summary>Reproduction details or extended technical notes (only when useful)</summary>
+
+Add exact commands, configuration, inputs, results, and limitations here when they are needed to verify the claim.
+
+</details>
+
+## Continuity closeout
+
+- Docs/task/checkpoint/catalog/index synchronized before push; as-of status and source issue revision:
+- Request ID / exact pushed SHA / leaf receipt and parent update:
+- Required CI on exact candidate / mandatory auto-merge / verified merge and live issue status:
+- One next action or explicit completion:
+
+This template records context; it does not automatically synchronize this pull request with issues or checkpoints.
 
 <!-- pcm:github-progression:start -->
 ## GitHub-owned progression

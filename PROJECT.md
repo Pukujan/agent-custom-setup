@@ -1,14 +1,6 @@
-# Agent Custom Setup
+# Agent Custom Setup — Project Contract
 
-Modular registry of custom agent setups with temporal and version metadata.
-
-Modules:
-- `oh-my-pi/` — oh-my-pi (OMP) agent config: advisor roster, JEV judge wiring, jev-court adjudication extension.
-- Claude Code custom setup — planned, not yet contributed.
-
-## Continuity
-
-Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.
+<!-- continuity:project {"id":"agent-custom-setup","protocol_version":"0.1.0-draft","schema":"project-continuity.project.v1","title":"Agent Custom Setup"} -->
 
 <!-- pcm:github-progression:start -->
 ## GitHub-owned progression
@@ -25,3 +17,23 @@ Before every push, synchronize relevant docs and task/checkpoint projections, CU
 
 Required CI and GitHub auto-merge are mandatory. Verify protection, required reviews/checks on the exact current-base or merge-queue candidate, and auto-merge; missing, failed, skipped, stale or unverified gates fail closed: no completion or cleanup. After CI/merge, append the exact check results, PR/merge SHA and live issue status to the leaf and link the parent update; fetch and verify accepted history. Reconcile material doc/status corrections in a new synchronized increment. Receipt-only transitions need no recursive doc commit: docs retain an explicit as-of/pending state and point to the live issue. Never label local-only or merely pushed work delivered. Preserve unsafe resources and keep incomplete issues open.
 <!-- pcm:github-progression:end -->
+
+## Main goal
+
+Describe the durable project goal.
+
+## Why
+
+Explain why the project exists.
+
+## Scope
+
+Describe what is in scope.
+
+## Non-goals
+
+Describe what is explicitly out of scope.
+
+## Definition of success
+
+Describe durable success criteria.
