@@ -34,7 +34,7 @@ docs/HOLDOUT_EVALUATION.md.
   claim removed → status unstatable (removal must weaken).
 - `stub`: differential observation only — current must not score below the stub.
 
-## Final verdict (suite 4, key v3, 2026-09-26T02:08–02:46Z, 13 arms / 65 sessions)
+## Final verdict (suite 4, key v3, 2026-09-26T02:08–02:46Z, 12 arms / 60 sessions)
 
 ```text
 current          2 arms PASS

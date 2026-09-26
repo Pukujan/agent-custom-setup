@@ -27,14 +27,14 @@ RESULTS = ROOT / "evals" / "results"
 RESULTS.mkdir(exist_ok=True)
 
 ARM_FLAGS = ["-p", "--no-tools", "--no-session", "--no-rules", "--no-extensions", "--no-skills"]
-OVERLAY = Path("/tmp/acs-eval-overlay.yml")  # advisor: enabled: false
+OVERLAY = ROOT / "evals" / "omp-arms-overlay.yml"  # committed; advisor: enabled: false
 
 
 def run_omp_arm(prompt: str, model: str, max_time: int = 120, retries: int = 2) -> tuple[str, str]:
     """Invoke one isolated omp session; return (raw stdout, error|'')."""
-    cmd = ["omp", *ARM_FLAGS]
-    if OVERLAY.is_file():
-        cmd += ["--config", str(OVERLAY)]
+    if not OVERLAY.is_file():
+        raise SystemExit(f"FATAL: isolation overlay missing: {OVERLAY} (refusing advisor-on run)")
+    cmd = ["omp", *ARM_FLAGS, "--config", str(OVERLAY)]
     proc = None
     for attempt in range(retries + 1):
         proc = subprocess.run(cmd + ["--max-time", str(max_time), "--model", model, prompt],
