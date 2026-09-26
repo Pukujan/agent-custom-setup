@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Pukujan/agent-custom-setup/schemas/registry.schema.json",
+  "title": "Agent custom-setup registry",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "system",
+    "version",
+    "updated",
+    "modules"
+  ],
+  "properties": {
+    "system": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "created": {
+      "type": "string"
+    },
+    "updated": {
+      "type": "string"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_time": {
+      "type": "object",
+      "properties": {
+        "start": { "type": ["string", "null"] },
+        "end": { "type": ["string", "null"] }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "deprecated"]
+    },
+    "description": {
+      "type": "string"
+    },
+    "policy": {
+      "type": "string",
+      "description": "Path to POLICY.md"
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/moduleIndexEntry"
+      }
+    }
+  },
+  "$defs": {
+    "moduleIndexEntry": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "name",
+        "purpose",
+        "harness",
+        "created",
+        "updated",
+        "owning_issue",
+        "owning_agent",
+        "deploy_mirrors",
+        "version",
+        "status",
+        "path"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "purpose": { "type": "string" },
+        "harness": { "type": "string" },
+        "created": { "type": "string" },
+        "updated": { "type": "string" },
+        "owning_issue": { "type": "string" },
+        "owning_agent": { "type": "string" },
+        "deploy_mirrors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["label", "path"],
+            "properties": {
+              "label": { "type": "string" },
+              "path": { "type": "string" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "path": { "type": "string" },
+        "recorded_at": { "type": "string" },
+        "valid_time": { "type": "object" },
+        "source_paths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "active", "deprecated", "unknown"]
+        },
+        "summary": { "type": "string" }
+      }
+    }
+  }
+}
