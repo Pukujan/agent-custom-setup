@@ -1,0 +1,120 @@
+{
+ "schema": "acs-0003.arm-run.v1",
+ "run_id": "reordered-20260926T010537Z",
+ "variant": "reordered",
+ "cgm_pinned": "f85e88bc00362c53061d95ac7811bd9c6ada8e32",
+ "readme_sha_len": 13669,
+ "started_at": "2026-09-26T01:05:37.590624+00:00",
+ "runs": [
+  {
+   "run": 1,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Operators maintaining customized agent setups on personal machines; fresh sessions that need to resume project state from the repository.",
+      "situation": "Agent configurations (judge models, scripts, environment variables) are built and debugged within single chat sessions through invisible work.",
+      "difficulty": "Setup knowledge evaporates when sessions end; subsequent readers inherit no trustworthy record of what was configured or why; configuration issues (like silent 401 errors) remain invisible and unverif"
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "A durable, reviewable system for agent setups that survives session boundaries. It captures invisible agent configuration\u2014model roles, decision loops, advisor rules\u2014as versioned modules with evidence ",
+      "mechanism": "Tasks start as GitHub issues that own scope and lifecycle. Work happens on task branches; each increment closes with a checkpoint (commit, push, stable request ID) and a receipt comment on the issue. "
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "on_default_branch": "['PCM continuity protocol infrastructure: AGENTS.md, PROJECT.md, checkpoints/CURRENT.md, HANDOFF.md', 'Repository structure: GitHub issue/PR templates, schemas/v1/, .content-system/ CGM adapter', 'Thi",
+      "awaiting_merge": "['oh-my-pi module (PR #4, task branch task/ACS-0001-oh-my-pi-module): advisor/JEV config templates (config.yml, models.yml, WATCHDOG.yml) + jev-court.ts extension, verified live with 3 notes adjudicat",
+      "planned": "['Multi-module adoption and full registry system', 'Required CI enforcement (issue #5)', 'Narrative image generation (hero, problem, brand assets) with prompt, SHA-256, alt-text metadata per assets/IM"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "promise": "Live JEV adjudication after 401 root-cause fix: three advisor notes were adjudicated at confidence 0.92/0.94/0.96 (act decisions) and one trivia note at 0.98 (ignore)",
+      "source": "issue #3 (GitHub issue where the fix was tested and results recorded)",
+      "not_proven": "Scalability, multi-provider compatibility, or production-grade reliability. The source documents only a small sample (3 real notes + 1 synthetic) collected on a single date (2026-09-25) with one provi"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Read HANDOFF.md, then checkpoints/CURRENT.md, then open tasks; this is the explicit cold-start sequence for resuming from the repository alone. Alternatively, clone and run `gh issue list --repo Pukuj",
+      "reproduce": "Run the CGM validation script against the README: `python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .content-system --project-root .` where `<cgm-checkout>` is"
+     },
+     "error": ""
+    }
+   }
+  },
+  {
+   "run": 2,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Operators who keep agent configuration on a personal machine and fresh agent sessions that must resume project state from the repository alone",
+      "situation": "Agent setups\u2014judge models, critic roles, launch scripts, environment keys\u2014are typically invisible work contained in a single chat session. When that session ends, the next reader (human or agent) inhe",
+      "difficulty": "Setup knowledge evaporates with the session, making it impossible to review, debug, or resume configuration state in fresh sessions. Invisible, session-bound state prevents other readers from inheriti"
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "Durable, reviewable agent configurations that persist across sessions. The project provides a template pattern for storing agent setups securely (API keys referenced by environment-variable names, not",
+      "mechanism": "Work flows through GitHub issues that define scope and acceptance. Contributors work on task branches, creating periodic versioned checkpoints with stable request IDs. Pull requests are reviewed and m"
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": false,
+     "reasons": [
+      "planned: no anchor match in \"['multi-module adoption', 'required-ci enforcement (issue #5)', 'narrative image\""
+     ],
+     "answer": {
+      "on_default_branch": "['PCM continuity protocol adoption: AGENTS.md, CURRENT.md, PROJECT.md, task/PR templates, validation schemas', 'No-secrets template pattern: environment-variable names in checked-in files; values in g",
+      "awaiting_merge": "['oh-my-pi module (PR #4, task branch ACS-0001): advisor/JEV config templates + jev-court.ts extension; live adjudication verified 2026-09-25 (3 notes act@0.92/0.94/0.96; trivia ignore@0.98)', 'regist",
+      "planned": "['multi-module adoption', 'required-CI enforcement (issue #5)', 'narrative image assets: hero/problem rasters with prompted generation, dimensions, SHA-256, alt text, review decision recorded in asset"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "promise": "Live JEV adjudication after 401 root-cause fix \u2014 the judge system successfully adjudicates advisor notes with specified confidence levels (0.92\u20130.98)",
+      "source": "issue #3 on GitHub recording test results",
+      "not_proven": "Scalability beyond the small sample (3 notes); generalization across multiple providers or dates; persistence of the fix beyond 2026-09-25; that the 401 root cause is permanently resolved vs. fixed fo"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Clone the repository and follow the cold-start read sequence: HANDOFF.md \u2192 checkpoints/CURRENT.md \u2192 active tasks/TASK-*.md. Then list open issues with `gh issue list --repo Pukujan/agent-custom-setup ",
+      "reproduce": "For README validation: clone the CGM helper at commit f85e88bc00362c53061d95ac7811bd9c6ada8e32, then run `python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .con"
+     },
+     "error": ""
+    }
+   }
+  }
+ ]
+}

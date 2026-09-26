@@ -1,0 +1,19 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.4.0",
+  "assets": [
+    {
+      "path": "assets/registry-icon.svg",
+      "role": "registry icon",
+      "kind": "non-narrative",
+      "orientation": "svg",
+      "dimensions": "64x64 viewBox",
+      "text_policy": "none",
+      "alt_text": "Three stacked bars on a dark rounded square, suggesting versioned entries in a registry.",
+      "usage": "small brand mark beside the README title; not a story image",
+      "review_decision": "accepted as a real non-narrative placeholder; narrative rasters are intentionally not shipped on this machine yet"
+    }
+  ],
+  "narrative_rasters": [],
+  "narrative_note": "The visual contract declares built-in image_gen, but no narrative raster is generated on this machine yet. Keeping narrative_rasters empty is the honest text-first boundary described in assets/IMAGE_NOTES.md."
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Agent setup registry icon">
+  <rect width="64" height="64" rx="12" fill="#0B1734"/>
+  <rect x="12" y="14" width="40" height="8" rx="2" fill="#50D6FF"/>
+  <rect x="12" y="28" width="28" height="8" rx="2" fill="#8D7CFF"/>
+  <rect x="12" y="42" width="34" height="8" rx="2" fill="#F7B955"/>
+</svg>

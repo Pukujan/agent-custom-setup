@@ -1,0 +1,59 @@
+{
+  "schema_version": "content-generation.visual-style.v1",
+  "reference_asset": "assets/registry-icon.svg",
+  "generation_workflow": "built-in image_gen",
+  "narrative_roles": [
+    "hero",
+    "problem",
+    "supporting",
+    "evidence"
+  ],
+  "palette": {
+    "background": "#0B1734",
+    "primary": "#1C4EA3",
+    "accent": "#50D6FF",
+    "warm_accent": "#F7B955",
+    "text": "#DCE9FF"
+  },
+  "subjects": [
+    "operator workstation with agent sessions",
+    "versioned module cards on a registry shelf",
+    "a sanitized copy separated from a locked secrets drawer"
+  ],
+  "composition": [
+    "one dominant idea per asset",
+    "keep the registry structure readable at the size it is actually shown",
+    "support the written story rather than replacing it",
+    "stack safely on narrow screens"
+  ],
+  "text_policy": "narrative raster assets carry one short title plus one short subtitle; icons, SVGs, and helper graphics remain text-free",
+  "roles": {
+    "hero": {
+      "orientation": "wide",
+      "dimensions": "1672x941"
+    },
+    "problem": {
+      "orientation": "wide",
+      "dimensions": "1672x941"
+    },
+    "supporting": {
+      "orientation": "square",
+      "dimensions": "1254x1254"
+    },
+    "evidence": {
+      "orientation": "portrait",
+      "dimensions": "1024x1536"
+    },
+    "icon": {
+      "orientation": "svg",
+      "dimensions": "64x64 viewBox",
+      "path": "assets/registry-icon.svg"
+    }
+  },
+  "reject_when": [
+    "an asset implies secret values are stored in git",
+    "a title or subtitle is unreadable at its placed size",
+    "an image pretends narrative rasters exist while the manifest ships none",
+    "the visual repeats a claim the README has not tied to evidence"
+  ]
+}
