@@ -6,26 +6,27 @@ This is an as-of projection; live GitHub issues own progression. Link the owning
 
 ## Program state
 
-Phase: bootstrap; docs delivery in flight while CI-gate work unblocks.
+Phase: bootstrap; CI gate definition + oh-my-pi module merged; enforcement plan-blocked (#5).
 
 ## Completed
 
 - continuity protocol initialized.
+- ACS-0002 (#5) increment merged: `.github/workflows/ci.yml` (job context `gates`) + issue-log-format marker sync (main b094c07). #5 stays OPEN (enforcement plan-blocked).
+- ACS-0001 (#3) merged at 7df54a1; #3 closed with verified closeout comment (module on main; owner-directed merge, gates unverified — recorded).
 
 ## Active
 
-- ACS-0003 (#7) README + CGM adapter — PR #8 head e8dccaa; product complete (validator VALID), reader-eval suite v3 PASS (M-01/M-04/M-09 + stub differential; HOLDOUT not_run disclosed), pending owner review/merge.
-- ACS-0001 (#3) oh-my-pi module — PR #4 head c3f7f91 pushed, owner review pending.
-- ACS-0002 (#5) CI gates — PR #6 head 943d4d4; blocked: private-repo runner allocation + private protection plan-gated per verified docs (see Blockers; owner options recorded on #5).
+- ACS-0003 (#7) README + CGM adapter + reader-eval harness — PR #8 head (this branch, synced to gated main), awaiting owner-directed squash merge; #7 closeout after main verification.
 
 ## Queued
 
-- After #6 merges (gated main): sync #4 by merging main into it (append-only; no rebase/force-push), confirm `gates`, owner merges; same sync pattern for #8/#2 if protection lands first.
+- After #8 lands: refresh PR #2 branch (feat/scaffold-pcm-cgm-1, CONFLICTING) so its README/registry story reconciles with main's rewritten README; owner decides #1 scope.
+- #5 enforcement: owner plan decision (public / Pro+budget / self-hosted / other agent's CI/CD).
 
 ## Blockers
 
-- Two verified layers, per primary-source docs 2026-09-26T00:1Z: (1) private-repo Actions usage blocked at account level (zero-step/zero-billable runs; public sibling healthy → private-specific); (2) **private-repo protected branches require Pro/Team/Enterprise — Free lists them as Pro "advanced private-repo tool"** (githubs-plans; about-protected-branches itself has no plan text; earlier attribution corrected). Account plan UNOBSERVED (gh api user .plan.name empty). Owner options: make repo public (fixes both), Pro/budget, or record gate plan-blocked and merge under fail-closed exception with issues kept OPEN and NOT marked delivered (PCM: owner direction cannot waive required gates — only a policy amendment supersedes). Protection/auto-merge unapplied meanwhile.
+- Gate enforcement (recorded on #5): private-repo Actions runs fail zero-step/zero-billable; private-repo protected branches need Pro/Team/Enterprise (docs.github.com verified 2026-09-26T00:1Z; URLs on #5). Merges under owner direction are recorded as such, never claimed CI-gated.
 
 ## Next atomic action
 
-Publish #7 eval-completion receipt; owner decision: merge #8 as-is now (validator+eval gates pass locally-recorded), or wait for Actions plan decision (#6/#5) so #8 lands on a gated main.
+Squash-merge PR #8 (no closing keywords), verify main carries README/.content-system/evals, post #7 closeout comment + manual close; then reconcile PR #2 if owner asks.
