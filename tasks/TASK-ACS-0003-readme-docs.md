@@ -124,6 +124,29 @@ Blocked/uncertain:
 Next:
 - Publish #7 eval receipt + PR #8 body update with verdict; owner merges #8 (or syncs onto gated main after #6).
 
+### 2026-09-26 03:33:24 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["None; merging now."],"changed":["evals/run_arms.py, evals/omp-arms-overlay.yml, evals/README.md, evals/results (rearchive), tasks/TASK-ACS-0003-readme-docs.md, checkpoints/CURRENT.md"],"completed":["Eval layer finalized per owner stop directive: hardened runner (in-repo overlay, isolation flags, sha256, full answers), suite-4 archived v3-prehard with honest mtime-audit disclosure (last stub arm ran isolated; isolated re-smoke still stub 4/5 FAIL => differential direction holds), counts corrected 12 arms/60 sessions. READY for owner-merge: user directed merging PRs."],"decisions":["Owner direction 03:2xZ: stop eval iteration, commit+push+merge PRs. Merges proceed as owner review+merge recorded on owning issues; #5 stays OPEN (acceptance 1-4 unmet, plan-gate)."],"evidence":["03:29Z isolated smoke: run_stub-20260926T032932Z.json schema arm-run.v2 (sha256 64, flags recorded, answer_full) results T2 only pass; suite-4 files stat-audited (stub end 02:48:00 vs ~103s for 10 sessions ~10s/arm vs 31-90s pre-hardening)."],"next_action":"Post owner-direction supersessions on #3/#5/#7; merge #4 -> sync -> merge #6 -> sync -> merge #8; closeout CURRENT+tasks on main; close #3/#7 with merge SHAs; #5 remains open plan-blocked.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0003","timestamp":"2026-09-26T03:33:24Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"49a0bb193d2e4df6442bca0a7e13158c6c6e5dd2c4b14c529639edf93b000a9e","request_id":"acs-0003-final-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0003"} -->
+
+Completed:
+- Eval layer finalized per owner stop directive: hardened runner (in-repo overlay, isolation flags, sha256, full answers), suite-4 archived v3-prehard with honest mtime-audit disclosure (last stub arm ran isolated; isolated re-smoke still stub 4/5 FAIL => differential direction holds), counts corrected 12 arms/60 sessions. READY for owner-merge: user directed merging PRs.
+
+Evidence:
+- 03:29Z isolated smoke: run_stub-20260926T032932Z.json schema arm-run.v2 (sha256 64, flags recorded, answer_full) results T2 only pass; suite-4 files stat-audited (stub end 02:48:00 vs ~103s for 10 sessions ~10s/arm vs 31-90s pre-hardening).
+
+Decisions:
+- Owner direction 03:2xZ: stop eval iteration, commit+push+merge PRs. Merges proceed as owner review+merge recorded on owning issues; #5 stays OPEN (acceptance 1-4 unmet, plan-gate).
+
+Changed:
+- evals/run_arms.py, evals/omp-arms-overlay.yml, evals/README.md, evals/results (rearchive), tasks/TASK-ACS-0003-readme-docs.md, checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- None; merging now.
+
+Next:
+- Post owner-direction supersessions on #3/#5/#7; merge #4 -> sync -> merge #6 -> sync -> merge #8; closeout CURRENT+tasks on main; close #3/#7 with merge SHAs; #5 remains open plan-blocked.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
