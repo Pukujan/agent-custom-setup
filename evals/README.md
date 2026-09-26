@@ -46,14 +46,13 @@ HOLDOUT: not_run
 SUITE: PASS
 ```
 
-Reproduce with `python3 evals/score.py` over the committed records. Raw per-arm
-records (answers, reasons, pass flags): `evals/results/run_*.json`; earlier-key
-runs archived in `v1-prekey/` and `v2-prekey3/` and a single hardened stub smoke
-in `smoke/` (subdirectories are excluded from `score.py`'s glob — pool hygiene so
-future suites can't silently mix cohorts; archives kept for audit). The README
-iteration this suite motivated is the "Status at a glance" line
-(order-independent shipped/pending/planned summary), driven by v1/v2 invariance
-failures localized to status-mapping fragility.
+Reproduce with `python3 evals/score.py --dir evals/results` (the committed
+suite-4 cohort). Raw per-arm records: `evals/results/run_*.json`; earlier-key
+runs archived in `v1-prekey/`, `v2-prekey3/`, and a single hardened-runner stub
+smoke in `smoke/` (subdirectories are excluded from flat pooling; see
+Cohorts). The README iteration this suite motivated is the "Status at a glance"
+line (order-independent shipped/pending/planned summary), driven by v1/v2
+invariance failures localized to status-mapping fragility.
 
 ## Key revision history (fully disclosed)
 
@@ -75,33 +74,50 @@ failures localized to status-mapping fragility.
   wording (general forms `lost`/`review` would have sufficed). Anchor lists were
   unchanged during suite 4, so all suite-4 verdicts stand as scored.
 
+## Cohorts and isolation (bounded, not "verified")
+
+A mid-suite edit (~02:34Z) added isolation flags to `run_arms.py` while keeping
+the v1 record shape; the full v2 record rewrite (sha256, `arm_flags`,
+`answer_full`) landed after suite 4. What the records prove:
+
+- `stub` launched 02:46:17Z wrote a **v1/no-flags** record, and the hardened
+  smoke wrote v2 at 03:29Z ⇒ the v2 rewrite falls in **(02:46Z, 03:29Z]**, but
+  the flag-only intermediate also wrote v1 — so **whether suite-4's `stub` arms
+  ran with isolation flags is indeterminate from the records**. The other four
+  variants launched before ~02:31Z and are firmly original-condition.
+- Two earlier "verification" legs are **retracted**: (1) `run_arms.py` mtime —
+  `git checkout` during merge work rewrites mtimes (observed 03:45:40Z =
+  checkout, not authoring); (2) "no `__advisor.*.jsonl` under this repo's
+  session dirs" — false: such files exist there (they belong to the parent
+  interactive session); arms used `--no-session` and never write session dirs,
+  so the absence/presence channel is uninformative either way.
+- Mitigation: the 03:29Z **hardened** single-arm stub run (`smoke/`, schema v2,
+  flags+sha256 recorded) independently fails 4/5 tasks (T2 only pass) — the
+  stub-inferiority direction of the differential does not depend on suite-4's
+  cohort question.
+- Weak supporting observation: per-arm duration tracks input size (stub 4.5 KB
+  ≈10 s/arm vs current 13.7 KB ≈31 s/arm), consistent with — but not proof of —
+  identical runner code.
+- Conclusion, labeled: the M-01/M-04/M-09 verdicts are within one cohort
+  (original conditions, current included) and stand. The current-vs-stub
+  differential is either same-cohort (if stub ran original) or cross-cohort with
+  the smoke as independent confirmation; either way the direction holds, and no
+  uniformity claim stronger than that is made.
+- Whether `-p` engages the ambient advisor cannot be observed externally;
+  records state `advisor_overlay_passed` + `advisor_effect: "unverified"`
+  (intent vs observation). The already-committed v2 smoke record predates the
+  field rename and carries the original boolean `advisor_enabled_during_run`;
+  future records use **schema `arm-run.v2.1`**. Suite-5 (fully hardened
+  current+stub, ~4 min) is recorded as a next action, not run (owner: stop).
+
 ## Limitations (not overclaimed)
 
-- **Isolation / cohort — settled by evidence, not assumption.** An interim
-  disclosure here claimed the suite-4 `stub` may have run under hardened flags
-  (mid-loop edit). Verification refutes that and confirms uniform conditions:
-  (1) `run_arms.py` mtime = 22:13Z (pre-edit original) vs `stub` launch
-  02:46:17Z — the file on disk at launch was the original code; (2) zero advisor
-  log lines in the arms' window and zero `__advisor.*.jsonl` artifacts under this
-  repo's session dirs (they exist only in an unrelated old /tmp session) — `-p`
-  print mode never engaged the ambient `advisor.enabled: true`; (3) per-arm
-  duration tracks input size (stub ~10 s/arm, others ~31–90 s/arm), not an
-  isolation change. All five suite-4 variants therefore ran the same
-  original-condition runner: the differential and invariance comparisons are
-  like-for-like. External advisor state is not directly observable, so (2) is
-  evidence, not a proof-by-observation — labeled *inferred*.
-- The hardened runner (v2: committed `evals/omp-arms-overlay.yml` with hard-fail,
-  `--no-rules --no-extensions --no-skills`, sha256, full answers) applies to
-  FUTURE suites. Its records state `advisor_overlay_passed: true` and
-  `advisor_effect: "unverified"` — the overlay is *passed*, and the speed/log
-  evidence is consistent with advisor-off, but omp does not report config-merge
-  results, so the machine-readable field never claims more than it observes.
-- Suite-4 records (`arm-run.v1`) store 200-char-truncated answers and no sha256,
-  so re-gradation under future keys is approximate; v2 records store full answers
-  for exactly this reason.
 - The **reader is a model arm**, not a human; per README_QUALITY_TDD.md this is a
   deterministic proxy, and writer/reader share a model family → **not** the
   independent review the release gate requires; a human pass remains open.
+- Suite-4 records (`arm-run.v1`) store 200-char-truncated answers and no sha256,
+  so re-gradation under future keys is approximate; v2.1 records store full
+  answers for exactly this reason.
 - **Holdout = `not_run`:** no sealed target/key/independent evaluator exists, and
   this key lives inside the repo a future arm could read — so no "hidden" claim.
 
@@ -109,10 +125,10 @@ failures localized to status-mapping fragility.
 
 ```bash
 python3 evals/build_variants.py
-for v in current reordered bold_stripped claim_removed stub; do
-  python3 evals/run_arms.py --variant "$v"   # counts from key runs_per_variant
-done
-python3 evals/score.py
+# fresh cohort into its own directory so score.py never pools two runners:
+python3 evals/run_arms.py --variant current --out evals/results/suite5
+python3 evals/score.py --dir evals/results/suite5          # suite-5 verdict
+python3 evals/score.py --dir evals/results                 # committed suite 4
 ```
 
 `continuity validate` VALID and the pinned CGM adapter validator exit 0 remain the

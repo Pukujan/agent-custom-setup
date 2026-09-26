@@ -2,14 +2,15 @@
 """Reader-task arm runner for ACS-0003 (owner direction: omp CLI sessions).
 
 Each arm = one fresh headless `omp -p` session given ONLY the variant README +
-one frozen task prompt; it must answer JSON. Isolation (v2, after disclosed
-v1-v3 confound): --no-tools --no-session --no-rules --no-extensions --no-skills
-plus an overlay disabling the ambient advisor runtime. Grading = deterministic
-anchor matching from evals/reader_tasks.json (no LLM judge). Emits
-evals/results/run_<id>.json (full answers + sha256 + flags for re-gradation).
+one frozen task prompt; it must answer JSON. Isolation: --no-tools
+--no-session --no-rules --no-extensions --no-skills + committed overlay
+(evals/omp-arms-overlay.yml, hard-fail if missing). Grading = deterministic
+anchor matching from evals/reader_tasks.json (no LLM judge). Records (schema
+v2.1) carry effective flags, overlay path, readme sha256, and full answers so
+future keys can re-grade without re-running.
 
-Per CGM docs/README_QUALITY_TDD.md: reader tasks + metamorphic + differential;
-holdout label stays not_run (no sealed fixture).
+Cohort hygiene: write each suite to its own --out directory and score that
+directory (score.py --dir). Never mix runner generations in one pool.
 """
 import argparse
 import hashlib
@@ -23,8 +24,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 KEY = json.loads((ROOT / "evals" / "reader_tasks.json").read_text(encoding="utf-8"))
-RESULTS = ROOT / "evals" / "results"
-RESULTS.mkdir(exist_ok=True)
 
 ARM_FLAGS = ["-p", "--no-tools", "--no-session", "--no-rules", "--no-extensions", "--no-skills"]
 OVERLAY = ROOT / "evals" / "omp-arms-overlay.yml"  # committed; advisor: enabled: false
@@ -33,7 +32,7 @@ OVERLAY = ROOT / "evals" / "omp-arms-overlay.yml"  # committed; advisor: enabled
 def run_omp_arm(prompt: str, model: str, max_time: int = 120, retries: int = 2) -> tuple[str, str]:
     """Invoke one isolated omp session; return (raw stdout, error|'')."""
     if not OVERLAY.is_file():
-        raise SystemExit(f"FATAL: isolation overlay missing: {OVERLAY} (refusing advisor-on run)")
+        raise SystemExit(f"FATAL: isolation overlay missing: {OVERLAY} (refusing unflagged run)")
     cmd = ["omp", *ARM_FLAGS, "--config", str(OVERLAY)]
     proc = None
     for attempt in range(retries + 1):
@@ -77,7 +76,11 @@ def main() -> int:
     ap.add_argument("--variant", required=True)
     ap.add_argument("--runs", type=int, default=None)
     ap.add_argument("--models", default=",".join(KEY["models"]))
+    ap.add_argument("--out", default="evals/results",
+                    help="cohort directory relative to repo root (score.py --dir must match)")
     args = ap.parse_args()
+    results = (ROOT / args.out).resolve()
+    results.mkdir(parents=True, exist_ok=True)
     rpv = KEY["runs_per_variant"]
     runs = args.runs if args.runs is not None else (rpv.get(args.variant, 2) if isinstance(rpv, dict) else rpv)
 
@@ -85,17 +88,18 @@ def main() -> int:
     readme = vpath.read_text(encoding="utf-8")
     run_id = f"{args.variant}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
     ver = subprocess.run(["omp", "--version"], capture_output=True, text=True)
-    omp_version = ((ver.stdout or "") + (ver.stderr or "")).strip().splitlines()
-    omp_version = omp_version[0] if omp_version else "unknown"
-    flags = ARM_FLAGS + (["--config", str(OVERLAY)] if OVERLAY.is_file() else [])
+    omp_lines = ((ver.stdout or "") + (ver.stderr or "")).strip().splitlines()
+    omp_version = omp_lines[0] if omp_lines else "unknown"
+    flags = ARM_FLAGS + ["--config", str(OVERLAY)]
     record = {
-        "schema": "acs-0003.arm-run.v2", "run_id": run_id, "variant": args.variant,
+        "schema": "acs-0003.arm-run.v2.1", "run_id": run_id, "variant": args.variant,
         "cgm_pinned": KEY["pinned_helper"],
         "key_schema": KEY["schema"], "key_note_head": KEY["revision_note"].split(" ")[0],
         "readme_sha256": hashlib.sha256(readme.encode()).hexdigest(),
         "arm_flags": flags, "omp_version": omp_version,
-        "advisor_overlay_passed": OVERLAY.is_file(),
-        "advisor_effect": "unverified (omp does not report config-merge results; speed/log evidence in evals/README.md)",
+        "overlay_path": str(OVERLAY.relative_to(ROOT)),
+        "advisor_overlay_passed": True,
+        "advisor_effect": "unverified (omp does not report config-merge results; see evals/README.md cohorts section)",
         "started_at": datetime.now(timezone.utc).isoformat(), "runs": [],
     }
     for model in args.models.split(","):
@@ -119,8 +123,9 @@ def main() -> int:
                 print(f"{args.variant} {model} run{n} {task['id']}: {'PASS' if ok else 'FAIL'} "
                       f"{'; '.join(reasons)[:110]}", flush=True)
             record["runs"].append(entry)
-    (RESULTS / f"run_{run_id}.json").write_text(json.dumps(record, indent=1), encoding="utf-8")
-    print(f"wrote evals/results/run_{run_id}.json")
+    out_path = results / f"run_{run_id}.json"
+    out_path.write_text(json.dumps(record, indent=1), encoding="utf-8")
+    print(f"wrote {out_path.relative_to(ROOT)}")
     return 0
 
 

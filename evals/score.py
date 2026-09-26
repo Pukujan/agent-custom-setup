@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
-"""Aggregate evals/results/run_*.json and apply frozen expectation rules (v3).
+"""Aggregate run_*.json from ONE cohort directory (score.py --dir) and apply the
+frozen expectation rules (key v3; majority invariance, strict M-04 degrade).
 
-- current/stub: every recorded arm must satisfy its rule.
-- metamorphic_invariance: per-task pass-fraction ≥0.5 (majority over ≥3 arms)
-  must equal the same majority pass-set as the "against" variant.
-- metamorphic_degrades: T3 fails on EVERY recorded arm (strict; 2/2 passed v1).
-Exit 0 only if all expectations hold. No LLM involved.
+Pool hygiene: each directory must contain a single runner generation — v1
+records carry truncated 200-char answers, v2/v2.1 carry answer_full; score.py
+ERRORS if the selected directory mixes `schema` values, so cohorts can never be
+silently double-counted. Exit 0 only if all expectations hold. No LLM involved.
 """
+import argparse
 import json
 import sys
-from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 KEY = json.loads((ROOT / "evals" / "reader_tasks.json").read_text(encoding="utf-8"))
-RESULTS = sorted((ROOT / "evals" / "results").glob("run_*.json"))
 TASK_IDS = [t["id"] for t in KEY["tasks"]]
 MIN_ARMS = {"reordered": 3, "bold_stripped": 3}
 
 
 def variant_arms(records, variant):
-    """List of per-arm {task_id: bool} dicts."""
     out = []
     for r in records:
         if r["variant"] != variant:
@@ -31,14 +29,25 @@ def variant_arms(records, variant):
 
 
 def majority_set(arms):
-    """{task: True/False} by ≥0.5; None when no arms."""
     if not arms:
         return None
     return {tid: sum(1 for a in arms if a[tid]) / len(arms) >= 0.5 for tid in TASK_IDS}
 
 
 def main() -> int:
-    records = [json.loads(p.read_text()) for p in RESULTS]
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dir", default="evals/results",
+                    help="cohort directory relative to repo root (must be one runner generation)")
+    args = ap.parse_args()
+    paths = sorted((ROOT / args.dir).glob("run_*.json"))
+    if not paths:
+        print(f"NO RECORDS in {args.dir}")
+        return 1
+    records = [json.loads(p.read_text()) for p in paths]
+    schemas = {r.get("schema", "?") for r in records}
+    if len(schemas) > 1:
+        print(f"MIXED COHORTS in {args.dir}: {sorted(schemas)} — refusing to pool")
+        return 1
     failures, lines = [], []
     for variant, rule in KEY["expectations"].items():
         arms = variant_arms(records, variant)
@@ -60,7 +69,9 @@ def main() -> int:
             vs = sum(sum(a.values()) for a in arms) / max(len(arms), 1)
             if cs < vs:
                 failures.append(f"{variant}: current regressed below baseline ({cs:.1f} < {vs:.1f})")
-            verdict = f"obs: current={cs:.1f}/{len(TASK_IDS)} ({len(cur)} arms) vs {variant}={vs:.1f}/{len(TASK_IDS)} ({len(arms)} arms)" + (" REGRESSION" if cs < vs else "")
+            verdict = (f"obs: current={cs:.1f}/{len(TASK_IDS)} ({len(cur)} arms) vs "
+                       f"{variant}={vs:.1f}/{len(TASK_IDS)} ({len(arms)} arms)"
+                       + (" REGRESSION" if cs < vs else ""))
         elif mode == "metamorphic_invariance":
             base = majority_set(variant_arms(records, rule["against"]))
             mine = majority_set(arms)
