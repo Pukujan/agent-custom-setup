@@ -20,7 +20,7 @@ Phase: registry + module + docs live on main; CI enforcement remains the open ga
 
 ## Queued
 
-- #9 (other agent) policy + multi-setup registry schema + InferHub Claude module sync — coordinate before touching README registry sections.
+- #9/#10 (other agent) policy + multi-setup registry schema + InferHub Claude module v0.2.0 — #10 head 7dee099 base 1c44c8d (+7 behind main), diff disjoint from CURRENT/AGENTS today; owner/#9-agent syncs before merge, then re-verify README registry/status lines against #10's registry.json + modules/.
 - #1/#2 scaffold branch refresh (currently CONFLICTING vs rewritten README).
 - After #9/#2 merge: re-verify README claims against main reality (status-at-a-glance line, evidence table).
 
@@ -30,4 +30,4 @@ Phase: registry + module + docs live on main; CI enforcement remains the open ga
 
 ## Next atomic action
 
-Owner plan decision unblocks #5; then: `gh run rerun 36196958507 --failed` (expect `gates` green on a re-synced branch), apply protection (require `gates`, `enforce_admins=true`; `restrict_pushes` org-only — dropped for personal repo), enable auto-merge, record merge/check facts on #5, then close #5.
+Owner plan decision on #5 (Actions capacity/protection) — the only open enforcement gate; suite-5 (hardened cohort) landing under evals/results/suite5/ when done.
