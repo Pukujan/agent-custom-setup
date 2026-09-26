@@ -197,6 +197,29 @@ Blocked/uncertain:
 Next:
 - Return to task/ACS-0003-readme-docs: run the frozen reader-task metamorphic + differential eval harness via omp -p arms, iterate README on failures, checkpoint, receipt on #7.
 
+### 2026-09-26 00:21:44 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["Root unchanged: private-repo runner allocation; protection acceptance plan-gated (owner plan unobserved)."],"changed":["checkpoints/CURRENT.md (Blockers wording only)"],"completed":["CURRENT blocker wording aligned with corrected provenance (githubs-plans for private-repo protected-branch eligibility; account plan explicitly unobserved; billing quotes verbatim via task file)."],"decisions":["None new."],"evidence":["Follow-on to acs-0002-provenance-20260926 (5234198): same-class fix applied to checkpoints/CURRENT.md line 26."],"next_action":"Switch to task/ACS-0003-readme-docs; run frozen reader-task eval harness (omp -p arms): current x2 repeatability, stub differential, M-01/M-09 invariance, M-04 degradation; iterate README; #7 receipt + checkpoint.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0002","timestamp":"2026-09-26T00:21:44Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a22f4301f2175a15aa5db01069875f98643e033ed1900ec44f94892db7fda2f8","request_id":"acs-0002-provenance-b-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0002"} -->
+
+Completed:
+- CURRENT blocker wording aligned with corrected provenance (githubs-plans for private-repo protected-branch eligibility; account plan explicitly unobserved; billing quotes verbatim via task file).
+
+Evidence:
+- Follow-on to acs-0002-provenance-20260926 (5234198): same-class fix applied to checkpoints/CURRENT.md line 26.
+
+Decisions:
+- None new.
+
+Changed:
+- checkpoints/CURRENT.md (Blockers wording only)
+
+Blocked/uncertain:
+- Root unchanged: private-repo runner allocation; protection acceptance plan-gated (owner plan unobserved).
+
+Next:
+- Switch to task/ACS-0003-readme-docs; run frozen reader-task eval harness (omp -p arms): current x2 repeatability, stub differential, M-01/M-09 invariance, M-04 degradation; iterate README; #7 receipt + checkpoint.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
