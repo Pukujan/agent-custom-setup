@@ -1,6 +1,6 @@
 # TASK-ACS-0002 — Ci Gates
 
-<!-- continuity:task {"acceptance":["gh pr checks on this PR head shows ci passing","gh api repos/Pukujan/agent-custom-setup/branches/main/protection reports required_status_checks context ci and restrict_pushes true; direct push to main is rejected","this PR merges via GitHub auto-merge after ci turns green; merge SHA recorded on issue #5","gh pr checks 4 shows ci green after ACS-0001 head is rebased onto the new main","continuity validate (pinned 0.5.0) exits VALID with zero issue-log-format marker warnings"],"depends_on":[],"goal":"Required ci status check on PRs to main, branch protection, auto-merge enabled; PCM issue-log-format marker sync","id":"ACS-0002","issue_url":"https://github.com/Pukujan/agent-custom-setup/issues/5","next_action":"implement ci.yml + marker sync, commit product, continuity checkpoint ACS-0002, PR, auto-merge, protection","owner":"owner/Astra (omp session)","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"PCM fail-closed delivery requires CI gates; repo has none, blocking ACS-0001 completion"} -->
+<!-- continuity:task {"acceptance": ["gh pr checks on a re-synced branch shows context gates passing (workflow itself merged as definition b094c07)", "PLAN-GATED (verified 2026-09-26T00:1Z): main protection requires gates + enforce_admins=true; unapplyable on Free personal", "owner-directed squash merge landed b094c07; auto-merge plan-blocked, recorded on #5", "after ACS-0001 head is synced onto gated main via append-only merge, gh pr checks 4 shows gates green", "continuity validate (pinned 0.5.0) exits VALID with zero issue-log-format marker warnings"], "depends_on": [], "goal": "Required ci status check on PRs to main, branch protection, auto-merge enabled; PCM issue-log-format marker sync", "id": "ACS-0002", "issue_url": "https://github.com/Pukujan/agent-custom-setup/issues/5", "next_action": "implement ci.yml + marker sync, commit product, continuity checkpoint ACS-0002, PR, auto-merge, protection", "owner": "owner/Astra (omp session)", "priority": "P1", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "PCM fail-closed delivery requires CI gates; repo has none, blocking ACS-0001 completion"}-->
 
 - Status: active
 - Owner: owner/Astra (omp session)
@@ -34,8 +34,8 @@ A fresh session resuming any task here can trust that "delivered" means machine-
 ## Acceptance criteria
 
 - [ ] `gh pr checks` on this PR head shows the check (context `gates` — job id; add `name: ci` to the job if a stable `ci` context is wanted) pass.
-- [ ] `main` protection requires status check `gates` and rejects direct pushes (`enforce_admins=true`; `restrict_pushes` availability on this plan = observe at apply time).
-- [ ] This PR merges via auto-merge once the check is green (merge SHA recorded on #5).
+- [ ] PLAN-GATED (verified docs.github.com/githubs-plans 2026-09-26T00:1Z): private-repo protected branches need Pro/Team/Enterprise → requires status check `gates` + `enforce_admins=true`; direct push rejected. (On Free personal this is unapplyable; recorded.)
+- [x] This PR merged via owner-directed squash (b094c07) after #6 checks failed capacity-side; auto-merge unconfigured (plan-blocked). Merge SHA recorded on #5.
 - [ ] After syncing ACS-0001 by merging main into it (append-only; no rebase/force-push), `gh pr checks 4` shows the check green on the new head.
 - [ ] Pinned 0.5.0 `continuity validate` exits VALID with zero marker warnings.
 

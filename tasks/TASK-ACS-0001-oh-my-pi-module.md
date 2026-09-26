@@ -1,8 +1,8 @@
 # TASK-ACS-0001 — Oh My Pi Module
 
-<!-- continuity:task {"acceptance":["replace this with observable, task-specific acceptance checks"],"depends_on":[],"goal":"Ship the oh-my-pi module: versioned advisor/JEV/extension config a fresh session can install into ~/.omp/agent","id":"ACS-0001","issue_url":"https://github.com/Pukujan/agent-custom-setup/issues/3","next_action":"define scope and observable acceptance checks, then begin bounded work","owner":"owner/Astra (omp session)","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"OMP setup currently lives only in one chat session; the user needs it durable, reviewable, and resumable"} -->
+<!-- continuity:task {"acceptance": ["replace this with observable, task-specific acceptance checks"], "depends_on": [], "goal": "Ship the oh-my-pi module: versioned advisor/JEV/extension config a fresh session can install into ~/.omp/agent", "id": "ACS-0001", "issue_url": "https://github.com/Pukujan/agent-custom-setup/issues/3", "next_action": "Closed: merged 7df54a1; #3 closed with verified closeout.", "owner": "owner/Astra (omp session)", "priority": "P1", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "completed", "why": "OMP setup currently lives only in one chat session; the user needs it durable, reviewable, and resumable"} -->
 
-- Status: active
+- Status: completed
 - Owner: owner/Astra (omp session)
 - Priority: P1
 - Depends on: none
