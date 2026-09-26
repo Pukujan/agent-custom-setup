@@ -174,6 +174,29 @@ Blocked/uncertain:
 Next:
 - On ACS-0003 branch: build hidden-holdout + metamorphic + baseline-vs-current differential eval per CGM HOLDOUT_EVALUATION/TDD docs using omp -p --no-tools --no-session arms; iterate README on failures; checkpoint + #7 receipt.
 
+### 2026-09-26 00:20:21 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["Root unchanged: private-repo runner allocation + (newly verified) private-repo protected branches require Pro/Team/Enterprise \u2014 acceptance 2-3 plan-gated; owner decides public/Pro/plan-blocked."],"changed":["tasks/TASK-ACS-0002-ci-gates.md (Evidence provenance line)"],"completed":["Provenance precision pass after owner challenge: every external claim now backed by a direct primary-page fetch (read tool .md rendering), with verbatim quotes. Corrected a wrong attribution I had introduced: 'protected branches need Pro on private' was cited to about-protected-branches (page contains no plan text at all); authoritative page is get-started/learning-about-github/githubs-plans. Billing numbers quoted verbatim from the billing page. Account plan explicitly UNOBSERVED (gh api user .plan.name empty; billing API needs user scope) \u2014 recorded as owner-checkable fact instead of inference."],"decisions":["Label discipline going forward: 'Verified' reserved for direct primary fetches quoted verbatim; advisor/search snippets labeled *reported*; unknowns (account plan) labeled unobserved. PCM append-only preserved: 23:5Z line replaced by this corrected line with correction note; checkpoint history untouched."],"evidence":["read: docs.github.com/en/billing/concepts/product-billing/github-actions (2,000/3,000 min; public standard runners free; usage blocked without payment method once quota used); read: docs.github.com/en/get-started/learning-about-github/githubs-plans (Pro private: Protected branches; Free private: limited feature set); grep about-protected-branches fetched page = zero 'plan|Free|Pro' statements. Docs commit prior to this checkpoint."],"next_action":"Return to task/ACS-0003-readme-docs: run the frozen reader-task metamorphic + differential eval harness via omp -p arms, iterate README on failures, checkpoint, receipt on #7.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0002","timestamp":"2026-09-26T00:20:21Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"6f5d30ae4f0d97aa9b3d9dde98439a315fe03b512b5aed0f60a3b469c998386f","request_id":"acs-0002-provenance-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0002"} -->
+
+Completed:
+- Provenance precision pass after owner challenge: every external claim now backed by a direct primary-page fetch (read tool .md rendering), with verbatim quotes. Corrected a wrong attribution I had introduced: 'protected branches need Pro on private' was cited to about-protected-branches (page contains no plan text at all); authoritative page is get-started/learning-about-github/githubs-plans. Billing numbers quoted verbatim from the billing page. Account plan explicitly UNOBSERVED (gh api user .plan.name empty; billing API needs user scope) — recorded as owner-checkable fact instead of inference.
+
+Evidence:
+- read: docs.github.com/en/billing/concepts/product-billing/github-actions (2,000/3,000 min; public standard runners free; usage blocked without payment method once quota used); read: docs.github.com/en/get-started/learning-about-github/githubs-plans (Pro private: Protected branches; Free private: limited feature set); grep about-protected-branches fetched page = zero 'plan|Free|Pro' statements. Docs commit prior to this checkpoint.
+
+Decisions:
+- Label discipline going forward: 'Verified' reserved for direct primary fetches quoted verbatim; advisor/search snippets labeled *reported*; unknowns (account plan) labeled unobserved. PCM append-only preserved: 23:5Z line replaced by this corrected line with correction note; checkpoint history untouched.
+
+Changed:
+- tasks/TASK-ACS-0002-ci-gates.md (Evidence provenance line)
+
+Blocked/uncertain:
+- Root unchanged: private-repo runner allocation + (newly verified) private-repo protected branches require Pro/Team/Enterprise — acceptance 2-3 plan-gated; owner decides public/Pro/plan-blocked.
+
+Next:
+- Return to task/ACS-0003-readme-docs: run the frozen reader-task metamorphic + differential eval harness via omp -p arms, iterate README on failures, checkpoint, receipt on #7.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
