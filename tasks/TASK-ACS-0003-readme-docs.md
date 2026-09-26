@@ -193,6 +193,29 @@ Blocked/uncertain:
 Next:
 - Post #7 correction comment (split admission refuted; placeholders fixed); monitor PR #10/#2 collisions when owner asks.
 
+### 2026-09-26 04:57:22 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["Open items unchanged: #5 Actions/protection owner decision; independent human reader review (arms share writer model family); #10 sync-before-merge."],"changed":["evals/results/suite5/ (2 records), evals/score.py, evals/run_arms.py(--out), evals/README.md, tasks/TASK-ACS-0003-readme-docs.md (marker + line 46), checkpoints/CURRENT.md"],"completed":["Suite-5 landed under the hardened v2.1 runner in an isolated cohort dir (evals/results/suite5/): 2 current arms 5.0/5, 2 stub arms 1.5/5, no regression \u2014 score.py --dir suite5 --variants current,stub exit 0. The current-vs-stub differential is now independently replicated same-cohort, resolving suite-4's stub-cohort indeterminacy without editing committed history. Scorer gained --variants subset + mixed-schema pooling guard; runner --out cohort flag; README line-46 phantom checkpoint-id replaced with real history refs (acs-0003-honesty-20260926 entry, retraction commit 091dc94)."],"decisions":["No retro-edit of the honesty checkpoint entry (CLI history, append-only): its flawed 'verified three ways' claim is superseded by retraction commit 091dc94, referenced from the task prose line 46 which is outside the checkpoint log and safe to correct."],"evidence":["records: run_current-20260926T044529Z.json + run_stub-20260926T044840Z.json (schema acs-0003.arm-run.v2.1, arm_flags verified contain --no-rules/--no-extensions/--no-skills + --config overlay, sha256 64, answer_full present \u2014 programmatically checked); suite-4 committed pool still scores SUITE PASS (python3 evals/score.py --dir evals/results exit 0); continuity validate VALID; commits 2a3aa15 + CURRENT follow-up on main."],"next_action":"Owner: #5 plan decision; #9-agent syncs #10 onto main; optional human reader pass on README.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0003","timestamp":"2026-09-26T04:57:22Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"ab2599b293b92044eff03aef5ffee4b736ccd1042653048cf4decb8cbfbac458","request_id":"acs-0003-suite5-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0003"} -->
+
+Completed:
+- Suite-5 landed under the hardened v2.1 runner in an isolated cohort dir (evals/results/suite5/): 2 current arms 5.0/5, 2 stub arms 1.5/5, no regression — score.py --dir suite5 --variants current,stub exit 0. The current-vs-stub differential is now independently replicated same-cohort, resolving suite-4's stub-cohort indeterminacy without editing committed history. Scorer gained --variants subset + mixed-schema pooling guard; runner --out cohort flag; README line-46 phantom checkpoint-id replaced with real history refs (acs-0003-honesty-20260926 entry, retraction commit 091dc94).
+
+Evidence:
+- records: run_current-20260926T044529Z.json + run_stub-20260926T044840Z.json (schema acs-0003.arm-run.v2.1, arm_flags verified contain --no-rules/--no-extensions/--no-skills + --config overlay, sha256 64, answer_full present — programmatically checked); suite-4 committed pool still scores SUITE PASS (python3 evals/score.py --dir evals/results exit 0); continuity validate VALID; commits 2a3aa15 + CURRENT follow-up on main.
+
+Decisions:
+- No retro-edit of the honesty checkpoint entry (CLI history, append-only): its flawed 'verified three ways' claim is superseded by retraction commit 091dc94, referenced from the task prose line 46 which is outside the checkpoint log and safe to correct.
+
+Changed:
+- evals/results/suite5/ (2 records), evals/score.py, evals/run_arms.py(--out), evals/README.md, tasks/TASK-ACS-0003-readme-docs.md (marker + line 46), checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- Open items unchanged: #5 Actions/protection owner decision; independent human reader review (arms share writer model family); #10 sync-before-merge.
+
+Next:
+- Owner: #5 plan decision; #9-agent syncs #10 onto main; optional human reader pass on README.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
