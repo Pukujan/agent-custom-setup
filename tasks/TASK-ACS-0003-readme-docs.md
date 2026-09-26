@@ -78,6 +78,52 @@ Blocked/uncertain:
 Next:
 - Publish #7 receipt keyed to request id + pushed SHA; open PR task/ACS-0003-readme-docs -> main with Refs #7; owner reviews/merges (no required checks exist yet); after merge close #7 and mark CURRENT.
 
+### 2026-09-26 03:11:34 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["None for this task. (Repo-wide: Actions plan-gate on #5 unchanged.)"],"changed":["README.md, evals/ (key+builder+runner+scorer+protocol+variants+20 results JSON), tasks/TASK-ACS-0003-readme-docs.md, checkpoints/CURRENT.md"],"completed":["Owner-directed eval layer delivered: spec-driven reader-task harness per CGM README_QUALITY_TDD/HOLDOUT_EVALUATION (pinned f85e88b) using omp -p headless arms. Suite 4 (key v3, 02:08-02:46Z, 13 arms/65 sessions): SUITE PASS \u2014 current T1-T5 5/5 on 2 arms; M-01 reordered + M-09 bold_stripped majority-invariant vs current (3 arms each); M-04 claim_removed T3 degrades 2/2; stub differential current 5.0 vs stub 2.0 (no regression); HOLDOUT labeled not_run. README iterated from failures: order-independent Status-at-a-glance line. Runner hardened post-suite (isolation flags, advisor-off overlay, sha256, full-answer records) for future runs."],"decisions":["Key revisions v1->v2->v3 fully disclosed in evals/README.md incl. self-admission that v3 copied phrase anchors verbatim from failing answers (lists unchanged during suite 4, verdicts stand). Isolation confound (ambient advisor, repo cwd, default rules) disclosed and bounded: identical-environment stub-2.0 vs current-5.0 spread + claim_removed T3-only degradation are unexplained by contamination. Reader remains a model proxy, NOT independent human review \u2014 human pass stays open. No 4th suite: existing evidence closes the direction."],"evidence":["evals/results/run_*.json (raw per-arm answers/reasons) committed on branch incl. v1-prekey/ + v2-prekey3/ archives; score.py verdict block quoted in evals/README.md; product commit eb3ba4e; continuity validate VALID; CGM validator VALID re-checked post-README-edit (9/9 sections, 15/15 refs, 24 bold anchors)."],"next_action":"Publish #7 eval receipt + PR #8 body update with verdict block; owner merges #8 (or syncs onto gated main if #6 lands first).","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0003","timestamp":"2026-09-26T03:11:34Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a114a9c1877791b671dc3da9ed719ed73c88abe23d250e32a0e85f99ed86fd02","request_id":"acs-0003-eval-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0003"} -->
+
+Completed:
+- Owner-directed eval layer delivered: spec-driven reader-task harness per CGM README_QUALITY_TDD/HOLDOUT_EVALUATION (pinned f85e88b) using omp -p headless arms. Suite 4 (key v3, 02:08-02:46Z, 13 arms/65 sessions): SUITE PASS — current T1-T5 5/5 on 2 arms; M-01 reordered + M-09 bold_stripped majority-invariant vs current (3 arms each); M-04 claim_removed T3 degrades 2/2; stub differential current 5.0 vs stub 2.0 (no regression); HOLDOUT labeled not_run. README iterated from failures: order-independent Status-at-a-glance line. Runner hardened post-suite (isolation flags, advisor-off overlay, sha256, full-answer records) for future runs.
+
+Evidence:
+- evals/results/run_*.json (raw per-arm answers/reasons) committed on branch incl. v1-prekey/ + v2-prekey3/ archives; score.py verdict block quoted in evals/README.md; product commit eb3ba4e; continuity validate VALID; CGM validator VALID re-checked post-README-edit (9/9 sections, 15/15 refs, 24 bold anchors).
+
+Decisions:
+- Key revisions v1->v2->v3 fully disclosed in evals/README.md incl. self-admission that v3 copied phrase anchors verbatim from failing answers (lists unchanged during suite 4, verdicts stand). Isolation confound (ambient advisor, repo cwd, default rules) disclosed and bounded: identical-environment stub-2.0 vs current-5.0 spread + claim_removed T3-only degradation are unexplained by contamination. Reader remains a model proxy, NOT independent human review — human pass stays open. No 4th suite: existing evidence closes the direction.
+
+Changed:
+- README.md, evals/ (key+builder+runner+scorer+protocol+variants+20 results JSON), tasks/TASK-ACS-0003-readme-docs.md, checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- None for this task. (Repo-wide: Actions plan-gate on #5 unchanged.)
+
+Next:
+- Publish #7 eval receipt + PR #8 body update with verdict block; owner merges #8 (or syncs onto gated main if #6 lands first).
+
+### 2026-09-26 03:13:22 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["None for this task; repo Actions plan-gate unchanged (#5)."],"changed":["README.md, evals/ (key+builder+runner+scorer+protocol+variants+20 results), tasks/TASK-ACS-0003-readme-docs.md, checkpoints/CURRENT.md"],"completed":["Owner-directed eval layer delivered: spec-driven reader-task harness per CGM README_QUALITY_TDD/HOLDOUT_EVALUATION (pinned f85e88b) using omp -p headless arms. Suite 4 (key v3, 02:08-02:46Z, 13 arms/65 sessions): SUITE PASS \u2014 current T1-T5 5/5 on 2 arms; M-01 reordered + M-09 bold_stripped majority-invariant vs current (3 arms each); M-04 claim_removed T3 degrades 2/2; stub differential current 5.0 vs stub 2.0 (no regression); HOLDOUT labeled not_run. README iterated from failures: order-independent Status-at-a-glance line. Runner hardened post-suite (isolation flags, advisor-off overlay, sha256, full-answer records) for future runs."],"decisions":["Key revisions v1->v2->v3 fully disclosed in evals/README.md incl. self-admission v3 copied phrase anchors from failing answers (lists unchanged during suite 4; verdicts stand). Isolation confound disclosed, bounded by stub-2.0 vs current-5.0 in identical environment. Reader = model proxy, not independent human review. No 4th suite."],"evidence":["evals/results/run_*.json (raw per-arm answers/reasons) committed on branch incl. v1-prekey/ + v2-prekey3/ archives; score.py verdict block quoted in evals/README.md; product commit eb3ba4e + CURRENT commit; continuity validate VALID; CGM validator re-checked post-README-edit (9/9 sections, 15/15 refs)."],"next_action":"Publish #7 eval receipt + PR #8 body update with verdict; owner merges #8 (or syncs onto gated main after #6).","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0003","timestamp":"2026-09-26T03:13:22Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"f1d69717b730991bdb58ebea948cd8cb937135d641e2728d9f48a4a0a8a851ac","request_id":"acs-0003-eval-b-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0003"} -->
+
+Completed:
+- Owner-directed eval layer delivered: spec-driven reader-task harness per CGM README_QUALITY_TDD/HOLDOUT_EVALUATION (pinned f85e88b) using omp -p headless arms. Suite 4 (key v3, 02:08-02:46Z, 13 arms/65 sessions): SUITE PASS — current T1-T5 5/5 on 2 arms; M-01 reordered + M-09 bold_stripped majority-invariant vs current (3 arms each); M-04 claim_removed T3 degrades 2/2; stub differential current 5.0 vs stub 2.0 (no regression); HOLDOUT labeled not_run. README iterated from failures: order-independent Status-at-a-glance line. Runner hardened post-suite (isolation flags, advisor-off overlay, sha256, full-answer records) for future runs.
+
+Evidence:
+- evals/results/run_*.json (raw per-arm answers/reasons) committed on branch incl. v1-prekey/ + v2-prekey3/ archives; score.py verdict block quoted in evals/README.md; product commit eb3ba4e + CURRENT commit; continuity validate VALID; CGM validator re-checked post-README-edit (9/9 sections, 15/15 refs).
+
+Decisions:
+- Key revisions v1->v2->v3 fully disclosed in evals/README.md incl. self-admission v3 copied phrase anchors from failing answers (lists unchanged during suite 4; verdicts stand). Isolation confound disclosed, bounded by stub-2.0 vs current-5.0 in identical environment. Reader = model proxy, not independent human review. No 4th suite.
+
+Changed:
+- README.md, evals/ (key+builder+runner+scorer+protocol+variants+20 results), tasks/TASK-ACS-0003-readme-docs.md, checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- None for this task; repo Actions plan-gate unchanged (#5).
+
+Next:
+- Publish #7 eval receipt + PR #8 body update with verdict; owner merges #8 (or syncs onto gated main after #6).
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
