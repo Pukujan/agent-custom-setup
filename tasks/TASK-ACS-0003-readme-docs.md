@@ -147,6 +147,29 @@ Blocked/uncertain:
 Next:
 - Post owner-direction supersessions on #3/#5/#7; merge #4 -> sync -> merge #6 -> sync -> merge #8; closeout CURRENT+tasks on main; close #3/#7 with merge SHAs; #5 remains open plan-blocked.
 
+### 2026-09-26 03:43:43 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["None."],"changed":["checkpoints/CURRENT.md (merge union); merge commit"],"completed":["Synced gated main into task/ACS-0003 append-only (merge 728e0ce; main carried b094c07 gates + 7df54a1 module; #3 closed with verified closeout). CURRENT union resolved. PR #8 head now includes gates + module history \u2014 merge-ready."],"decisions":["None new."],"evidence":["continuity validate VALID post-merge; zero conflict markers; push origin 728e0ce confirmed via gh pr view head."],"next_action":"Squash-merge #8, verify main, #7 closeout + manual close.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0003","timestamp":"2026-09-26T03:43:43Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"9fec7a0fb0157171eb58968093cd063f28928c70c43676d540a103d16977dc67","request_id":"acs-0003-sync-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0003"} -->
+
+Completed:
+- Synced gated main into task/ACS-0003 append-only (merge 728e0ce; main carried b094c07 gates + 7df54a1 module; #3 closed with verified closeout). CURRENT union resolved. PR #8 head now includes gates + module history — merge-ready.
+
+Evidence:
+- continuity validate VALID post-merge; zero conflict markers; push origin 728e0ce confirmed via gh pr view head.
+
+Decisions:
+- None new.
+
+Changed:
+- checkpoints/CURRENT.md (merge union); merge commit
+
+Blocked/uncertain:
+- None.
+
+Next:
+- Squash-merge #8, verify main, #7 closeout + manual close.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
