@@ -170,6 +170,29 @@ Blocked/uncertain:
 Next:
 - Squash-merge #8, verify main, #7 closeout + manual close.
 
+### 2026-09-26 04:21:42 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["None."],"changed":["evals/README.md, evals/run_arms.py, evals/results/smoke/, tasks/TASK-ACS-0001-oh-my-pi-module.md, tasks/TASK-ACS-0003-readme-docs.md"],"completed":["Honesty pass: cohort uniformity VERIFIED (mtime refutes my mid-suite-split admission; advisor-log/artifact evidence for uniform original conditions, labeled inferred); runner records observable fields (advisor_overlay_passed/advisor_effect:unverified); score pool made glob-safe (smoke to results/smoke/); ACS-0001 placeholder acceptance replaced with issue #3's real criteria; ACS-0003 evidence line corrected."],"decisions":["Advisory-caught contradiction ('identical-environment' vs split admission) resolved by measurement, not wording."],"evidence":["stat run_arms.py 22:13Z vs stub launch 02:46:17Z; grep advisor ~/.omp/logs 22:08-22:48 window = 0; find session dirs __advisor* under this repo = 0 (only old /tmp dogfood session); python score after pool restore = SUITE PASS (5 files, 12 arms)."],"next_action":"Post #7 correction comment (split admission refuted; placeholders fixed); monitor PR #10/#2 collisions when owner asks.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0003","timestamp":"2026-09-26T04:21:42Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"b7f646a5b1ca02563418914c56a5681131f99aa39107e0e2e082a78d9e7f0c69","request_id":"acs-0003-honesty-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0003"} -->
+
+Completed:
+- Honesty pass: cohort uniformity VERIFIED (mtime refutes my mid-suite-split admission; advisor-log/artifact evidence for uniform original conditions, labeled inferred); runner records observable fields (advisor_overlay_passed/advisor_effect:unverified); score pool made glob-safe (smoke to results/smoke/); ACS-0001 placeholder acceptance replaced with issue #3's real criteria; ACS-0003 evidence line corrected.
+
+Evidence:
+- stat run_arms.py 22:13Z vs stub launch 02:46:17Z; grep advisor ~/.omp/logs 22:08-22:48 window = 0; find session dirs __advisor* under this repo = 0 (only old /tmp dogfood session); python score after pool restore = SUITE PASS (5 files, 12 arms).
+
+Decisions:
+- Advisory-caught contradiction ('identical-environment' vs split admission) resolved by measurement, not wording.
+
+Changed:
+- evals/README.md, evals/run_arms.py, evals/results/smoke/, tasks/TASK-ACS-0001-oh-my-pi-module.md, tasks/TASK-ACS-0003-readme-docs.md
+
+Blocked/uncertain:
+- None.
+
+Next:
+- Post #7 correction comment (split admission refuted; placeholders fixed); monitor PR #10/#2 collisions when owner asks.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
