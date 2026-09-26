@@ -46,21 +46,23 @@ HOLDOUT: not_run
 SUITE: PASS
 ```
 
-Raw per-arm records (answers, reasons, pass flags): `evals/results/run_*.json`;
-earlier-key runs archived in `v1-prekey/` and `v2-prekey3/` (excluded from the
-pooled verdict above, retained for audit). The README iteration this suite
-motivated is the "Status at a glance" line (order-independent shipped/pending/
-planned summary), driven by v1/v2 invariance failures localized to
-status-mapping fragility; the residual v3 anchor-gap classification is below.
+Reproduce with `python3 evals/score.py` over the committed records. Raw per-arm
+records (answers, reasons, pass flags): `evals/results/run_*.json`; earlier-key
+runs archived in `v1-prekey/` and `v2-prekey3/` and a single hardened stub smoke
+in `smoke/` (subdirectories are excluded from `score.py`'s glob — pool hygiene so
+future suites can't silently mix cohorts; archives kept for audit). The README
+iteration this suite motivated is the "Status at a glance" line
+(order-independent shipped/pending/planned summary), driven by v1/v2 invariance
+failures localized to status-mapping fragility.
 
 ## Key revision history (fully disclosed)
 
 - **v1** (00:00Z): initial key; 50-arm suite 01:00–01:20Z → two invariance FAILs;
   stored answers showed anchor gaps ("multi-module adoption"; "reproducibility
   beyond…"), not README defects. The full v1 suite survives at
-  `evals/results/v1-prekey/` (an earlier draft of this section wrongly said v1 was
-  deleted — only the first 10-arm smoke file was removed). The pre-status-line
-  README v1 graded is uncommitted, so v1→v2 deltas are re-readable from JSON, not
+  `evals/results/v1-prekey/` (an earlier draft wrongly said v1 was deleted — only
+  the first 10-arm smoke file was removed; fixed here). The pre-status-line README
+  v1 graded is uncommitted, so v1→v2 deltas are re-readable from JSON, not
   re-buildable from git.
 - **v2** (01:25Z): synonym anchors; 50-arm suite → current/stub/claim_removed/
   reordered pass; `bold_stripped` flaked 1 arm on paraphrase (T1 "lost between
@@ -75,14 +77,28 @@ status-mapping fragility; the residual v3 anchor-gap classification is below.
 
 ## Limitations (not overclaimed)
 
-- **Isolation gap, disclosed:** all reported records (schemas `arm-run.v1`) ran
-  with cwd=repo, default rules discovery, and ambient advisor config (no
-  `--no-rules/--no-extensions/--no-skills`, advisor not overlay-disabled).
-  Bounding evidence: identical-environment `stub` scored 2.0/5 vs `current` 5/5,
-  and `claim_removed` degraded only T3 — contamination would not reproduce that
-  spread. The runner is now hardened (v2: isolation flags, advisor-off overlay,
-  sha256, full stored answers) for future runs; v1 answers are truncated to 200
-  chars, so future keys can't re-grade exactly — next iteration re-runs clean.
+- **Isolation / cohort — settled by evidence, not assumption.** An interim
+  disclosure here claimed the suite-4 `stub` may have run under hardened flags
+  (mid-loop edit). Verification refutes that and confirms uniform conditions:
+  (1) `run_arms.py` mtime = 22:13Z (pre-edit original) vs `stub` launch
+  02:46:17Z — the file on disk at launch was the original code; (2) zero advisor
+  log lines in the arms' window and zero `__advisor.*.jsonl` artifacts under this
+  repo's session dirs (they exist only in an unrelated old /tmp session) — `-p`
+  print mode never engaged the ambient `advisor.enabled: true`; (3) per-arm
+  duration tracks input size (stub ~10 s/arm, others ~31–90 s/arm), not an
+  isolation change. All five suite-4 variants therefore ran the same
+  original-condition runner: the differential and invariance comparisons are
+  like-for-like. External advisor state is not directly observable, so (2) is
+  evidence, not a proof-by-observation — labeled *inferred*.
+- The hardened runner (v2: committed `evals/omp-arms-overlay.yml` with hard-fail,
+  `--no-rules --no-extensions --no-skills`, sha256, full answers) applies to
+  FUTURE suites. Its records state `advisor_overlay_passed: true` and
+  `advisor_effect: "unverified"` — the overlay is *passed*, and the speed/log
+  evidence is consistent with advisor-off, but omp does not report config-merge
+  results, so the machine-readable field never claims more than it observes.
+- Suite-4 records (`arm-run.v1`) store 200-char-truncated answers and no sha256,
+  so re-gradation under future keys is approximate; v2 records store full answers
+  for exactly this reason.
 - The **reader is a model arm**, not a human; per README_QUALITY_TDD.md this is a
   deterministic proxy, and writer/reader share a model family → **not** the
   independent review the release gate requires; a human pass remains open.

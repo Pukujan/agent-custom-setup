@@ -94,7 +94,8 @@ def main() -> int:
         "key_schema": KEY["schema"], "key_note_head": KEY["revision_note"].split(" ")[0],
         "readme_sha256": hashlib.sha256(readme.encode()).hexdigest(),
         "arm_flags": flags, "omp_version": omp_version,
-        "advisor_enabled_during_run": not OVERLAY.is_file(),
+        "advisor_overlay_passed": OVERLAY.is_file(),
+        "advisor_effect": "unverified (omp does not report config-merge results; speed/log evidence in evals/README.md)",
         "started_at": datetime.now(timezone.utc).isoformat(), "runs": [],
     }
     for model in args.models.split(","):
