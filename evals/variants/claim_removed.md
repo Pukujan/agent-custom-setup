@@ -16,13 +16,11 @@ The concrete situation this repo exists for: an advisor/JEV judge configuration 
 
 It is **not** a secrets vault (keys never enter git), not a hosted agent platform, and not a guarantee that any setup works on your machine unchanged.
 
-**Status at a glance:** on `main` today, the only merged increment is the PCM continuity protocol itself; the oh-my-pi module (advisor/JEV config + `jev-court` extension) is delivered but still pending owner review on pull request #4; the registry/Claude Code scaffold (pull request #2) and multi-module adoption are planned. Every module claim below is tied to that reality, with the citations in the Evidence table.
 
 Two contracts shape every file here: PCM makes GitHub issues authoritative for task state, with checked-in `PROJECT.md` / `checkpoints/CURRENT.md` / `tasks/*` as versioned projections; CGM (Content Generation Modules) binds every promise in human-facing docs to pinned evidence — the writing method behind this README, including its scanability rules, comes from the CGM [playbook](https://github.com/Pukujan/content-generation-modules/blob/f85e88bc00362c53061d95ac7811bd9c6ada8e32/docs/README_PLAYBOOK.md).
 
 ## What you can make or use
 
-- **The oh-my-pi module (product of issue #3):** advisor/JEV config templates (`config.yml`, `models.yml`, `WATCHDOG.yml`) and the `jev-court.ts` extension that adjudicates every advisor note through the JEV judge with risk-tiered thresholds — currently delivered on task branch `task/ACS-0001-oh-my-pi-module` behind open [pull request #4](https://github.com/Pukujan/agent-custom-setup/pull/4). Details: [oh-my-pi README @ 0b29fdc](https://github.com/Pukujan/agent-custom-setup/blob/0b29fdccda48c875fac07b7f087b59609cbbfb99/oh-my-pi/README.md).
 - **A resumable continuity record:** the PCM adoption is merged on `main` — [checkpoints/CURRENT.md @ 1c44c8d](https://github.com/Pukujan/agent-custom-setup/blob/1c44c8d2f25cb71e8acb20253e2cc26cd682af81/checkpoints/CURRENT.md) shows how any fresh session cold-starts (read order in `HANDOFF.md`).
 - **A planned registry of further modules:** a sanitized Claude Code launcher scaffold with `registry.json` temporal metadata exists on `feat/scaffold-pcm-cgm-1` behind open [pull request #2](https://github.com/Pukujan/agent-custom-setup/pull/2); its shape is described in [issue #1](https://github.com/Pukujan/agent-custom-setup/issues/1) and [`module.json` @ 8420b78](https://github.com/Pukujan/agent-custom-setup/blob/8420b7876a77b38985b652541071e8cca72288ca/modules/claude-code/module.json). Pending PRs are pending: nothing here claims they are merged.
 - **A no-secrets template pattern:** every provider key is referenced by environment-variable *name* only; real values live in gitignored `.env` files outside this repository.
@@ -46,7 +44,6 @@ Claim fields follow the CGM `content-generation.claim-evidence.v2` contract (cla
 | Claim | Status | Supports | Limits | Source |
 |---|---|---|---|---|
 | PCM adopted; issues own progression; projections versioned | shipped | `CURRENT.md`/`PROJECT.md` on default branch | scaffold discipline, not proof every future task follows it | [CURRENT.md @ 1c44c8d](https://github.com/Pukujan/agent-custom-setup/blob/1c44c8d2f25cb71e8acb20253e2cc26cd682af81/checkpoints/CURRENT.md) |
-| oh-my-pi module with JEV wiring + jev-court extension | shipped (on task branch, PR #4 open) | module files exist with install steps and verified behavior | **not merged to default branch yet** | [oh-my-pi README @ 0b29fdc](https://github.com/Pukujan/agent-custom-setup/blob/0b29fdccda48c875fac07b7f087b59609cbbfb99/oh-my-pi/README.md) |
 | Live JEV adjudication after 401 root-cause fix | shipped | 3 notes act@0.92/0.94/0.96; trivia ignore@0.98 (~$0.00005/call) | small sample, one provider, one date (2026-09-25) | [issue #3](https://github.com/Pukujan/agent-custom-setup/issues/3) |
 | Registry + sanitized Claude Code launcher module | planned | module scaffold with `secrets_policy` exists | unmerged PR #2; adoption unproven | [module.json @ 8420b78](https://github.com/Pukujan/agent-custom-setup/blob/8420b7876a77b38985b652541071e8cca72288ca/modules/claude-code/module.json) |
 | Product boundary: own project state only | planned | scope decision recorded on the tracker | an issue's prose, not measured behavior | [issue #1](https://github.com/Pukujan/agent-custom-setup/issues/1) |
@@ -93,7 +90,6 @@ cd agent-custom-setup
 gh issue list --repo Pukujan/agent-custom-setup --state open
 ```
 
-Want the oh-my-pi setup today? Wait for PR #4 to merge (or review it), copy `oh-my-pi/config/*` and `oh-my-pi/extensions/jev-court.ts` into `~/.omp/agent/`, and put real key values only in `~/.omp/agent/.env` — see [oh-my-pi README @ 0b29fdc](https://github.com/Pukujan/agent-custom-setup/blob/0b29fdccda48c875fac07b7f087b59609cbbfb99/oh-my-pi/README.md).
 
 Re-check this page's contract (needs a checkout of the pinned helper):
 

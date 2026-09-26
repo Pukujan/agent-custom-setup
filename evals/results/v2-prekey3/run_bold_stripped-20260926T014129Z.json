@@ -1,0 +1,122 @@
+{
+ "schema": "acs-0003.arm-run.v1",
+ "run_id": "bold_stripped-20260926T014129Z",
+ "variant": "bold_stripped",
+ "cgm_pinned": "f85e88bc00362c53061d95ac7811bd9c6ada8e32",
+ "readme_sha_len": 13573,
+ "started_at": "2026-09-26T01:41:29.460796+00:00",
+ "runs": [
+  {
+   "run": 1,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Operators who maintain customized agent setups on personal machines and need fresh sessions to resume project state from the repository; teams collaborating on agent configurations; future module auth",
+      "situation": "Agent setups\u2014judge models, advisor loops, critic roles, launch scripts, environment variables\u2014are typically invisible work living only in a single chat session. An advisor/JEV judge configuration had ",
+      "difficulty": "Setup knowledge evaporates when the session ends. The next reader\u2014human or agent\u2014inherits nothing they can trust and cannot resume from the repository. Critical bugs like the 401 remain invisible and "
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "Durable, reviewable agent setups that survive across sessions without relying on chat memory. Turns invisible agent configuration\u2014models, judge logic, provider references\u2014into versioned modules with e",
+      "mechanism": "A repeatable GitHub-driven loop: tasks start as issues (owning scope and lifecycle), work happens on a task branch, completed increments are committed with a stable checkpoint and pushed, a pull reque"
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "on_default_branch": "['PCM adoption: GitHub issues own progression; CURRENT.md/PROJECT.md versioned projections (merged @ 1c44c8d)', 'Repository structure: task/checkpoint schemas, .content-system CGM adapter, .github tem",
+      "awaiting_merge": "['oh-my-pi module: advisor/JEV config + jev-court.ts extension (PR #4, delivered, pending owner review)', 'Registry scaffold: sanitized Claude Code launcher with module.json temporal metadata (PR #2)'",
+      "planned": "['Registry of further modules (beyond Claude Code scaffold)', 'Multi-module adoption framework', 'Required CI enforcement (issue #5)', 'Narrative asset generation (currently text-first; hero/problem i"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "promise": "Live JEV adjudication verified: 3 advisor notes adjudicated act at confidence 0.92/0.94/0.96; synthetic trivia note correctly ignored at 0.98",
+      "source": "issue #3 (github.com/Pukujan/agent-custom-setup/issues/3)",
+      "not_proven": "Generalizability across dates, providers, or workload types; the evidence is a single-day test (2026-09-25) with one provider (OpenRouter) and four total notes, and does not establish stability over t"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Clone the repo and follow the cold-start read order: HANDOFF.md \u2192 checkpoints/CURRENT.md \u2192 active tasks/TASK-*.md, then `gh issue list --repo Pukujan/agent-custom-setup --state open` to see active wor",
+      "reproduce": "Run `python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .content-system --project-root .` (requires pinned CGM helper 0.4.0 @ f85e88bc) to validate the README ag"
+     },
+     "error": ""
+    }
+   }
+  },
+  {
+   "run": 2,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": false,
+     "reasons": [
+      "difficulty: no anchor match in 'setup state is lost between sessions; configuration decisions cannot be reviewed'"
+     ],
+     "answer": {
+      "audience": "Operators maintaining agent configuration on personal machines; fresh agent sessions that must resume project state from repository alone; future module authors.",
+      "situation": "Agent setups are invisible work living in single chat sessions\u2014configurations, role definitions, and tuning evaporate when sessions end, leaving the next reader or session nothing they can trust or in",
+      "difficulty": "Setup state is lost between sessions; configuration decisions cannot be reviewed, debugged, or carried forward; problems (like silent model errors) remain hidden from those who didn't build them."
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": false,
+     "reasons": [
+      "offer: no anchor match in 'agent configurations that survive between sessions and can be reviewed for corre'"
+     ],
+     "answer": {
+      "offer": "Agent configurations that survive between sessions and can be reviewed for correctness. Templated advisor-and-judge systems with built-in decision filtering. Governance through GitHub issues to track ",
+      "mechanism": "Each task is a GitHub issue defining scope. Work proceeds on branches, with periodic progress checkpoints. Pull requests undergo review by humans. Code merged to the main branch becomes the official d"
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "on_default_branch": "['PCM continuity protocol adoption (CURRENT.md, PROJECT.md, AGENTS.md, checkpoints framework)', 'Repository structure: task templates, schemas, cold-start read order (HANDOFF.md)', 'CGM content system",
+      "awaiting_merge": "['oh-my-pi module: advisor/JEV config templates + jev-court.ts extension (PR #4, task branch task/ACS-0001-oh-my-pi-module) \u2014 delivered, pending owner review', 'Registry scaffold + Claude Code launche",
+      "planned": "['Multi-module adoption beyond scaffold', 'Required CI enforcement (issue #5) \u2014 merge discipline currently manual', 'Narrative marketing images (depends on image generation becoming available; procedu"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "promise": "Live JEV adjudication working after 401 root-cause fix, with 3 advisor notes adjudicated at act@0.92/0.94/0.96 and synthetic trivia ignore@0.98",
+      "source": "issue #3 \u2014 records the root-cause trace and provides the exact adjudication results with confidence scores and cost",
+      "not_proven": "Generalizability: the sample is small (3 real notes + 1 synthetic), tested with one provider (OpenRouter) on one date (2026-09-25), so the evidence does not prove the system works reliably at scale, a"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Clone the repo and follow the cold-start read order: (1) read HANDOFF.md, (2) read checkpoints/CURRENT.md, (3) read the active tasks/TASK-*.md, then (4) review open issues with `gh issue list --repo P",
+      "reproduce": "Content-system validation (README contract): clone the CGM helper at f85e88bc00362c53061d95ac7811bd9c6ada8e32 from github.com/Pukujan/content-generation-modules, then run `python3 <cgm-checkout>/scrip"
+     },
+     "error": ""
+    }
+   }
+  }
+ ]
+}

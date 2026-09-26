@@ -1,6 +1,6 @@
 # TASK-ACS-0003 — Readme Docs
 
-<!-- continuity:task {"acceptance":["validator VALID on pinned helper f85e88b","README carries the 9 contract sections + 15 references, worked example, evidence table","cite_in_readme URIs appear verbatim in README","continuity validate VALID; no private paths/secrets; touches only README, .content-system, assets, task projection, CURRENT"],"depends_on":[],"goal":"Story-first README + CGM 0.4.0 validator-green adapter (.content-system) for agent-custom-setup","id":"ACS-0003","issue_url":"https://github.com/Pukujan/agent-custom-setup/issues/7","next_action":"author adapter JSON + README + assets, iterate to validator VALID, checkpoint + PR","owner":"owner/Astra (omp session)","priority":"P2","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Repo entry point is a stub; owner direction: human-first docs per content-generation-modules specs"} -->
+<!-- continuity:task {"acceptance": ["pinned CGM validator exit 0 VALID on adapter+project-root", "README: 9 sections + 15 refs + anchors + worked example + shipped/pending/planned evidence table + status-at-a-glance", "cite_in_readme URIs verbatim; manifest paths exist", "continuity validate VALID; no secrets/private paths", "reader eval suite v3 PASS (current 5/5x2; M-01/M-09 majority-invariant 3 arms; M-04 T3 degrades 2/2; stub differential recorded; HOLDOUT not_run)", "PCM delivery: checkpoint + #7 receipt + PR Refs #7"], "depends_on": [], "goal": "Story-first README + CGM 0.4.0 validator-green adapter (.content-system) for agent-custom-setup", "id": "ACS-0003", "issue_url": "https://github.com/Pukujan/agent-custom-setup/issues/7", "next_action": "Owner reviews/merges PR #8 (or syncs it onto gated main when #6 lands); record merge SHA on #7.", "owner": "owner/Astra (omp session)", "priority": "P2", "protocol_version": "0.1.0-draft", "schema": "project-continuity.task.v1", "status": "active", "why": "Repo entry point is a stub; owner direction: human-first docs per content-generation-modules specs"} -->
 
 - Status: active
 - Owner: owner/Astra (omp session)
@@ -31,17 +31,19 @@ A newcomer understands within a minute: this is a PCM-governed registry of agent
 
 ## Acceptance criteria
 
-- [ ] `python3 .../validate_content_system.py --root <cgm@f85e88b> --adapter .content-system --project-root .` → `VALID: … and target adapter`, exit 0 (output recorded in checkpoint).
-- [ ] README has all 9 `## ` contract headings + all 15 required reference strings + bold scan anchors + a repository-grounded worked example; Evidence-and-boundaries table separates shipped / branch-pending / planned with permalinks.
-- [ ] Every `cite_in_readme:true` brief URI appears verbatim in README; every manifest asset path exists.
-- [ ] `continuity validate` VALID; secret pattern clean; no `D:\`/`C:\`/`/Users/` in product files.
-- [ ] Delivered per PCM: checkpoint on `task/ACS-0003-readme-docs`, #7 receipt, PR `Refs #7`.
+- [x] `python3 .../validate_content_system.py --root <cgm@f85e88b> --adapter .content-system --project-root .` → `VALID: … and target adapter`, exit 0 (observed pre-status-line and re-run after; output in checkpoints).
+- [x] README has all 9 `## ` contract headings + all 15 required reference strings + bold scan anchors + a repository-grounded worked example; Evidence-and-boundaries table separates shipped / branch-pending / planned with permalinks; order-independent "Status at a glance" summary added after eval iteration.
+- [x] Every `cite_in_readme:true` brief URI appears verbatim in README; every manifest asset path exists.
+- [x] `continuity validate` VALID; secret pattern clean; no private paths in product files.
+- [x] Reader-task eval suite (owner direction: omp CLI differential/iterative): key v3 SUITE PASS — `current` 5/5×2 arms, M-01 `reordered` + M-09 `bold_stripped` majority-invariance (3 arms each), M-04 `claim_removed` T3-degrades 2/2, `stub` differential current 5.0 vs stub 2.0 recorded; HOLDOUT `not_run`; full disclosure of key revisions + isolation confound in `evals/README.md`.
+- [x] Delivered per PCM: checkpoint on `task/ACS-0003-readme-docs`, #7 receipt, PR #8 `Refs #7`.
 
 ## Evidence and sources
 
 - Spec: `Pukujan/content-generation-modules`@`f85e88bc00362c53061d95ac7811bd9c6ada8e32` — `system-version.json`, `templates/readme-contract.json`, `docs/README_PLAYBOOK.md`, `scripts/validate_content_system.py` (`check_adapter`, `check_project_brief_v2`, `check_narrative_assets`, `_valid_repository_permalink`).
 - Prior reviewed adapter/README: `origin/feat/scaffold-pcm-cgm-1`@`8420b7876a77b38985b652541071e8cca72288ca` (PR #2, open).
 - Repo reality: `main`@`1c44c8d2f25cb71e8acb20253e2cc26cd682af81` (PCM adoption); oh-my-pi @`0b29fdccda48c875fac07b7f087b59609cbbfb99` (PR #4 pending); JEV smoke evidence on issue #3.
+- Eval evidence (observed 2026-09-26T02:08–02:46Z): 13 arms × 5 tasks via isolated-ish `omp -p` headless sessions; raw per-arm JSON + full answers archived at `evals/results/` (v1/v2-key runs in `v1-prekey/`, `v2-prekey3/`); `score.py` verdict block quoted in `evals/README.md`. Limitations disclosed there: model-arm proxy (writer==reader family, not the independent review), ambient-advisor/rules confound bounded by stub-2.0 vs current-5.0 spread in identical conditions, v3 self-admitted verbatim phrase anchors.
 
 ## Related records
 

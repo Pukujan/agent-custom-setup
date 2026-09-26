@@ -1,0 +1,119 @@
+{
+ "schema": "acs-0003.arm-run.v1",
+ "run_id": "current-20260926T020811Z",
+ "variant": "current",
+ "cgm_pinned": "f85e88bc00362c53061d95ac7811bd9c6ada8e32",
+ "key_version": "2026-09-26T02:00Z.",
+ "readme_sha_len": 13669,
+ "started_at": "2026-09-26T02:08:11.191219+00:00",
+ "runs": [
+  {
+   "run": 1,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Operators who maintain customized agent setups on personal machines, fresh agent sessions that must resume from repository state, and future module authors",
+      "situation": "Agent configurations (judge models, advisor loops, critic roles, launch scripts, keys) are built and tuned inside individual chat sessions, then live only in that session's memory",
+      "difficulty": "Setup knowledge becomes invisible and evaporates when sessions end, leaving no reviewable or versioned record; next sessions inherit nothing trustworthy and lose prior tuning work"
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "A repository for storing customized agent configurations as durable, reviewable modules. When a session ends, the next reader can resume from the repository alone without relying on chat history. It p",
+      "mechanism": "Work begins with a GitHub issue that owns the task scope and lifecycle. Changes happen on a task branch and end with a checkpoint commit that generates a stable request ID. A pull request with review "
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "on_default_branch": "['PCM continuity protocol adoption (AGENTS.md, HANDOFF.md, checkpoints/CURRENT.md, PROJECT.md)', 'Repository structure: task templates, GitHub workflows, schemas, .content-system/ adapter']",
+      "awaiting_merge": "['PR #4 (task/ACS-0001-oh-my-pi-module): oh-my-pi module \u2014 advisor/JEV config templates (config.yml, models.yml, WATCHDOG.yml) + jev-court.ts extension with verified live adjudication (3 notes at 0.92",
+      "planned": "['Multi-module adoption workflow and further module development', 'Required-CI enforcement (issue #5)', 'Narrative image generation (hero/problem assets; only non-narrative registry-icon.svg shipped t"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "promise": "Live JEV adjudication after 401 root-cause fix produces act-confidence scores of 0.92/0.94/0.96 for real advisor notes and ignore@0.98 for trivia",
+      "source": "issue #3",
+      "not_proven": "Generalization beyond single date (2026-09-25), consistency across different providers (only OpenRouter tested), or statistical significance beyond small sample size"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Clone the repo and follow the cold-start read order: HANDOFF.md \u2192 checkpoints/CURRENT.md \u2192 active tasks/TASK-*.md. This is the entry point documented for any fresh session.",
+      "reproduce": "Validate README against the pinned CGM adapter (v0.4.0) using: `python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .content-system --project-root .`. For project"
+     },
+     "error": ""
+    }
+   }
+  },
+  {
+   "run": 2,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Operators who maintain agent configurations on personal machines, fresh agent sessions that must resume project state from the repository, and future module authors adding other stacks.",
+      "situation": "Agent setups\u2014model roles, advisor loops, critic rosters, launch scripts, and configuration\u2014live as invisible work inside individual chat sessions. When that session ends, the next reader inherits noth",
+      "difficulty": "Setup knowledge evaporates with the session. Configuration bugs (like a judge role's silent 401s) remain hidden and unreviewable outside that session, invisible to future readers or sessions."
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "Agent setups (configurations, decision rules, launch files, and tool references) normally disappear when a session ends. This project preserves them permanently and reviews them like code, so fresh se",
+      "mechanism": "Each improvement starts with a task description. Work happens on an isolated code branch. At each milestone, a checkpoint records what was done and its evidence. When complete, it's reviewed and merge"
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "on_default_branch": "['PCM continuity protocol adoption (issues own progression, versioned projections)', 'checkpoints/CURRENT.md (cold-start reference for fresh sessions)', 'PROJECT.md (versioned task projections)', 'AGE",
+      "awaiting_merge": "['PR #4: oh-my-pi module (task branch task/ACS-0001-oh-my-pi-module, issue #3)', '  \u2022 config.yml, models.yml, WATCHDOG.yml (advisor/JEV config templates)', '  \u2022 jev-court.ts extension (adjudicates adv",
+      "planned": "['PR #2: Registry of further modules + sanitized Claude Code launcher scaffold (feat/scaffold-pcm-cgm-1, issue #1)', '  \u2022 module.json skeleton with secrets_policy', '  \u2022 registry.json temporal metadat"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "promise": "Live JEV adjudication after 401 root-cause fix: 3 advisor notes adjudicated as act at confidence 0.92/0.94/0.96, and a synthetic trivia note correctly ignored at 0.98 (~$0.00005/call)",
+      "source": "issue #3 (https://github.com/Pukujan/agent-custom-setup/issues/3)",
+      "not_proven": "The evidence does not prove generalizability beyond the tested conditions: single provider (OpenRouter), single date (2026-09-25), small sample (4 notes), and one configuration. It does not demonstrat"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Clone repo, read HANDOFF.md \u2192 checkpoints/CURRENT.md \u2192 active tasks/TASK-*.md",
+      "reproduce": "python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .content-system --project-root . (requires CGM helper v0.4.0 @ f85e88bc)"
+     },
+     "error": ""
+    }
+   }
+  }
+ ]
+}
