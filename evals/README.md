@@ -134,7 +134,7 @@ the v1 record shape; the full v2 record rewrite (sha256, `arm_flags`,
 python3 evals/build_variants.py
 # fresh cohort into its own directory so score.py never pools two runners:
 python3 evals/run_arms.py --variant current --out evals/results/suite5
-python3 evals/score.py --dir evals/results/suite5          # suite-5 verdict
+python3 evals/score.py --dir evals/results/suite5 --variants current,stub   # suite-5 differential (subset cohort)
 python3 evals/score.py --dir evals/results                 # committed suite 4
 ```
 
