@@ -74,6 +74,29 @@ Blocked/uncertain:
 Next:
 - Open PR for task/ACS-0001-oh-my-pi-module -> main, post #3 receipt comment with pushed SHA, merge after owner check, then close #3 and mark CURRENT delivered.
 
+### 2026-09-26 03:40:27 UTC — owner/Astra (omp session)
+
+<!-- continuity:checkpoint {"agent":"owner/Astra (omp session)","blocked":["Gates still unverified (private plan block). #5 open."],"changed":["checkpoints/CURRENT.md (merge resolution), merge of main"],"completed":["Merged gated main (b094c07) into task/ACS-0001 append-only (no rebase/force-push; receipt-keyed 7a87492/c3f7f91 intact). CURRENT union resolved (ACS-0002 completed-as-definition, enforcement plan-blocked per #5). continuity validate VALID."],"decisions":["PR #4 to be squash-merged under owner direction with manual #3 closeout after main verification; ci/gates expected NOT to pass on #4 (account block unchanged; #6's own head 943d4d4 failed zero-step at 00:21Z \u2014 checked before merging)."],"evidence":["Merge commit e18a95d; main b094c07 confirmed carries .github/workflows/ci.yml via git ls-tree; PR #4 head will be e18a95d post-push."],"next_action":"Squash-merge #4; verify main tree; #3 closeout comment with merge SHA + close #3; then sync+merge #8 and close #7.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0001","timestamp":"2026-09-26T03:40:27Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"517551dda64fb82e377a48cd5c227798a0d72038026b8f89af9b5764ce73a98d","request_id":"acs-0001-sync-20260926","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0001"} -->
+
+Completed:
+- Merged gated main (b094c07) into task/ACS-0001 append-only (no rebase/force-push; receipt-keyed 7a87492/c3f7f91 intact). CURRENT union resolved (ACS-0002 completed-as-definition, enforcement plan-blocked per #5). continuity validate VALID.
+
+Evidence:
+- Merge commit e18a95d; main b094c07 confirmed carries .github/workflows/ci.yml via git ls-tree; PR #4 head will be e18a95d post-push.
+
+Decisions:
+- PR #4 to be squash-merged under owner direction with manual #3 closeout after main verification; ci/gates expected NOT to pass on #4 (account block unchanged; #6's own head 943d4d4 failed zero-step at 00:21Z — checked before merging).
+
+Changed:
+- checkpoints/CURRENT.md (merge resolution), merge of main
+
+Blocked/uncertain:
+- Gates still unverified (private plan block). #5 open.
+
+Next:
+- Squash-merge #4; verify main tree; #3 closeout comment with merge SHA + close #3; then sync+merge #8 and close #7.
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
