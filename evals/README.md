@@ -110,9 +110,12 @@ the v1 record shape; the full v2 record rewrite (sha256, `arm_flags`,
   future records use **schema `arm-run.v2.1`**. Suite-5 (fully hardened
   current+stub, ~4 min) is recorded as a next action, not run (owner: stop).
 
-- Suite-5 (05:35Z, hardened runner): launched after 091dc94 shipped the working `--out` flag; writes only to
-  `evals/results/suite5/` (new directory). Records are v2.1 (full answers, sha256, overlay fields);
-  `score.py --dir` defaults to the committed cohort — pass the directory to score it; mixed-schema dirs refuse to pool.
+- **Suite-5 (05:35Z, hardened v2.1 runner, `--out evals/results/suite5/`, isolated cohort):**
+  scored with `python3 evals/score.py --dir evals/results/suite5 --variants current,stub` →
+  `current` 5.0/5 (2 arms) vs `stub` 1.5/5 (2 arms), no regression, subset SUITE PASS. This
+  resolves the suite-4 stub-cohort indeterminacy: the current-vs-stub differential now has a
+  fully same-cohort hardened replication; suite-4 invariance/degrade verdicts stand on their
+  own single-cohort evidence. Mixed-schema dirs refuse to pool (score.py guard).
 
 ## Limitations (not overclaimed)
 

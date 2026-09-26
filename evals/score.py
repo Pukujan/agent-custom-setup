@@ -5,7 +5,9 @@ frozen expectation rules (key v3; majority invariance, strict M-04 degrade).
 Pool hygiene: each directory must contain a single runner generation — v1
 records carry truncated 200-char answers, v2/v2.1 carry answer_full; score.py
 ERRORS if the selected directory mixes `schema` values, so cohorts can never be
-silently double-counted. Exit 0 only if all expectations hold. No LLM involved.
+silently double-counted. --variants scores a subset of expectation keys for
+partial cohorts (e.g. suite-5 current+stub only). Exit 0 only if all scored
+expectations hold. No LLM involved.
 """
 import argparse
 import json
@@ -38,7 +40,10 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", default="evals/results",
                     help="cohort directory relative to repo root (must be one runner generation)")
+    ap.add_argument("--variants", default=None,
+                    help="comma list of expectation keys to score (subset runs, e.g. current,stub)")
     args = ap.parse_args()
+    subset = [v.strip() for v in args.variants.split(",")] if args.variants else None
     paths = sorted((ROOT / args.dir).glob("run_*.json"))
     if not paths:
         print(f"NO RECORDS in {args.dir}")
@@ -50,6 +55,8 @@ def main() -> int:
         return 1
     failures, lines = [], []
     for variant, rule in KEY["expectations"].items():
+        if subset and variant not in subset:
+            continue
         arms = variant_arms(records, variant)
         mode = rule["mode"]
         if not arms:
