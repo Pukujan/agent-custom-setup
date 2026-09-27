@@ -119,6 +119,8 @@ def test_watchdog_runner_must_be_agentless(tmp_path: Path):
 
 def _find_cgm_for_tests() -> Path | None:
     candidates = [
+        Path("/workspace/cgm-054"),
+        Path("/workspace/cgm-053"),
         Path("/workspace/cgm-051"),
         Path(r"D:\claude\content-generation-modules"),
         Path.home() / "content-generation-modules",
@@ -231,8 +233,8 @@ def test_example_pins_are_full_stacks():
     data = json.loads(
         (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
     )
-    assert data["pins"]["cgm"]["version"] == "0.5.1"
-    assert data["pins"]["cgm"]["revision"].startswith("9874b26")
+    assert data["pins"]["cgm"]["version"] == "0.5.4"
+    assert data["pins"]["cgm"]["revision"].startswith("c95d73a")
     assert data["pins"]["pcm"]["revision"].startswith("4e23854")
     assert set(mod.REQUIRED_CGM_MODULES).issubset(
         {
@@ -269,4 +271,39 @@ def test_cli_ok_with_cgm_validate():
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert "hotload_check: OK" in proc.stdout
     assert "cgm_validate=VALID" in proc.stdout
-    assert "WRITING_ROUTING" in proc.stdout
+    assert "WRITING_ROUTING" in proc.stdout or "writing-routing" in proc.stdout or "acs_prompt_inject" in proc.stdout
+    assert "acs_prompt_inject" in proc.stdout
+    assert (MODULE_ROOT / "PROMPT_INJECT.md").is_file()
+    inject = (MODULE_ROOT / "PROMPT_INJECT.md").read_text(encoding="utf-8")
+    assert "MUST load" in inject or "required_load" in inject or "writing-direction" in inject
+
+
+def test_cgm_pin_constants_054():
+    mod = _load_mod()
+    assert mod.CGM_PIN_VERSION == "0.5.4"
+    assert mod.CGM_PIN_REVISION.startswith("c95d73a")
+    assert mod.CGM_PIN_REVISION == "c95d73a0ce072a6d7173ce4848621a25cdf1cc7e"
+    assert mod.CGM_PIN_REVISION_PREFIX == "c95d73a"
+
+
+def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):
+    """When CGM pin is available, apply_acs_prompt_inject writes PROMPT_INJECT.md."""
+    import os
+    cgm = _find_cgm_for_tests()
+    if cgm is None:
+        import pytest
+        pytest.skip("CGM checkout not present on this machine")
+    mod = _load_mod()
+    # ensure pin SHA matches (caller responsibility in live install)
+    sha = mod.cgm_checkout_sha(cgm)
+    if sha is None or not sha.startswith(mod.CGM_PIN_REVISION_PREFIX):
+        import pytest
+        pytest.skip(f"CGM checkout HEAD={sha} not at pin {mod.CGM_PIN_REVISION}")
+    out_root = tmp_path
+    text, notes = mod.apply_acs_prompt_inject(cgm, out_root)
+    assert text and "MUST load" in text
+    assert (out_root / "PROMPT_INJECT.md").is_file()
+    body = (out_root / "PROMPT_INJECT.md").read_text(encoding="utf-8")
+    assert "writing-direction" in body
+    assert "human-sounding-writing" in body or "hsw" in body.lower()
+    assert any("wrote" in n for n in notes)

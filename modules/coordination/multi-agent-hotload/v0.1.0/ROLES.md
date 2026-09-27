@@ -91,12 +91,12 @@ Schema fields `lease_ttl_minutes`, `claim_queue`, `watchdog_interval_minutes`, a
 | System | Role |
 | --- | --- |
 | PCM | **Full** continuity + PR-only/gates/protection/auto-merge preference — **not** boss, not proposal store, not lease store of record |
-| CGM | **Full** 0.5.1 stack (seven modules + contracts) for titles/README/UX — **not** ownership |
+| CGM | **Full** 0.5.4 stack (seven modules + contracts) for titles/README/UX — **not** ownership |
 | Tool brand (Grok/Claude/Codex/…) | Irrelevant to seat assignment |
 | Watchdog | Liveness flags only — not failover |
 | Local SQLite / device DBs | Execution aids — GitHub issues / claim win on disagreement |
 | Out-of-band DM | **Forbidden** for lease handoff |
-| ACS this pack | Install surface that hot-loads FULL PCM + FULL CGM 0.5.1 + these role rules |
+| ACS this pack | Install surface that hot-loads FULL PCM + FULL CGM 0.5.4 + these role rules |
 
 ## Example fill (illustrative)
 

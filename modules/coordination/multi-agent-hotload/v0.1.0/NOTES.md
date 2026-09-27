@@ -4,15 +4,15 @@
 
 - **ACS is source of truth** for this module. Desktop (or other) paths are deploy mirrors only.
 - Sync direction after merge: **ACS → mirrors**.
-- This pack is an **install surface**: agents loading the hot-loader must wire **FULL PCM + FULL CGM 0.5.1 + this runtime**. ACS does not replace PCM or CGM and must not vendor their source trees.
+- This pack is an **install surface**: agents loading the hot-loader must wire **FULL PCM + FULL CGM 0.5.4 + this runtime**. ACS does not replace PCM or CGM and must not vendor their source trees.
 - **Binding:** ACS and all agent-hotloader adopters use the **complete** PCM and CGM stacks — not a slim subset (not HSW+writing-direction only, not hotload-only, not continuity-only PCM).
 
 ## Pins
 
 | Dependency | Pin / note |
 | --- | --- |
-| PCM | `4e2385474b4af9249ca009cbdcb38c4498932475` · CLI **0.6.0** · protocol `0.1.0-draft`. Full stack: continuity/checkpoints + GitHub issues own progression + PR-only + required CI gates + branch-protection/auto-merge preference + fail-closed + leaf/parent receipts. Still not the proposal layer. |
-| CGM | `9874b26dc46499137bf22e1ca163874ef2dd5e7a` · **0.5.1**. Full seven modules: `brand-foundation`, `content-context`, `writing-direction`, `human-sounding-writing`, `visual-direction`, `image-generation`, `html-demo` + `human_output_contract` (README playbook/template/contract, quality PDD/SDD/TDD, provenance, WRITING_ROUTING, HSW guide/rules, scanability, claim-evidence). |
+| PCM | `4e2385474b4af9249ca009cbdcb38c4498932475` · CLI **0.6.0** · protocol `0.1.0-draft`. Full stack ([adopter-enforcement](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md)): continuity/checkpoints + GitHub issues own progression + PR-only + required CI gates + branch-protection/auto-merge preference + fail-closed + leaf/parent receipts. Still not the proposal layer. |
+| CGM | `c95d73a0ce072a6d7173ce4848621a25cdf1cc7e` · **0.5.4**. Full seven modules: `brand-foundation`, `content-context`, `writing-direction`, `human-sounding-writing`, `visual-direction`, `image-generation`, `html-demo` + `human_output_contract` (README playbook/template/contract, quality PDD/SDD/TDD, provenance, WRITING_ROUTING, HSW guide/rules, scanability, claim-evidence). |
 
 Validate CGM adapters with:
 
@@ -44,7 +44,7 @@ Branched from ACS policy / multi-setup registry lineage (PR #10 / `POLICY.md` + 
 ## Verify
 
 ```bash
-export CGM_ROOT=/path/to/content-generation-modules  # HEAD must be 9874b26… (0.5.1)
+export CGM_ROOT=/path/to/content-generation-modules  # HEAD must be c95d73a… (0.5.4)
 export ADOPTER_ROOT=/path/to/working-repo            # must include .content-system/
 python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
   --cgm-root "$CGM_ROOT" --adopter-root "$ADOPTER_ROOT"
@@ -52,4 +52,4 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```
 
-After VALID: load modules per CGM `docs/WRITING_ROUTING.md` (README→writing-direction; posts→hsw). Validate does not enforce prose quality.
+After VALID: MUST load modules per CGM writing-routing.json / ACS_VERIFY.md; apply acs_prompt_inject. After VALID: MUST load modules per CGM `docs/writing-routing.json` / `docs/ACS_VERIFY.md` (README→writing-direction; PR/issue/docs/commits→hsw); paste/apply `acs_prompt_inject` (hotload_check writes `PROMPT_INJECT.md` and prints instruction). Validate does not enforce prose quality.

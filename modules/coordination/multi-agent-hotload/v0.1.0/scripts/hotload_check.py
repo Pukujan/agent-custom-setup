@@ -117,10 +117,10 @@ REQUIRED_PCM_FEATURES = (
     "leaf_parent_dependency_receipts",
 )
 
-CGM_PIN_VERSION = "0.5.1"
-CGM_PIN_REVISION_PREFIX = "9874b26"
+CGM_PIN_VERSION = "0.5.4"
+CGM_PIN_REVISION_PREFIX = "c95d73a"
 PCM_PIN_REVISION_PREFIX = "4e23854"
-CGM_PIN_REVISION = "9874b26dc46499137bf22e1ca163874ef2dd5e7a"
+CGM_PIN_REVISION = "c95d73a0ce072a6d7173ce4848621a25cdf1cc7e"
 CGM_HELPER_REPO = "https://github.com/Pukujan/content-generation-modules"
 
 
@@ -137,6 +137,8 @@ def discover_cgm_root(explicit: Path | None = None) -> Path | None:
     acs_root = MODULE_ROOT.parents[3]  # v0.1.0 -> multi-agent-hotload -> coordination -> modules -> repo
     candidates.extend(
         [
+            Path("/workspace/cgm-054"),
+            Path("/workspace/cgm-053"),
             Path("/workspace/cgm-051"),
             Path("/workspace/cgm-hsw"),
             acs_root.parent / "content-generation-modules",
@@ -194,7 +196,7 @@ def validate_cgm_live(
         if require:
             errors.append(
                 "CGM checkout not found: set CGM_ROOT or pass --cgm-root to a "
-                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.1)"
+                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.4)"
             )
         return errors
 
@@ -217,7 +219,7 @@ def validate_cgm_live(
             )
             return errors
 
-    # Confirm helper system-version.json reports 0.5.1 + seven modules
+    # Confirm helper system-version.json reports 0.5.4 + seven modules
     try:
         version = load_json(cgm_root / "system-version.json")
     except Exception as exc:  # noqa: BLE001
@@ -269,13 +271,87 @@ def validate_cgm_live(
         return errors
 
     out = (proc.stdout or "") + (proc.stderr or "")
-    first = next((ln.strip() for ln in out.splitlines() if ln.strip()), "")
-    if proc.returncode != 0 or not first.startswith("VALID"):
-        detail = f"(exit={proc.returncode}, first_line={first!r}). Output:\n{out.strip()}"
+    lines = [ln.strip() for ln in out.splitlines() if ln.strip()]
+    first = lines[0] if lines else ""
+    # CGM 0.5.2+ may print CGM_VERIFY before VALID; accept any VALID line.
+    valid_line = next((ln for ln in lines if ln.startswith("VALID")), "")
+    if proc.returncode != 0 or not valid_line:
+        detail = (
+            f"(exit={proc.returncode}, first_line={first!r}, valid_line={valid_line!r}). "
+            f"Output:\n{out.strip()}"
+        )
         errors.append("validate_content_system.py did not return VALID " + detail)
     return errors
 
 
+
+
+
+def load_writing_routing(cgm_root: Path) -> dict | None:
+    path = cgm_root / "docs" / "writing-routing.json"
+    if not path.is_file():
+        return None
+    try:
+        data = load_json(path)
+    except Exception:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def render_prompt_inject_md(routing: dict, *, pin_sha: str, pin_version: str) -> str:
+    inject = routing.get("acs_prompt_inject") if isinstance(routing.get("acs_prompt_inject"), dict) else {}
+    instruction = str(inject.get("instruction") or "").strip()
+    checklist = routing.get("apply_checklist") if isinstance(routing.get("apply_checklist"), list) else []
+    checklist_md = "\n".join(f"{i+1}. {c}" for i, c in enumerate(checklist))
+    return (
+        f"# PROMPT_INJECT — acs_prompt_inject (CGM {pin_version})\n\n"
+        f"Generated / refreshed by `hotload_check` after full adapter `VALID`.\n"
+        f"Source: CGM `docs/writing-routing.json` → `acs_prompt_inject` @ `{pin_sha}`.\n\n"
+        f"Also see: CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/{pin_sha}/docs/ACS_VERIFY.md) "
+        f"and [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/{pin_sha}/docs/writing-routing.json).\n\n"
+        "## When\n\n"
+        "After `hotload_check` / full adapter validate succeeds, **before** writing "
+        "PR/issue/docs/commits (or any routed surface).\n\n"
+        "## Instruction (MUST paste/apply into system or task prompts)\n\n"
+        f"{instruction}\n\n"
+        "## apply_checklist\n\n"
+        f"{checklist_md}\n\n"
+        "## Surface → module (MUST load)\n\n"
+        "| Surface | MUST load |\n"
+        "| --- | --- |\n"
+        "| README / product entry | `writing-direction` |\n"
+        "| PR titles/bodies, issue titles/bodies, issue-log titles, commit messages/subjects, "
+        "non-README docs, changelog prose, posts/blogs/social/general prose, papers/data writeups | "
+        "`human-sounding-writing` (**hsw**) |\n\n"
+        "Contract language is **MUST / APPLY**, not prefer. Soft enforcement = no NLP CI grade of prose.\n"
+    )
+
+
+def apply_acs_prompt_inject(cgm_root: Path, pack_root: Path) -> tuple[str | None, list[str]]:
+    """After VALID: load writing-routing.json, write PROMPT_INJECT.md, return instruction text."""
+    notes: list[str] = []
+    routing = load_writing_routing(cgm_root)
+    if routing is None:
+        notes.append(
+            "acs_prompt_inject: missing or unreadable docs/writing-routing.json in CGM pin "
+            f"(expected at {cgm_root / 'docs' / 'writing-routing.json'})"
+        )
+        return None, notes
+    inject = routing.get("acs_prompt_inject")
+    if not isinstance(inject, dict) or not str(inject.get("instruction") or "").strip():
+        notes.append("acs_prompt_inject: writing-routing.json missing acs_prompt_inject.instruction")
+        return None, notes
+    instruction = str(inject["instruction"]).strip()
+    out = pack_root / "PROMPT_INJECT.md"
+    try:
+        out.write_text(
+            render_prompt_inject_md(routing, pin_sha=CGM_PIN_REVISION, pin_version=CGM_PIN_VERSION),
+            encoding="utf-8",
+        )
+        notes.append(f"acs_prompt_inject: wrote {out}")
+    except OSError as exc:
+        notes.append(f"acs_prompt_inject: failed to write PROMPT_INJECT.md: {exc}")
+    return instruction, notes
 
 
 def validate_pins(data: object) -> list[str]:
@@ -311,7 +387,7 @@ def validate_pins(data: object) -> list[str]:
 
     cgm = pins.get("cgm")
     if not isinstance(cgm, dict):
-        errors.append("pins.cgm: required (FULL CGM 0.5.1 stack)")
+        errors.append("pins.cgm: required (FULL CGM 0.5.4 stack)")
     else:
         ver = str(cgm.get("version") or "")
         if ver != CGM_PIN_VERSION:
@@ -321,7 +397,7 @@ def validate_pins(data: object) -> list[str]:
         rev = str(cgm.get("revision") or "")
         if not rev.startswith(CGM_PIN_REVISION_PREFIX):
             errors.append(
-                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.1)"
+                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.4)"
             )
         mods = cgm.get("modules")
         if not isinstance(mods, list):
@@ -404,21 +480,33 @@ def run(
             for line in str(item).splitlines() or [str(item)]:
                 print(f"  - {line}")
         return 1
+    # After full adapter VALID: wire acs_prompt_inject (primary done-when remains VALID)
+    inject_text = None
+    inject_notes: list[str] = []
+    if resolved_cgm is not None:
+        inject_text, inject_notes = apply_acs_prompt_inject(resolved_cgm, root)
+
     print("hotload_check: OK")
     print(f"  module_root={root}")
     print(f"  assignment={example_path}")
     print(f"  cgm_root={resolved_cgm}")
     print(f"  adopter_root={resolved_adopter}")
     print(f"  cgm_pin={CGM_PIN_VERSION}@{CGM_PIN_REVISION}")
-    print("  install_surface=FULL PCM + FULL CGM 0.5.1 + this runtime")
+    print("  install_surface=FULL PCM + FULL CGM 0.5.4 + this runtime")
     print("  cgm_validate=VALID (validate_content_system.py)")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
     print("  claim_queue=FIFO after vacancy; zombie re-reads GitHub claim")
+    for note in inject_notes:
+        print(f"  {note}")
     print(
-        "  next: load CGM modules per docs/WRITING_ROUTING.md "
-        "(README/product -> writing-direction; posts/prose -> hsw). "
-        "Titles/bodies remain agent discipline — validate does not score prose."
+        "  next: MUST load CGM modules per docs/writing-routing.json / docs/ACS_VERIFY.md "
+        "(README/product -> writing-direction; PR/issue/docs/commits -> hsw). "
+        "Paste/apply acs_prompt_inject.instruction into system/task prompts before writing."
     )
+    if inject_text:
+        print("  --- acs_prompt_inject.instruction ---")
+        print(inject_text)
+        print("  --- end acs_prompt_inject ---")
     return 0
 
 
