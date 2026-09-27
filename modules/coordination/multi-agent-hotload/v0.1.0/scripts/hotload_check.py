@@ -36,6 +36,18 @@ def check_required_files(root: Path) -> list[str]:
     return [rel for rel in REQUIRED_FILES if not (root / rel).is_file()]
 
 
+def console_safe(text: str) -> str:
+    """ASCII-safe for Windows cp1252 consoles (Unicode arrows crash print)."""
+    return (
+        text.replace("→", "->")
+        .replace("←", "<-")
+        .replace("⇒", "=>")
+        .replace("—", "--")
+        .replace("–", "-")
+        .replace(" ", " ")
+    )
+
+
 def load_json(path: Path) -> object:
     with path.open(encoding="utf-8-sig") as fh:
         return json.load(fh)
@@ -505,7 +517,7 @@ def run(
     )
     if inject_text:
         print("  --- acs_prompt_inject.instruction ---")
-        print(inject_text)
+        print(console_safe(inject_text))
         print("  --- end acs_prompt_inject ---")
     return 0
 
