@@ -1,0 +1,34 @@
+# AGENT-LESS boss-seat watchdog stub.
+# Copy into a consuming repo as .github/workflows/boss-watchdog.yml if desired.
+# No secrets embedded. Uses default GITHUB_TOKEN only if you enable gh API steps.
+# Watchdog != failover. Lease TTL is in minutes (assignment boss_failover.lease_ttl_minutes; default 30).
+# After vacancy, agents enqueue on GitHub-canonical claim_queue — this job does not appoint a boss.
+
+name: boss-seat-watchdog
+
+on:
+  schedule:
+    # ~every 10 minutes (GitHub may delay cron slightly)
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+      issues: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run agent-less watchdog skeleton
+        # Point --assignment at the project's live assignment JSON once installed.
+        # Optional: compute latest commit/PR stamp and pass --github-last-activity.
+        run: |
+          python modules/coordination/multi-agent-hotload/v0.1.0/scripts/watchdog_check.py \
+            --assignment modules/coordination/multi-agent-hotload/v0.1.0/examples/assignment.example.json \
+            --dry-run
+        # Remove --dry-run in consuming repos when claim file writes are intended.

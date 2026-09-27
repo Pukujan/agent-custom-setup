@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Pukujan/agent-custom-setup/modules/coordination/multi-agent-hotload/v0.1.0/schema/assignment.schema.json",
+  "title": "Multi-agent hotload assignment",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "project",
+    "agents",
+    "boss_failover",
+    "watchdog"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recorded_at": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "role_fill": {
+      "type": "object",
+      "description": "Live join/continue order fills roles; assignment may seed.",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "join_continue_order"
+          ]
+        },
+        "seed_is_hint_only": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Optional seed list. Live join/continue order fills seats. Index 0 seed hint = preferred first boss if room empty.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "agent_id"
+        ],
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role_seed": {
+            "type": "string",
+            "enum": [
+              "decision_boss",
+              "coder",
+              "worker"
+            ]
+          },
+          "harness": {
+            "type": "string"
+          },
+          "machine_label": {
+            "type": "string"
+          },
+          "may_implement": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "boss_failover": {
+      "type": "object",
+      "description": "Authoritative seat lease in MINUTES (short leases). Not the watchdog. Vacancy uses a FIFO claim_queue.",
+      "required": [
+        "lease_ttl_minutes",
+        "check_in"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "lease_ttl_minutes": {
+          "type": "number",
+          "minimum": 15,
+          "maximum": 120,
+          "default": 30,
+          "description": "Boss lease TTL in minutes (default 30; range 15-120). Short leases are intentional. Watchdog (~10m) stays liveness-only."
+        },
+        "check_in": {
+          "type": "object",
+          "required": [
+            "mechanism"
+          ],
+          "properties": {
+            "mechanism": {
+              "type": "string",
+              "enum": [
+                "issue_comment",
+                "claim_file"
+              ]
+            },
+            "interval_hint_minutes": {
+              "type": "number",
+              "minimum": 5,
+              "maximum": 120,
+              "description": "How often the sitting boss should renew (typically <= lease_ttl_minutes)"
+            },
+            "claim_file_path": {
+              "type": "string",
+              "description": "Required when mechanism is claim_file; also authoritative for zombie rejection"
+            },
+            "issue_url": {
+              "type": "string",
+              "description": "Owning issue for issue_comment check-ins"
+            }
+          }
+        },
+        "claim_queue": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "FIFO of agent_ids waiting to take boss after vacancy. Front takes next. Old boss rejoining appends at end — no auto-reclaim."
+        },
+        "standby": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional preferred agent_id order when enqueueing after vacancy (hints only; live claim_queue order wins)"
+        },
+        "grace_minutes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60,
+          "description": "Optional takeover refute window AFTER lease TTL expiry — not the lease itself"
+        },
+        "as_of_history": {
+          "type": "array",
+          "description": "Append-only who-was-boss-at-T; separate from who-is-boss-now. Never rewrite on zombie or re-queue.",
+          "items": {
+            "type": "object",
+            "required": [
+              "as_of",
+              "boss_agent_id"
+            ],
+            "properties": {
+              "as_of": {
+                "type": "string"
+              },
+              "boss_agent_id": {
+                "type": "string"
+              },
+              "ended_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "who_is_boss_now": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Current lease holder agent_id, or null if vacant. Authoritative with claim file — zombies must re-queue."
+        }
+      }
+    },
+    "watchdog": {
+      "type": "object",
+      "description": "AGENT-LESS liveness only (cron/Action/script). Not failover. No LLM. ~10m typical.",
+      "required": [
+        "watchdog_interval_minutes",
+        "idle_window",
+        "runner"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "watchdog_interval_minutes": {
+          "type": "number",
+          "minimum": 5,
+          "maximum": 30,
+          "default": 10,
+          "description": "How often the agent-less watcher runs (~10m). NOT boss failover. Liveness/nudge only."
+        },
+        "idle_window": {
+          "type": "object",
+          "required": [
+            "minutes"
+          ],
+          "properties": {
+            "minutes": {
+              "type": "number",
+              "minimum": 10,
+              "description": "No GitHub activity for this long + stale heartbeat => at risk (flag only). Prefer <= lease_ttl_minutes."
+            }
+          }
+        },
+        "runner": {
+          "type": "string",
+          "enum": [
+            "cron",
+            "github_action",
+            "script"
+          ],
+          "description": "Must be agent-less infrastructure — never an LLM or peer agent"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "claim_heartbeat",
+              "github_commit",
+              "github_pr",
+              "local_telemetry_optional"
+            ]
+          },
+          "description": "Prefer claim heartbeat + GitHub stamps; local telemetry optional secondary"
+        },
+        "on_fresh_heartbeat": {
+          "type": "string",
+          "const": "noop"
+        },
+        "on_stale_with_github_activity": {
+          "type": "string",
+          "description": "nudge check-in; keep boss"
+        },
+        "on_stale_idle": {
+          "type": "string",
+          "description": "flag seat at risk"
+        },
+        "on_past_lease_ttl": {
+          "type": "string",
+          "description": "write vacant in claim file; do not appoint boss; claimants enqueue"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "pins": {
+      "type": "object",
+      "properties": {
+        "pcm": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "cgm": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "ticket_links": {
+      "type": "object",
+      "description": "Parent/child notes only — no DAG engine",
+      "properties": {
+        "parent_issue": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "child_issues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

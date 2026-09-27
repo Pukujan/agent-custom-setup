@@ -63,8 +63,19 @@ jobs:
 
       - name: Extension TypeScript syntax check
         run: |
+          # Extensions are Bun/TypeScript (import type, satisfies, bun:*).
+          # Plain `node --check` cannot parse them under Node 24.
+          # esbuild parses syntax with all packages marked external (no install of Bun/@oh-my-pi).
           shopt -s nullglob
-          for ts in oh-my-pi/extensions/*.ts; do
-            node --check "$ts"
-            echo "OK $ts"
-          done
+          files=(oh-my-pi/extensions/*.ts)
+          if (( ${#files[@]} == 0 )); then
+            echo "OK: no extension .ts files"
+            exit 0
+          fi
+          npm install --no-save esbuild@0.25
+          npx esbuild "${files[@]}" \
+            --outdir=/tmp/acs-ext-syntax \
+            --format=esm \
+            --platform=neutral \
+            --packages=external
+          echo "OK: esbuild parsed ${#files[@]} extension(s)"

@@ -1,0 +1,101 @@
+{
+  "id": "multi-agent-hotload",
+  "name": "Multi-agent hotload coordination",
+  "purpose": "Install surface: hot-load FULL PCM + FULL CGM 0.5.4 + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
+  "harness": "coordination",
+  "created": "2026-09-27",
+  "updated": "2026-09-27",
+  "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/11",
+  "owning_agent": "agent-custom-setup",
+  "deploy_mirrors": [
+    {
+      "label": "ACS module tree (SoT; agents load from checkout)",
+      "path": "D:\\claude\\agent-custom-setup\\modules\\coordination\\multi-agent-hotload\\v0.1.0\\",
+      "notes": "ACS is SoT. No Desktop launcher mirror required for this pack."
+    }
+  ],
+  "version": "0.1.0",
+  "title": "Multi-agent hotload coordination pack",
+  "path": "modules/coordination/multi-agent-hotload/v0.1.0/",
+  "recorded_at": "2026-09-27T05:00:00Z",
+  "valid_time": {
+    "start": "2026-09-27T00:00:00-04:00",
+    "end": null
+  },
+  "status": "active",
+  "files": [
+    {
+      "path": "README.md",
+      "role": "install-overview"
+    },
+    {
+      "path": "HOTLOAD.md",
+      "role": "startup-load-order"
+    },
+    {
+      "path": "PROMPT_INJECT.md",
+      "role": "acs-prompt-inject"
+    },
+    {
+      "path": "ROLES.md",
+      "role": "boss-worker-rules"
+    },
+    {
+      "path": "BEHAVIOR.md",
+      "role": "normative-ops"
+    },
+    {
+      "path": "PROPOSALS.md",
+      "role": "propose-accept-claim-flow"
+    },
+    {
+      "path": "NOTES.md",
+      "role": "operator-notes"
+    },
+    {
+      "path": "module.json",
+      "role": "module-metadata"
+    },
+    {
+      "path": "schema/assignment.schema.json",
+      "role": "assignment-schema"
+    },
+    {
+      "path": "examples/assignment.example.json",
+      "role": "assignment-example"
+    },
+    {
+      "path": "scripts/hotload_check.py",
+      "role": "validator"
+    },
+    {
+      "path": "scripts/watchdog_check.py",
+      "role": "agentless-watchdog"
+    },
+    {
+      "path": "workflow-stubs/watchdog.yml",
+      "role": "gh-action-stub"
+    },
+    {
+      "path": "tests/test_hotload_check.py",
+      "role": "tests"
+    }
+  ],
+  "secrets_policy": {
+    "never_commit": [
+      "API keys",
+      "tokens",
+      "cookies",
+      ".env file contents",
+      "bak files"
+    ],
+    "runtime_secret_locations": [],
+    "repo_rule": "Docs, schemas, and agent-less stubs only. No secrets."
+  },
+  "dependencies": [
+    "PCM @ 4e2385474b4af9249ca009cbdcb38c4498932475 (CLI 0.6.0, protocol 0.1.0-draft) — FULL stack: continuity + PR-only + required CI + branch protection/auto-merge preference; pin/reference, do not vendor",
+    "CGM @ c95d73a0ce072a6d7173ce4848621a25cdf1cc7e (0.5.4) — FULL seven-module stack + human_output_contract; not HSW+writing-direction only; pin/reference, do not vendor",
+    "Python 3 + jsonschema for hotload_check"
+  ],
+  "summary": "Hot-load FULL PCM + FULL CGM 0.5.4 + this runtime. Join order fills roles. Boss lease default 30m (15–120). GitHub-canonical claim_queue after vacancy; returning boss joins end; zombie re-reads claim. Agent-less watchdog ~10m. GitHub primary progress. No DAG. Slim subsets are incomplete installs."
+}
