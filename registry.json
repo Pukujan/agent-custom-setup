@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "created": "2026-09-25",
   "updated": "2026-09-27",
-  "recorded_at": "2026-09-27T04:55:00Z",
+  "recorded_at": "2026-09-27T20:45:00Z",
   "valid_time": {
     "start": "2026-09-25T00:00:00-04:00",
     "end": null
@@ -66,6 +66,36 @@
       "dependencies": [
         "PCM @ 4e2385474b4af9249ca009cbdcb38c4498932475 (CLI 0.6.0) full stack",
         "CGM @ 9874b26dc46499137bf22e1ca163874ef2dd5e7a (0.5.1) full seven modules"
+      ]
+    },
+    {
+      "id": "jev-gate-pin",
+      "name": "JEV gate + constraint pin",
+      "purpose": "Optional PreToolUse-style gate with constraint pin/gather stubs; Fish fixtures target FN=0 on block (cite knowledge pack).",
+      "harness": "coordination",
+      "created": "2026-09-27",
+      "updated": "2026-09-27",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/17",
+      "owning_agent": "agent-custom-setup",
+      "deploy_mirrors": [
+        {
+          "label": "ACS module tree (SoT; optional opt-in; agents load from checkout)",
+          "path": "D:\\\\claude\\\\agent-custom-setup\\\\modules\\\\coordination\\\\jev-gate-pin\\\\v0.1.0\\\\",
+          "notes": "ACS is SoT. Optional until proven; not binding in multi-agent-hotload HOTLOAD.md load-order."
+        }
+      ],
+      "version": "0.1.0",
+      "path": "modules/coordination/jev-gate-pin/v0.1.0/",
+      "recorded_at": "2026-09-27T20:45:00Z",
+      "valid_time": {
+        "start": "2026-09-27T00:00:00-04:00",
+        "end": null
+      },
+      "status": "draft",
+      "summary": "Draft optional module: pin + gatherer + mock gate + Fish fixtures (FN=0 on block) + JSONL log. Cite pack #15/#16. Not binding hotload until proven.",
+      "dependencies": [
+        "Knowledge pack docs/knowledge/jev-architecture-gate-pin-compaction-fish.md (#15 / PR #16)",
+        "Complementary to #13/#14 research checklist"
       ]
     }
   ]
