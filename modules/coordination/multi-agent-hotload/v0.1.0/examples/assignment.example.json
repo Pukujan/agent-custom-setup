@@ -1,0 +1,100 @@
+{
+  "schema_version": "0.1.0",
+  "project": "Example three-lane hotload (Jev-style)",
+  "recorded_at": "2026-09-27T00:00:00-04:00",
+  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease in hours; watchdog agent-less in minutes.",
+  "role_fill": {
+    "mode": "join_continue_order",
+    "seed_is_hint_only": true,
+    "notes": "First continuer = decision boss; next = coder1; next = coder2."
+  },
+  "agents": [
+    {
+      "agent_id": "claude-code-main",
+      "role_seed": "decision_boss",
+      "harness": "claude-code",
+      "machine_label": "primary",
+      "may_implement": true,
+      "notes": "Seed hint for empty room; live join order wins when filling."
+    },
+    {
+      "agent_id": "jev-classifier@teresa",
+      "role_seed": "coder",
+      "harness": "claude-code",
+      "machine_label": "Teresa-Pujan",
+      "may_implement": true,
+      "notes": "Worker/coder seed."
+    },
+    {
+      "agent_id": "omp@macbookpro",
+      "role_seed": "coder",
+      "harness": "oh-my-pi",
+      "machine_label": "macbookpro",
+      "may_implement": true,
+      "notes": "Worker/coder seed."
+    }
+  ],
+  "boss_failover": {
+    "lease_ttl_hours": 12,
+    "check_in": {
+      "mechanism": "issue_comment",
+      "interval_hint_hours": 6,
+      "issue_url": "https://github.com/Pukujan/agent-custom-setup/issues/11",
+      "claim_file_path": ".coord/boss_claim.json"
+    },
+    "standby": [
+      "jev-classifier@teresa",
+      "omp@macbookpro"
+    ],
+    "grace_minutes": 30,
+    "who_is_boss_now": "claude-code-main",
+    "as_of_history": [
+      {
+        "as_of": "2026-09-27T00:00:00-04:00",
+        "boss_agent_id": "claude-code-main",
+        "ended_at": null,
+        "notes": "Illustrative seed; append on failover \u2014 do not rewrite."
+      }
+    ]
+  },
+  "watchdog": {
+    "watchdog_interval_minutes": 10,
+    "idle_window": {
+      "minutes": 45
+    },
+    "runner": "github_action",
+    "inputs": [
+      "claim_heartbeat",
+      "github_commit",
+      "github_pr",
+      "local_telemetry_optional"
+    ],
+    "on_fresh_heartbeat": "noop",
+    "on_stale_with_github_activity": "nudge_check_in_keep_boss",
+    "on_stale_idle": "flag_seat_at_risk",
+    "on_past_lease_ttl": "write_vacant_in_claim_file",
+    "notes": "AGENT-LESS. Cron/Action/script only. No LLM. No peer agent. Watchdog != failover."
+  },
+  "pins": {
+    "pcm": {
+      "repo": "https://github.com/Pukujan/project-continuity-modules",
+      "role": "continuity_only",
+      "notes": "Checkout/continuity/checkpoints. Not the proposal layer."
+    },
+    "cgm": {
+      "repo": "https://github.com/Pukujan/content-generation-modules",
+      "revision": "c7d9c3f6b5b301d3a3bc89642d2f92fd08748979",
+      "version": "0.5.0",
+      "modules": [
+        "modules/human-sounding-writing",
+        "modules/writing-direction"
+      ],
+      "repin_after": "After CGM PR #17 merges, re-pin to 0.5.1"
+    }
+  },
+  "ticket_links": {
+    "parent_issue": null,
+    "child_issues": [],
+    "notes": "Parent/child notes only; no full DAG engine."
+  }
+}

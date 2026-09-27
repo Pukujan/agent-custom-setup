@@ -6,6 +6,11 @@ Read PROJECT → CURRENT → active TASK → minimum relevant spec before editin
 
 For GitHub repositories, verify the live linked issue with `continuity issue verify <TASK-ID>` before resuming; the issue owns task scope and lifecycle, merged default-branch history owns accepted code, and PR checks/merge records own delivery. Resolve discrepancies from the issue before editing.
 
+## Multi-agent hotload (ACS install surface)
+
+When told to load the agent hot-loader, follow [modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md). That pack wires **PCM** (continuity) + **CGM** (HSW / writing-direction) + this coordination runtime together; it does not replace PCM or CGM.
+
+
 When a GitHub issue reference appears in a pull-request description or commit message, use a supported issue-closing keyword only when merging should complete that issue. GitHub treats `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference as a close directive; negation does not cancel it. For progress-only work, link with `Refs #<number>` or the GitHub sidebar. After each merge, verify the live issue state before changing task status. See [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
 
 <!-- pcm:github-progression:start -->

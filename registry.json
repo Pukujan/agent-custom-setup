@@ -2,8 +2,8 @@
   "system": "agent-custom-setup",
   "version": "0.2.0",
   "created": "2026-09-25",
-  "updated": "2026-09-25",
-  "recorded_at": "2026-09-26T03:30:00Z",
+  "updated": "2026-09-27",
+  "recorded_at": "2026-09-27T04:55:00Z",
   "valid_time": {
     "start": "2026-09-25T00:00:00-04:00",
     "end": null
@@ -15,7 +15,7 @@
     {
       "id": "inferhub-litellm",
       "name": "InferHub Claude Code (LiteLLM)",
-      "purpose": "Claude Code via local LiteLLM → InferHub seats; CKFF-cleared launcher",
+      "purpose": "Claude Code via local LiteLLM \u2192 InferHub seats; CKFF-cleared launcher",
       "harness": "claude-code",
       "created": "2026-09-25",
       "updated": "2026-09-25",
@@ -37,6 +37,32 @@
       },
       "status": "active",
       "summary": "Sanitized InferHub-only Claude Code launcher (v0.2.0 seal). Seats main/advisor through unified local LiteLLM at 127.0.0.1:4000; loads LITELLM_MASTER_KEY from Desktop configs\\.env at runtime."
+    },
+    {
+      "id": "multi-agent-hotload",
+      "name": "Multi-agent hotload coordination",
+      "purpose": "Install surface that hot-loads PCM + CGM + coordination runtime (roles, proposals, claim to PR) without replacing or vendoring PCM/CGM",
+      "harness": "coordination",
+      "created": "2026-09-27",
+      "updated": "2026-09-27",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/11",
+      "owning_agent": "agent-custom-setup",
+      "deploy_mirrors": [
+        {
+          "label": "ACS module tree (SoT; agents load from checkout)",
+          "path": "D:\\\\claude\\\\agent-custom-setup\\\\modules\\\\coordination\\\\multi-agent-hotload\\\\v0.1.0\\\\",
+          "notes": "ACS is SoT. No Desktop launcher mirror required for this docs/runtime pack."
+        }
+      ],
+      "version": "0.1.0",
+      "path": "modules/coordination/multi-agent-hotload/v0.1.0/",
+      "recorded_at": "2026-09-27T04:55:00Z",
+      "valid_time": {
+        "start": "2026-09-27T00:00:00-04:00",
+        "end": null
+      },
+      "status": "active",
+      "summary": "When told to load the agent hot-loader, wire PCM + CGM + this runtime together. ACS does not replace PCM/CGM."
     }
   ]
 }
