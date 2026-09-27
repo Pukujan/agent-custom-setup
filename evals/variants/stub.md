@@ -1,39 +1,14 @@
-When a GitHub issue reference appears in a pull-request description or commit message, use a supported issue-closing keyword only when merging should complete that issue. GitHub treats `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, and `resolved` followed by an issue reference as a close directive; negation does not cancel it. For progress-only work, link with `Refs #<number>` or the GitHub sidebar. After each merge, verify the live issue state before changing task status. See [GitHub's issue-linking rules](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue).
+# Agent Custom Setup
 
-## Human outcome
+Modular registry of custom agent setups with temporal and version metadata.
 
-What changed for the person or project?
+Modules:
+- `oh-my-pi/` — oh-my-pi (OMP) agent config: advisor roster, JEV judge wiring, jev-court adjudication extension.
+- Claude Code custom setup — planned, not yet contributed.
 
-## Change and scope
+## Continuity
 
-Summarize the change and important boundaries.
-
-## Verification
-
-List focused commands and observed results. Link the CI run; do not paste full logs.
-
-## Evidence and provenance (when relevant)
-
-- Task ID and leaf owning issue, parent ancestry and dependencies (or explicitly none):
-- Starting revision, inputs, or source:
-- Direct citations or reproducible artifact:
-- What remains unknown:
-
-<details>
-<summary>Reproduction details or extended technical notes (only when useful)</summary>
-
-Add exact commands, configuration, inputs, results, and limitations here when they are needed to verify the claim.
-
-</details>
-
-## Continuity closeout
-
-- Docs/task/checkpoint/catalog/index synchronized before push; as-of status and source issue revision:
-- Request ID / exact pushed SHA / leaf receipt and parent update:
-- Required CI on exact candidate / mandatory auto-merge / verified merge and live issue status:
-- One next action or explicit completion:
-
-This template records context; it does not automatically synchronize this pull request with issues or checkpoints.
+Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.
 
 <!-- pcm:github-progression:start -->
 ## GitHub-owned progression
@@ -50,11 +25,3 @@ Before every push, synchronize relevant docs and task/checkpoint projections, CU
 
 Required CI and GitHub auto-merge are mandatory. Verify protection, required reviews/checks on the exact current-base or merge-queue candidate, and auto-merge; missing, failed, skipped, stale or unverified gates fail closed: no completion or cleanup. After CI/merge, append the exact check results, PR/merge SHA and live issue status to the leaf and link the parent update; fetch and verify accepted history. Reconcile material doc/status corrections in a new synchronized increment. Receipt-only transitions need no recursive doc commit: docs retain an explicit as-of/pending state and point to the live issue. Never label local-only or merely pushed work delivered. Preserve unsafe resources and keep incomplete issues open.
 <!-- pcm:github-progression:end -->
-
-<!-- pcm:issue-log-format:start -->
-## Issue log format (issue-log-format 1.1.0)
-
-<!-- pcm:policy {"id":"issue-log-format","policy_version":"1.1.0","protocol_version":"0.1.0-draft"} -->
-
-Write issue logs, progress updates, and pull requests in one plain-language shape a newcomer can follow. Pick the tier by the kind of issue, not by preference. **Core tier (every issue log):** title states the problem and intended direction; a 1-3 paragraph summary naming who/what is affected, the consequence, and what this proposes; identity and lineage (leaf owning issue, parent ancestry or none, task ID, primary writer, branch); observed facts vs interpretation, with inferences labelled *inferred*; acceptance criteria with numeric thresholds marked *(proposed)* when untested; boundaries/non-goals and one next action. **Investigation tier (incidents, failures, research, design issues):** numbered symptoms; hypotheses with Status, confirm/refute, and experiment; evidence with provenance; a **Counter-signal** entry when one exists; honest caveat; problems-vs-gaps; a **Proposal** labelled *(proposal)* stating none of it exists unless named as existing. **Pull requests open reader-first:** problem and consequence, what changes, how to verify, and what stays unchanged; lineage links; evidence and one next action; long logs collapsed or linked; reference issues with "Refs #<number>" and use closing keywords only when closing at merge is intended. **Diagrams (mermaid):** when a record describes a flow with 4+ ordered steps or 2+ branches, add a fenced mermaid diagram *and* keep an adjacent text list or table so the record survives render failure; default to `graph TD` (vertical) because wide `LR` flows shrink to illegible strips on phones — reserve `LR` for 4 or fewer short nodes; cap 8 nodes and 6-word labels; wrap diagrams that may exceed the container width inside `<details>` (GitHub mounts the renderer lazily on expand); preview the rendered diagram before publishing (broken syntax shows a visible parse error) and never cite renderer URLs as standalone sources. No private absolute paths or secrets; link rather than paste long logs. See `docs/ISSUE_LOG_FORMAT.md` for the full format, exemplar, and examples.
-<!-- pcm:issue-log-format:end -->

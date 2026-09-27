@@ -1,0 +1,26 @@
+# OMP agent config (module: oh-my-pi) — copy to ~/.omp/agent/config.yml
+# API keys are NEVER stored here; provider entries in models.yml reference
+# variable NAMES resolved from ~/.omp/agent/.env (see .env.example).
+modelRoles:
+  default: inferhub/qwen3.8-flash
+  advisor: inferhub/deepseek-v4.1-flash
+  task: yolo-auto/qwen3.8-flash
+  smol: yolo-auto/yolo-small
+  tiny: inferhub/deepseek-v4.1-flash
+  plan: ckff-astra/gpt-6-astra
+  vision: inferhub/qwen3.8-flash
+  image: ckff-image/gpt-image-2.5
+  judge: openrouter-jev/typesafe/jev-1.13
+  research: inferhub/deepseek-v4.1-flash:auto
+advisor:
+  enabled: true
+  # syncBacklog=1: primary waits up to 30s for advisor catch-up at turn end.
+  # Fixes observed advisor staleness: with backlog off, advisors lagged the
+  # primary by up to 812s of review latency while streaming continued.
+  syncBacklog: 1
+symbolPreset: unicode
+composer:
+  shape: band
+theme:
+  dark: titanium
+setupVersion: 2

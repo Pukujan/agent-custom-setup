@@ -1,0 +1,180 @@
+{
+ "schema": "acs-0003.arm-run.v2.1",
+ "run_id": "current-20260926T044529Z",
+ "variant": "current",
+ "cgm_pinned": "f85e88bc00362c53061d95ac7811bd9c6ada8e32",
+ "key_schema": "acs-0003.eval-key.v1",
+ "key_note_head": "v3",
+ "readme_sha256": "b3d43a135a7481fe488190e890bea0f27ce70de85c46f462accfd7da3693bfa5",
+ "arm_flags": [
+  "-p",
+  "--no-tools",
+  "--no-session",
+  "--no-rules",
+  "--no-extensions",
+  "--no-skills",
+  "--config",
+  "/Users/teresaguajardo/Documents/Projects/agent-custom-setup/evals/omp-arms-overlay.yml"
+ ],
+ "omp_version": "omp/18.3.0",
+ "overlay_path": "evals/omp-arms-overlay.yml",
+ "advisor_overlay_passed": true,
+ "advisor_effect": "unverified (omp does not report config-merge results; see evals/README.md cohorts section)",
+ "started_at": "2026-09-26T04:45:29.672668+00:00",
+ "runs": [
+  {
+   "run": 1,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Operators managing agent configurations on personal machines, and fresh agent sessions that must resume project state from the repository without relying on chat history",
+      "situation": "Agent setups\u2014judge models, advisor loops, critic roles, launch scripts, environment configuration\u2014are typically built and tuned within a single chat session, where they remain invisible and unversione",
+      "difficulty": "Setup knowledge evaporates when the session ends; the next reader or agent session inherits no trustworthy record and cannot resume work without living in the original chat's memory"
+     },
+     "answer_full": {
+      "audience": "Operators managing agent configurations on personal machines, and fresh agent sessions that must resume project state from the repository without relying on chat history",
+      "situation": "Agent setups\u2014judge models, advisor loops, critic roles, launch scripts, environment configuration\u2014are typically built and tuned within a single chat session, where they remain invisible and unversioned",
+      "difficulty": "Setup knowledge evaporates when the session ends; the next reader or agent session inherits no trustworthy record and cannot resume work without living in the original chat's memory"
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "Customizable agent setup templates that persist across sessions with built-in review process and audit trails. Includes working examples for advisor and judge configurations. Changes are versioned and",
+      "mechanism": "GitHub issues define and track setup work scope. Changes happen on branches with versioned checkpoints (commit, push, and dated issue receipt). Pull request review gates changes before merge to main. "
+     },
+     "answer_full": {
+      "offer": "Customizable agent setup templates that persist across sessions with built-in review process and audit trails. Includes working examples for advisor and judge configurations. Changes are versioned and reviewable. Secrets stay local using environment variables only.",
+      "mechanism": "GitHub issues define and track setup work scope. Changes happen on branches with versioned checkpoints (commit, push, and dated issue receipt). Pull request review gates changes before merge to main. Configuration templates copy from the repository into your local agent directory. All changes are tied to specific commits for full traceability."
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "on_default_branch": "['PCM continuity protocol adoption with versioned checkpoints (CURRENT.md, PROJECT.md, HANDOFF.md)']",
+      "awaiting_merge": "['oh-my-pi module (advisor/JEV config + jev-court extension) \u2014 PR #4 pending owner review', 'Registry + Claude Code launcher scaffold \u2014 PR #2']",
+      "planned": "['Multi-module adoption', 'Image generation workflow', 'Required-CI enforcement (in-flight on issue #5)']"
+     },
+     "answer_full": {
+      "on_default_branch": "['PCM continuity protocol adoption with versioned checkpoints (CURRENT.md, PROJECT.md, HANDOFF.md)']",
+      "awaiting_merge": "['oh-my-pi module (advisor/JEV config + jev-court extension) \u2014 PR #4 pending owner review', 'Registry + Claude Code launcher scaffold \u2014 PR #2']",
+      "planned": "['Multi-module adoption', 'Image generation workflow', 'Required-CI enforcement (in-flight on issue #5)']"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "promise": "Live JEV adjudication after 401 root-cause fix produces correct decisions: 3 notes adjudicated act@0.92/0.94/0.96; trivia ignore@0.98",
+      "source": "issue #3 (GitHub issue)",
+      "not_proven": "Generalizability beyond one provider (OpenRouter), one date (2026-09-25), and the small sample tested; consistency across other dates, models, or advisory scenarios"
+     },
+     "answer_full": {
+      "promise": "Live JEV adjudication after 401 root-cause fix produces correct decisions: 3 notes adjudicated act@0.92/0.94/0.96; trivia ignore@0.98",
+      "source": "issue #3 (GitHub issue)",
+      "not_proven": "Generalizability beyond one provider (OpenRouter), one date (2026-09-25), and the small sample tested; consistency across other dates, models, or advisory scenarios"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Clone the repo, then read HANDOFF.md \u2192 checkpoints/CURRENT.md \u2192 active tasks/TASK-*.md files in order. Run `gh issue list --repo Pukujan/agent-custom-setup --state open` to see active work.",
+      "reproduce": "Run `python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .content-system --project-root .` (requires pinned CGM helper checkout @ f85e88bc00362c53061d95ac7811bd9c"
+     },
+     "answer_full": {
+      "next_action": "Clone the repo, then read HANDOFF.md \u2192 checkpoints/CURRENT.md \u2192 active tasks/TASK-*.md files in order. Run `gh issue list --repo Pukujan/agent-custom-setup --state open` to see active work.",
+      "reproduce": "Run `python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .content-system --project-root .` (requires pinned CGM helper checkout @ f85e88bc00362c53061d95ac7811bd9c6ada8e32). For oh-my-pi module: see PR #4 or issue #3 for live JEV adjudication evidence (3 notes act@0.92/0.94/0.96, trivia ignore@0.98)."
+     },
+     "error": ""
+    }
+   }
+  },
+  {
+   "run": 2,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Operators who manage agent configurations locally and fresh agent sessions that must resume project state from stored code rather than chat history",
+      "situation": "Agent setups\u2014judge models, critic roles, launch scripts, environment keys\u2014are usually tuned inside a single chat session and become invisible work. When the session ends, configuration evaporates and ",
+      "difficulty": "Setup knowledge does not persist across sessions; a fresh session cannot resume agent configuration without being embedded in the same chat's memory. Configuration remains ad-hoc, unreviewable, and lo"
+     },
+     "answer_full": {
+      "audience": "Operators who manage agent configurations locally and fresh agent sessions that must resume project state from stored code rather than chat history",
+      "situation": "Agent setups\u2014judge models, critic roles, launch scripts, environment keys\u2014are usually tuned inside a single chat session and become invisible work. When the session ends, configuration evaporates and the next reader (human or agent) inherits nothing they can trust.",
+      "difficulty": "Setup knowledge does not persist across sessions; a fresh session cannot resume agent configuration without being embedded in the same chat's memory. Configuration remains ad-hoc, unreviewable, and lost when the session closes."
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "A personal, version-controlled repository for storing customized agent setups\u2014like advisor and decision-maker configurations\u2014so fresh agent sessions can resume project work directly from the repositor",
+      "mechanism": "Work begins as a GitHub issue that owns task scope and acceptance criteria. Contributors work on a task branch and periodically checkpoint progress (commit + push to an exact revision), receiving a ti"
+     },
+     "answer_full": {
+      "offer": "A personal, version-controlled repository for storing customized agent setups\u2014like advisor and decision-maker configurations\u2014so fresh agent sessions can resume project work directly from the repository without depending on a single chat's memory. Includes a sample configuration module with a decision-judging extension, a protocol for tracking work through GitHub issues, and a pattern for keeping API keys secure outside version control.",
+      "mechanism": "Work begins as a GitHub issue that owns task scope and acceptance criteria. Contributors work on a task branch and periodically checkpoint progress (commit + push to an exact revision), receiving a timestamped receipt tied to that commit. Pull requests with review merge into the main branch; only merged work counts as delivered. When merged, setup modules are ready to copy into a user's local agent directory, with environment variable names stored in the repository but actual secret values kept only in local gitignored files."
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "on_default_branch": "['PCM continuity protocol adoption (AGENTS.md governance, checkpoints/CURRENT.md, PROJECT.md structure)', 'README with CGM validation adapter (.content-system/)']",
+      "awaiting_merge": "['oh-my-pi module: advisor/JEV config templates (config.yml, models.yml, WATCHDOG.yml) + jev-court.ts extension \u2014 PR #4, task branch task/ACS-0001-oh-my-pi-module, verified live adjudication 2026-09-2",
+      "planned": "['Multi-module adoption workflow', 'Required-CI enforcement (issue #5, merge discipline currently manual)', 'Image generation for hero/problem assets (when generator available; currently zero narrativ"
+     },
+     "answer_full": {
+      "on_default_branch": "['PCM continuity protocol adoption (AGENTS.md governance, checkpoints/CURRENT.md, PROJECT.md structure)', 'README with CGM validation adapter (.content-system/)']",
+      "awaiting_merge": "['oh-my-pi module: advisor/JEV config templates (config.yml, models.yml, WATCHDOG.yml) + jev-court.ts extension \u2014 PR #4, task branch task/ACS-0001-oh-my-pi-module, verified live adjudication 2026-09-25', 'Registry + Claude Code launcher scaffold \u2014 PR #2, feat/scaffold-pcm-cgm-1, includes module.json with secrets_policy']",
+      "planned": "['Multi-module adoption workflow', 'Required-CI enforcement (issue #5, merge discipline currently manual)', 'Image generation for hero/problem assets (when generator available; currently zero narrative rasters)', 'Product boundary scope clarification (issue #1)']"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "promise": "Live JEV adjudication after 401 root-cause fix: 3 advisor notes adjudicated as 'act' at confidences 0.92, 0.94, 0.96 and synthetic trivia note correctly ignored at 0.98",
+      "source": "issue #3",
+      "not_proven": "Reproducibility across multiple dates, generalizability to other providers or configurations, long-term reliability, or applicability beyond the single test date (2026-09-25) and one provider (OpenRou"
+     },
+     "answer_full": {
+      "promise": "Live JEV adjudication after 401 root-cause fix: 3 advisor notes adjudicated as 'act' at confidences 0.92, 0.94, 0.96 and synthetic trivia note correctly ignored at 0.98",
+      "source": "issue #3",
+      "not_proven": "Reproducibility across multiple dates, generalizability to other providers or configurations, long-term reliability, or applicability beyond the single test date (2026-09-25) and one provider (OpenRouter)"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Read HANDOFF.md",
+      "reproduce": "python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .content-system --project-root . (requires CGM helper @ f85e88bc); PR review; CI enforcement pending issue #5"
+     },
+     "answer_full": {
+      "next_action": "Read HANDOFF.md",
+      "reproduce": "python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .content-system --project-root . (requires CGM helper @ f85e88bc); PR review; CI enforcement pending issue #5"
+     },
+     "error": ""
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,199 @@
+{
+ "schema": "acs-0003.arm-run.v2.1",
+ "run_id": "stub-20260926T044840Z",
+ "variant": "stub",
+ "cgm_pinned": "f85e88bc00362c53061d95ac7811bd9c6ada8e32",
+ "key_schema": "acs-0003.eval-key.v1",
+ "key_note_head": "v3",
+ "readme_sha256": "61738210c62417c49aa977065b4d7360bd72bd1be0f27b57d32eeeff9c31cbda",
+ "arm_flags": [
+  "-p",
+  "--no-tools",
+  "--no-session",
+  "--no-rules",
+  "--no-extensions",
+  "--no-skills",
+  "--config",
+  "/Users/teresaguajardo/Documents/Projects/agent-custom-setup/evals/omp-arms-overlay.yml"
+ ],
+ "omp_version": "omp/18.3.0",
+ "overlay_path": "evals/omp-arms-overlay.yml",
+ "advisor_overlay_passed": true,
+ "advisor_effect": "unverified (omp does not report config-merge results; see evals/README.md cohorts section)",
+ "started_at": "2026-09-26T04:48:40.074396+00:00",
+ "runs": [
+  {
+   "run": 1,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": false,
+     "reasons": [
+      "audience: no anchor match in 'teams managing custom agent configurations across multiple agent types (omp, cla'"
+     ],
+     "answer": {
+      "audience": "Teams managing custom agent configurations across multiple agent types (OMP, Claude Code, etc.) in GitHub-based workflows",
+      "situation": "They need to set up modular agent configurations with temporal and version metadata, then provide fresh agents and sessions with correct starting state",
+      "difficulty": "Maintaining configuration consistency and cold-start state across sessions, managing versions over time, and coordinating changes through collaborative GitHub workflows"
+     },
+     "answer_full": {
+      "audience": "Teams managing custom agent configurations across multiple agent types (OMP, Claude Code, etc.) in GitHub-based workflows",
+      "situation": "They need to set up modular agent configurations with temporal and version metadata, then provide fresh agents and sessions with correct starting state",
+      "difficulty": "Maintaining configuration consistency and cold-start state across sessions, managing versions over time, and coordinating changes through collaborative GitHub workflows"
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "A modular registry of custom agent configurations with temporal and version metadata, providing setup templates for agent advisors, judgment system wiring, and adjudication extensions.",
+      "mechanism": "Organizes reusable configuration modules that fresh agents can load via a documented initialization sequence. Tracks all work through GitHub-integrated issue progression and versioned checkpoints, ens"
+     },
+     "answer_full": {
+      "offer": "A modular registry of custom agent configurations with temporal and version metadata, providing setup templates for agent advisors, judgment system wiring, and adjudication extensions.",
+      "mechanism": "Organizes reusable configuration modules that fresh agents can load via a documented initialization sequence. Tracks all work through GitHub-integrated issue progression and versioned checkpoints, ensuring teams maintain continuity and canonical history of configuration changes."
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": false,
+     "reasons": [
+      "on_default_branch: no anchor match in \"['oh-my-pi/ module \u2014 omp agent config with advisor roster, jev judge wiring, jev\"",
+      "awaiting_merge: no anchor match in '[]'"
+     ],
+     "answer": {
+      "on_default_branch": "['oh-my-pi/ module \u2014 OMP agent config with advisor roster, JEV judge wiring, jev-court adjudication extension', 'HANDOFF.md']",
+      "awaiting_merge": "[]",
+      "planned": "['Claude Code custom setup']"
+     },
+     "answer_full": {
+      "on_default_branch": "['oh-my-pi/ module \u2014 OMP agent config with advisor roster, JEV judge wiring, jev-court adjudication extension', 'HANDOFF.md']",
+      "awaiting_merge": "[]",
+      "planned": "['Claude Code custom setup']"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": false,
+     "reasons": [
+      "promise: no anchor match in 'point a fresh agent/session to `handoff.md`; it contains the cold-start read ord'",
+      "source: no anchor match in 'continuity section: \"point a fresh agent/session to `handoff.md`; it contains th'",
+      "not_proven: no anchor match in 'whether handoff.md actually exists, is complete, is kept current, or that follow'"
+     ],
+     "answer": {
+      "promise": "Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.",
+      "source": "Continuity section: \"Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.\"",
+      "not_proven": "Whether HANDOFF.md actually exists, is complete, is kept current, or that following it will result in successful agent setup. The README asserts only the instruction to point to it and what it claims "
+     },
+     "answer_full": {
+      "promise": "Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.",
+      "source": "Continuity section: \"Point a fresh agent/session to `HANDOFF.md`; it contains the cold-start read order.\"",
+      "not_proven": "Whether HANDOFF.md actually exists, is complete, is kept current, or that following it will result in successful agent setup. The README asserts only the instruction to point to it and what it claims to contain, not that it delivers those promises in practice."
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": false,
+     "reasons": [
+      "reproduce: no anchor match in 'not documented in readme. references github ci and required checks but provides '"
+     ],
+     "answer": {
+      "next_action": "Read HANDOFF.md for cold-start read order (as stated: 'Point a fresh agent/session to HANDOFF.md; it contains the cold-start read order')",
+      "reproduce": "Not documented in README. References GitHub CI and required checks but provides no local reproduction steps, test commands, or check configuration details."
+     },
+     "answer_full": {
+      "next_action": "Read HANDOFF.md for cold-start read order (as stated: 'Point a fresh agent/session to HANDOFF.md; it contains the cold-start read order')",
+      "reproduce": "Not documented in README. References GitHub CI and required checks but provides no local reproduction steps, test commands, or check configuration details."
+     },
+     "error": ""
+    }
+   }
+  },
+  {
+   "run": 2,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Agents and fresh sessions requiring custom configurations; developers maintaining modular agent setups across platforms.",
+      "situation": "Agents and sessions need to initialize with custom configurations (advisor rosters, judge wiring, adjudication extensions, etc.) while tracking temporal and version metadata across multiple platforms ",
+      "difficulty": "Managing and versioning custom agent setups across multiple platforms; cold-starting agents with correct configuration; maintaining consistency and temporal provenance of configurations."
+     },
+     "answer_full": {
+      "audience": "Agents and fresh sessions requiring custom configurations; developers maintaining modular agent setups across platforms.",
+      "situation": "Agents and sessions need to initialize with custom configurations (advisor rosters, judge wiring, adjudication extensions, etc.) while tracking temporal and version metadata across multiple platforms (OMP, Claude Code, etc.).",
+      "difficulty": "Managing and versioning custom agent setups across multiple platforms; cold-starting agents with correct configuration; maintaining consistency and temporal provenance of configurations."
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "A modular registry of reusable custom agent setups with temporal and version tracking. Currently contains specialized agent configurations featuring advisor rosters and adjudication extensions, with a",
+      "mechanism": "Fresh agents or sessions consult a startup guide to establish the initialization order. Configurations are packaged as independent, versionable modules. The system ties to GitHub issues and merged his"
+     },
+     "answer_full": {
+      "offer": "A modular registry of reusable custom agent setups with temporal and version tracking. Currently contains specialized agent configurations featuring advisor rosters and adjudication extensions, with additional setups planned for future contribution.",
+      "mechanism": "Fresh agents or sessions consult a startup guide to establish the initialization order. Configurations are packaged as independent, versionable modules. The system ties to GitHub issues and merged history for continuity\u2014scope, ownership, and delivery facts are recorded against GitHub issues and accepted commits, with version checkpoints synchronized before each push."
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": false,
+     "reasons": [
+      "on_default_branch: no anchor match in \"['oh-my-pi/ \u2014 omp agent config (advisor roster, jev judge wiring, jev-court adju\"",
+      "awaiting_merge: no anchor match in '[]'"
+     ],
+     "answer": {
+      "on_default_branch": "['oh-my-pi/ \u2014 OMP agent config (advisor roster, JEV judge wiring, jev-court adjudication extension)', 'HANDOFF.md \u2014 cold-start read order document']",
+      "awaiting_merge": "[]",
+      "planned": "['Claude Code custom setup']"
+     },
+     "answer_full": {
+      "on_default_branch": "['oh-my-pi/ \u2014 OMP agent config (advisor roster, JEV judge wiring, jev-court adjudication extension)', 'HANDOFF.md \u2014 cold-start read order document']",
+      "awaiting_merge": "[]",
+      "planned": "['Claude Code custom setup']"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": false,
+     "reasons": [
+      "promise: no anchor match in 'automatic issue-comment synchronization is not implemented. issue #67 remains op'",
+      "not_proven: no anchor match in 'whether issue #67 actually exists in this repository, whether it is currently op'"
+     ],
+     "answer": {
+      "promise": "Automatic issue-comment synchronization is not implemented. Issue #67 remains open.",
+      "source": "README.md \u2014 GitHub-owned progression section (static document snapshot)",
+      "not_proven": "Whether Issue #67 actually exists in this repository, whether it is currently open or closed, or what its live status is. A README document cannot verify or link to live GitHub issue state, only asser"
+     },
+     "answer_full": {
+      "promise": "Automatic issue-comment synchronization is not implemented. Issue #67 remains open.",
+      "source": "README.md \u2014 GitHub-owned progression section (static document snapshot)",
+      "not_proven": "Whether Issue #67 actually exists in this repository, whether it is currently open or closed, or what its live status is. A README document cannot verify or link to live GitHub issue state, only assert what was true at document write time."
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": false,
+     "reasons": [
+      "reproduce: no anchor match in 'not documented in readme. check .github/workflows/ for ci configuration; readme '"
+     ],
+     "answer": {
+      "next_action": "Read HANDOFF.md for cold-start setup and task progression guidance",
+      "reproduce": "Not documented in README. Check .github/workflows/ for CI configuration; README references required checks but does not explain local reproduction steps"
+     },
+     "answer_full": {
+      "next_action": "Read HANDOFF.md for cold-start setup and task progression guidance",
+      "reproduce": "Not documented in README. Check .github/workflows/ for CI configuration; README references required checks but does not explain local reproduction steps"
+     },
+     "error": ""
+    }
+   }
+  }
+ ]
+}

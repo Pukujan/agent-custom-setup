@@ -1,0 +1,126 @@
+{
+ "schema": "acs-0003.arm-run.v1",
+ "run_id": "claim_removed-20260926T023116Z",
+ "variant": "claim_removed",
+ "cgm_pinned": "f85e88bc00362c53061d95ac7811bd9c6ada8e32",
+ "key_version": "2026-09-26T02:00Z.",
+ "readme_sha_len": 12009,
+ "started_at": "2026-09-26T02:31:16.706097+00:00",
+ "runs": [
+  {
+   "run": 1,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Operators managing agent configurations locally, teams running fresh agent sessions that need to resume project state from git, and module authors building reusable agent stacks",
+      "situation": "Agent setups are created and tuned inside individual chat sessions, becoming invisible infrastructure that disappears when the session ends",
+      "difficulty": "Setup knowledge evaporates with the session; configurations cannot be reviewed, debugged, or trusted by readers outside that session. Issues like authentication failures remain hidden and unfixed beca"
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "A durable, reviewable system for agent setups that persists configuration across sessions. It solves the problem of agent setup knowledge evaporating when a session ends\u2014turning invisible configuratio",
+      "mechanism": "Work flows through GitHub issues (which own task scope and lifecycle), task branches with incremental checkpoints that produce stable identifiers, pull requests with review gates, and merge to the def"
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": false,
+     "reasons": [
+      "awaiting_merge: no anchor match in \"['registry of further modules (pr #2, feat/scaffold-pcm-cgm-1): sanitized claude\"",
+      "planned: no anchor match in \"['product boundary enforcement: own project state only (issue #1, scope recorded\""
+     ],
+     "answer": {
+      "on_default_branch": "['PCM adoption with versioned CURRENT.md and PROJECT.md checkpoints', 'Continuity infrastructure: HANDOFF.md, task/checkpoint schemas, templates, AGENTS.md contract', 'Judge 401 root-cause fix and liv",
+      "awaiting_merge": "['Registry of further modules (PR #2, feat/scaffold-pcm-cgm-1): sanitized Claude Code launcher scaffold with registry.json metadata and module.json secrets_policy']",
+      "planned": "['Product boundary enforcement: own project state only (issue #1, scope recorded, behavior unproven)', 'Required CI enforcement for merge gates (issue #5, in flight)', 'Narrative image generation with"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "promise": "Live JEV adjudication works after fixing the 401 root-cause: 3 advisor notes adjudicated as act at confidence 0.92/0.94/0.96, and a synthetic trivia note correctly ignored at 0.98 (~$0.00005/call)",
+      "source": "issue #3 (https://github.com/Pukujan/agent-custom-setup/issues/3)",
+      "not_proven": "Scalability to larger sample sizes, generalizability beyond the single tested provider (OpenRouter), temporal stability beyond the single test date (2026-09-25), or production-grade reliability at sca"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Clone the repository, then read HANDOFF.md \u2192 checkpoints/CURRENT.md \u2192 the active tasks/TASK-*.md in order (documented read sequence for cold-start). List open issues with `gh issue list --repo Pukujan",
+      "reproduce": "Clone the pinned CGM helper (content-generation-modules @ 0.4.0, commit f85e88bc00362c53061d95ac7811bd9c6ada8e32), then run: `python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-chec"
+     },
+     "error": ""
+    }
+   }
+  },
+  {
+   "run": 2,
+   "model": "haiku",
+   "tasks": {
+    "T1": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "audience": "Operators who keep customized agent configurations on personal machines and need fresh agent sessions to resume project state from the repository alone",
+      "situation": "Agent setups are typically built and tuned inside individual chat sessions\u2014judge models, critic roles, launch scripts, environment-keyed configs\u2014living invisibly in that session's memory. When the ses",
+      "difficulty": "Setup knowledge evaporates with the session; configurations cannot be audited, resumed, or proven to work. Bugs (like 401 errors in judge logic) may exist undetected in invisible state, leaving no tra"
+     },
+     "error": ""
+    },
+    "T2": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "offer": "A persistent, reviewable home for agent configurations that survive beyond single chat sessions. Instead of setups living invisibly in chat memory, it provides version-controlled storage for customize",
+      "mechanism": "GitHub issues define task scope and acceptance criteria. Work proceeds on feature branches with timestamped checkpoints (stable request IDs and commits). Pull requests trigger review and merging to th"
+     },
+     "error": ""
+    },
+    "T3": {
+     "pass": false,
+     "reasons": [
+      "awaiting_merge: no anchor match in \"['pull request #2: registry module scaffold + sanitized claude code launcher wit\""
+     ],
+     "answer": {
+      "on_default_branch": "['PCM governance with GitHub-owned issue progression and versioned checkpoints/CURRENT.md @ 1c44c8d', 'Live JEV adjudication after 401 root-cause fix (3 notes verified at 0.92/0.94/0.96; trivia at 0.9",
+      "awaiting_merge": "['Pull request #2: Registry module scaffold + sanitized Claude Code launcher with module.json @ 8420b78 (on feat/scaffold-pcm-cgm-1; adoption unproven)']",
+      "planned": "['Product boundary: own project state only (issue #1)', 'Required-CI enforcement (issue #5)', 'Narrative raster image generation (guide linked, zero narrative images shipped to date)', 'Additional reg"
+     },
+     "error": ""
+    },
+    "T4": {
+     "pass": false,
+     "reasons": [
+      "not_proven: no anchor match in 'long-term consistency (one-day snapshot), generalization across providers (only '"
+     ],
+     "answer": {
+      "promise": "Live JEV adjudication after 401 root-cause fix",
+      "source": "issue #3 documenting three real advisor notes adjudicated 'act' at confidence 0.92/0.94/0.96 and one trivia note correctly 'ignored' at 0.98 on 2026-09-25, with cost ~$0.00005/call",
+      "not_proven": "Long-term consistency (one-day snapshot), generalization across providers (only OpenRouter tested), statistical significance (n=4 notes), or cost sustainability at production scale"
+     },
+     "error": ""
+    },
+    "T5": {
+     "pass": true,
+     "reasons": [],
+     "answer": {
+      "next_action": "Clone repository and read in cold-start order: HANDOFF.md \u2192 checkpoints/CURRENT.md \u2192 active tasks/TASK-*.md. Then `gh issue list --repo Pukujan/agent-custom-setup --state open` to see open work.",
+      "reproduce": "Validate README contract: `python3 <cgm-checkout>/scripts/validate_content_system.py --root <cgm-checkout> --adapter .content-system --project-root .` (requires CGM helper pinned at f85e88bc00362c5306"
+     },
+     "error": ""
+    }
+   }
+  }
+ ]
+}
