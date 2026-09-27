@@ -1,0 +1,26 @@
+{
+  "schema_version": "content-generation.adapter.v1",
+  "system": "content-generation-modules",
+  "helper_repository": "https://github.com/Pukujan/content-generation-modules",
+  "helper_version": "0.5.1",
+  "helper_commit": "9874b26dc46499137bf22e1ca163874ef2dd5e7a",
+  "helper_pin_note": "FULL CGM 0.5.1 required for ACS + all hotloader adopters. Slim HSW+WD-only fails. Validate with scripts/validate_content_system.py; then load modules per docs/WRITING_ROUTING.md.",
+  "modules": [
+    "brand-foundation",
+    "content-context",
+    "writing-direction",
+    "human-sounding-writing",
+    "visual-direction",
+    "image-generation",
+    "html-demo"
+  ],
+  "authoritative_project_files": [
+    "AGENTS.md",
+    "POLICY.md",
+    "README.md",
+    "registry.json",
+    "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
+  ],
+  "review_outputs": [],
+  "adoption_status": "adapter pinned at 0.5.1; hotload install requires FULL stack validate (Refs #11)"
+}

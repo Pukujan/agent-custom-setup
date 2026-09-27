@@ -115,13 +115,37 @@ Before acting as decision boss:
 6. **Zombie boss:** if you still think you are boss but the claim says vacant or names someone else → **reject boss-only actions** (ACCEPT/REJECT, lease renew as boss). Drop to worker **or** re-queue at the end. Optionally comment on the owning issue: `lost lease → rejoining queue`. Do **not** DM out-of-band.
 7. Optional path: worker posts a takeover proposal; if old boss is past lease and does not refute within `grace_minutes`, accept and record as-of — still enqueue-aware; no skip-ahead of the FIFO queue without explicit boss ACCEPT of a queue reorder proposal.
 
-### 7. Verify
+### 7. Verify (FULL CGM validate required)
 
 ```bash
-python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py
+# Pin CGM checkout first (example):
+#   git -C "$CGM_ROOT" fetch && git -C "$CGM_ROOT" checkout 9874b26dc46499137bf22e1ca163874ef2dd5e7a
+export CGM_ROOT=/path/to/content-generation-modules   # or pass --cgm-root
+export ADOPTER_ROOT=/path/to/working-repo             # must contain .content-system/
+
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
+  --cgm-root "$CGM_ROOT" --adopter-root "$ADOPTER_ROOT"
 ```
 
-`hotload_check` requires `boss_failover` and `watchdog` fields on the assignment document, checks that lease TTL stays in the **15–120 minute** band (default 30), and that `claim_queue` (when present) is a FIFO list of agent ids.
+`hotload_check` fails the install unless **all** of the following succeed:
+
+1. Assignment pins declare **FULL** PCM + **FULL** CGM 0.5.1 (seven modules; slim HSW+WD-only fails).
+2. `boss_failover` / `watchdog` / `claim_queue` rules validate (lease **15–120** minutes, default 30).
+3. `CGM_ROOT` is a git checkout of `Pukujan/content-generation-modules` at `9874b26dc46499137bf22e1ca163874ef2dd5e7a` (0.5.1).
+4. It runs `python "$CGM_ROOT/scripts/validate_content_system.py" --root "$CGM_ROOT" --adapter "$ADOPTER_ROOT/.content-system" --project-root "$ADOPTER_ROOT"` and the stdout **starts with `VALID`** (exit 0). There is **no** separate HSW-only script.
+
+### 8. After validate — load writing modules (agent step)
+
+`validate_content_system.py` checks helper/adapter **structure**. It does **not** score prose quality.
+
+Required agent follow-up: open CGM [`docs/WRITING_ROUTING.md`](https://github.com/Pukujan/content-generation-modules/blob/9874b26dc46499137bf22e1ca163874ef2dd5e7a/docs/WRITING_ROUTING.md) and load modules accordingly:
+
+| Situation | Load |
+| --- | --- |
+| README / product entry | `writing-direction` (scan-first selective bold; do **not** apply HSW bold restraints) |
+| Posts / blogs / social / general prose / papers | `human-sounding-writing` (short name **hsw** / HSW) |
+
+Issue/commit/PR titles and bodies remain **agent discipline** under that router.
 
 ## Minimal session checklist
 

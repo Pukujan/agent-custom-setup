@@ -1,0 +1,22 @@
+{
+  "schema_version": "content-generation.review-rubric.v1",
+  "dimensions": [
+    {
+      "id": "full_stack_pins",
+      "question": "Are FULL PCM and FULL CGM 0.5.1 required and pinned?"
+    },
+    {
+      "id": "hotload_order",
+      "question": "Does HOTLOAD list ACS \u2192 PCM \u2192 CGM \u2192 runtime?"
+    },
+    {
+      "id": "validate_gate",
+      "question": "Does hotload_check run validate_content_system and require VALID?"
+    },
+    {
+      "id": "writing_routing",
+      "question": "Do docs point agents at WRITING_ROUTING after validate?"
+    }
+  ],
+  "status_note": "ACS hotload full-stack review rubric (Refs #11)."
+}

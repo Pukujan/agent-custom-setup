@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Validate multi-agent hotload pack: required files + assignment schema + failover/watchdog."""
+"""Validate multi-agent hotload pack: files, pins, FULL CGM validate_content_system, failover."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -118,6 +120,162 @@ REQUIRED_PCM_FEATURES = (
 CGM_PIN_VERSION = "0.5.1"
 CGM_PIN_REVISION_PREFIX = "9874b26"
 PCM_PIN_REVISION_PREFIX = "4e23854"
+CGM_PIN_REVISION = "9874b26dc46499137bf22e1ca163874ef2dd5e7a"
+CGM_HELPER_REPO = "https://github.com/Pukujan/content-generation-modules"
+
+
+def discover_cgm_root(explicit: Path | None = None) -> Path | None:
+    """Resolve CGM checkout: --cgm-root, CGM_ROOT, then common sibling/local paths."""
+    candidates: list[Path] = []
+    if explicit is not None:
+        candidates.append(explicit)
+    env = os.environ.get("CGM_ROOT")
+    if env:
+        candidates.append(Path(env))
+    here = Path(__file__).resolve()
+    # ACS repo root = parents[4] from scripts/ under v0.1.0 pack
+    acs_root = MODULE_ROOT.parents[3]  # v0.1.0 → multi-agent-hotload → coordination → modules → repo
+    candidates.extend(
+        [
+            Path("/workspace/cgm-051"),
+            Path("/workspace/cgm-hsw"),
+            acs_root.parent / "content-generation-modules",
+            Path.home() / "content-generation-modules",
+            Path("D:/claude/content-generation-modules"),
+            Path("C:/Users/pujan/content-generation-modules"),
+        ]
+    )
+    for cand in candidates:
+        try:
+            root = cand.expanduser().resolve()
+        except OSError:
+            continue
+        marker = root / "scripts" / "validate_content_system.py"
+        version = root / "system-version.json"
+        if marker.is_file() and version.is_file():
+            return root
+    return None
+
+
+def discover_adopter_root(explicit: Path | None = None) -> Path:
+    if explicit is not None:
+        return explicit.expanduser().resolve()
+    env = os.environ.get("ADOPTER_ROOT")
+    if env:
+        return Path(env).expanduser().resolve()
+    # Default: ACS repository root containing this pack
+    return MODULE_ROOT.parents[3].resolve()
+
+
+def cgm_checkout_sha(cgm_root: Path) -> str | None:
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(cgm_root), "rev-parse", "HEAD"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    return (proc.stdout or "").strip()
+
+
+def validate_cgm_live(
+    cgm_root: Path | None,
+    adopter_root: Path,
+    *,
+    require: bool = True,
+) -> list[str]:
+    """Fail install unless CGM pin SHA is checked out and validate_content_system prints VALID."""
+    errors: list[str] = []
+    if cgm_root is None:
+        if require:
+            errors.append(
+                "CGM checkout not found: set CGM_ROOT or pass --cgm-root to a "
+                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.1)"
+            )
+        return errors
+
+    sha = cgm_checkout_sha(cgm_root)
+    if not sha:
+        errors.append(f"CGM_ROOT={cgm_root} is not a git checkout (rev-parse HEAD failed)")
+        return errors
+    if not (
+        sha.startswith(CGM_PIN_REVISION_PREFIX)
+        or sha.lower() == CGM_PIN_REVISION.lower()
+        or CGM_PIN_REVISION.lower().startswith(sha.lower()[:12])
+    ):
+        # Accept exact full SHA match or prefix match on pinned commit
+        if sha.lower() != CGM_PIN_REVISION.lower() and not sha.lower().startswith(
+            CGM_PIN_REVISION_PREFIX.lower()
+        ):
+            errors.append(
+                f"CGM checkout HEAD={sha} must be pinned at {CGM_PIN_REVISION} "
+                f"(helper_version {CGM_PIN_VERSION}); got wrong revision"
+            )
+            return errors
+
+    # Confirm helper system-version.json reports 0.5.1 + seven modules
+    try:
+        version = load_json(cgm_root / "system-version.json")
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"CGM system-version.json unreadable: {exc}")
+        return errors
+    if not isinstance(version, dict) or str(version.get("version")) != CGM_PIN_VERSION:
+        errors.append(
+            f"CGM system-version.json version must be {CGM_PIN_VERSION} at pin "
+            f"{CGM_PIN_REVISION}"
+        )
+    mods = version.get("modules") if isinstance(version, dict) else None
+    if not isinstance(mods, list) or set(mods) != set(REQUIRED_CGM_MODULES):
+        errors.append(
+            "CGM system-version.json modules must be exactly the seven FULL modules "
+            "(slim HSW+WD-only fails)"
+        )
+
+    adapter = adopter_root / ".content-system"
+    if not adapter.is_dir():
+        errors.append(
+            f"adopter missing .content-system adapter at {adapter} "
+            "(FULL CGM install requires target adapter)"
+        )
+        return errors
+
+    script = cgm_root / "scripts" / "validate_content_system.py"
+    if not script.is_file():
+        errors.append(f"missing {script}")
+        return errors
+
+    try:
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--root",
+                str(cgm_root),
+                "--adapter",
+                str(adapter),
+                "--project-root",
+                str(adopter_root),
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError as exc:
+        errors.append(f"failed to run validate_content_system.py: {exc}")
+        return errors
+
+    out = (proc.stdout or "") + (proc.stderr or "")
+    first = next((ln.strip() for ln in out.splitlines() if ln.strip()), "")
+    if proc.returncode != 0 or not first.startswith("VALID"):
+        detail = f"(exit={proc.returncode}, first_line={first!r}). Output:\n{out.strip()}"
+        errors.append("validate_content_system.py did not return VALID " + detail)
+    return errors
+
+
 
 
 def validate_pins(data: object) -> list[str]:
@@ -211,7 +369,14 @@ def validate_assignment(schema_path: Path, assignment_path: Path) -> list[str]:
     return errors
 
 
-def run(root: Path, assignment: Path | None = None) -> int:
+def run(
+    root: Path,
+    assignment: Path | None = None,
+    *,
+    cgm_root: Path | None = None,
+    adopter_root: Path | None = None,
+    skip_cgm_validate: bool = False,
+) -> int:
     problems: list[str] = []
     missing = check_required_files(root)
     if missing:
@@ -222,17 +387,38 @@ def run(root: Path, assignment: Path | None = None) -> int:
         problems.extend(validate_assignment(schema_path, example_path))
     elif not example_path.is_file():
         problems.append(f"assignment not found: {example_path}")
+
+    resolved_adopter = discover_adopter_root(adopter_root)
+    resolved_cgm = discover_cgm_root(cgm_root)
+    if skip_cgm_validate:
+        # Explicit opt-out for isolated schema unit tests only — not a successful install.
+        print("hotload_check: WARN skip_cgm_validate=1 (schema-only; install incomplete)")
+    else:
+        problems.extend(
+            validate_cgm_live(resolved_cgm, resolved_adopter, require=True)
+        )
+
     if problems:
         print("hotload_check: FAIL")
-        for p in problems:
-            print(f"  - {p}")
+        for item in problems:
+            for line in str(item).splitlines() or [str(item)]:
+                print(f"  - {line}")
         return 1
     print("hotload_check: OK")
     print(f"  module_root={root}")
     print(f"  assignment={example_path}")
+    print(f"  cgm_root={resolved_cgm}")
+    print(f"  adopter_root={resolved_adopter}")
+    print(f"  cgm_pin={CGM_PIN_VERSION}@{CGM_PIN_REVISION}")
     print("  install_surface=FULL PCM + FULL CGM 0.5.1 + this runtime")
+    print("  cgm_validate=VALID (validate_content_system.py)")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
     print("  claim_queue=FIFO after vacancy; zombie re-reads GitHub claim")
+    print(
+        "  next: load CGM modules per docs/WRITING_ROUTING.md "
+        "(README/product → writing-direction; posts/prose → hsw). "
+        "Titles/bodies remain agent discipline — validate does not score prose."
+    )
     return 0
 
 
@@ -240,8 +426,32 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=MODULE_ROOT)
     parser.add_argument("--assignment", type=Path, default=None)
+    parser.add_argument(
+        "--cgm-root",
+        type=Path,
+        default=None,
+        help="Path to content-generation-modules checkout (else CGM_ROOT / discovery)",
+    )
+    parser.add_argument(
+        "--adopter-root",
+        type=Path,
+        default=None,
+        help="Adopter repo root with .content-system (else ADOPTER_ROOT / ACS root)",
+    )
+    parser.add_argument(
+        "--skip-cgm-validate",
+        action="store_true",
+        help="Schema-only (tests). A real install must NOT use this flag.",
+    )
     args = parser.parse_args(argv)
-    return run(args.root.resolve(), args.assignment)
+    skip = bool(args.skip_cgm_validate) or os.environ.get("HOTLOAD_SKIP_CGM_VALIDATE") == "1"
+    return run(
+        args.root.resolve(),
+        args.assignment,
+        cgm_root=args.cgm_root,
+        adopter_root=args.adopter_root,
+        skip_cgm_validate=skip,
+    )
 
 
 if __name__ == "__main__":

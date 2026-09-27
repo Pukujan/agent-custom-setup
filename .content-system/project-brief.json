@@ -1,0 +1,41 @@
+{
+  "schema_version": "content-generation.project-brief.v2",
+  "project": "Agent Custom Setup",
+  "audience": [
+    "agents and humans installing multi-agent hotload into a working repo",
+    "maintainers of ACS module registry"
+  ],
+  "problem": "Multi-agent work needs a shared install surface for roles, leases, and proposals, but without FULL PCM and FULL CGM the install is incomplete and titles/README quality drift.",
+  "solution": "ACS registers versioned setup modules and ships multi-agent-hotload as the install surface that wires FULL PCM + FULL CGM 0.5.1 + coordination runtime without vendoring those helpers.",
+  "mechanism": [
+    "registry.json + POLICY.md define harness/setup/version layout",
+    "multi-agent-hotload HOTLOAD.md load order: ACS policy \u2192 FULL PCM \u2192 FULL CGM \u2192 runtime",
+    "hotload_check validates assignment pins and runs CGM validate_content_system.py"
+  ],
+  "evidence": [
+    {
+      "claim": "multi-agent-hotload pack is registered and documents FULL PCM + FULL CGM pins.",
+      "source": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md and registry.json",
+      "status": "shipped",
+      "supports": "The pack files and registry entry exist on the task branch and name full-stack pins.",
+      "limits": "Does not prove every adopter has run validate yet; CI may be budget-blocked.",
+      "recorded_at": "2026-09-27T01:47:00-04:00",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "HOTLOAD.md on task/multi-agent-hotload-coordination-11",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "0441bb19390870e354d3f60d7f4123228bdb2ec2",
+        "path": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
+        "locator": "section FULL CGM 0.5.1",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/0441bb19390870e354d3f60d7f4123228bdb2ec2/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
+      }
+    }
+  ],
+  "boundaries": [
+    "ACS does not replace PCM or CGM",
+    "ACS does not vendor helper source trees",
+    "Narrative marketing imagery for ACS root README is deferred",
+    "Slim HSW+writing-direction-only pins are incomplete installs"
+  ]
+}

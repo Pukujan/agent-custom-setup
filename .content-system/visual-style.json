@@ -1,0 +1,33 @@
+{
+  "schema_version": "content-generation.visual-style.v1",
+  "reference_asset": ".content-system/assets/adapter-placeholder.txt",
+  "generation_workflow": "built-in image_gen",
+  "narrative_roles": [
+    "hero",
+    "problem",
+    "supporting",
+    "evidence",
+    "story",
+    "social"
+  ],
+  "palette": [
+    "neutral documentation gray",
+    "ACS registry blue accent"
+  ],
+  "subjects": [
+    "agents reading HOTLOAD.md",
+    "registry cards"
+  ],
+  "composition": "documentation-first; narrative hero deferred",
+  "text_policy": "no baked-in UI chrome text in deferred assets",
+  "roles": {
+    "documentation": "non-narrative helper records and placeholders",
+    "hero": "deferred until narrative art ships"
+  },
+  "reject_when": [
+    "secrets in images",
+    "Desktop path treated as SoT",
+    "SVG substituted for required narrative raster"
+  ],
+  "status_note": "Narrative raster art deferred; placeholder is non-narrative documentation role only."
+}

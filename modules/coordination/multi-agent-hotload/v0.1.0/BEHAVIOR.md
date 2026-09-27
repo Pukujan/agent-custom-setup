@@ -14,6 +14,8 @@ When told to load the agent hot-loader into a working repo, wire **all three** a
 
 ACS installs them together; it does **not** replace or vendor PCM/CGM source. ACS and **all** hotloader adopters must use the full stacks.
 
+`hotload_check` must run `scripts/validate_content_system.py` against the adopter `.content-system` and require stdout starting with `VALID`. After VALID, agents load modules per CGM `docs/WRITING_ROUTING.md` (prose quality remains agent discipline).
+
 ## Role fill
 
 - **Join/continue order** fills roles: first continuer = decision boss; next = coder1; next = coder2…

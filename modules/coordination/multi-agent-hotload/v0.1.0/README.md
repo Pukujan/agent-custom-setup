@@ -61,11 +61,16 @@ Details: [HOTLOAD.md](HOTLOAD.md). Skeleton: `scripts/watchdog_check.py`, `workf
 2. Point the agent (or session brief) at this module path.
 3. On start, follow **[HOTLOAD.md](HOTLOAD.md)** (PCM → CGM → this pack).
 4. Confirm join order / lease / queue / watchdog config via assignment example or project live assignment.
-5. Run:
+5. Point `CGM_ROOT` at content-generation-modules checked out at `9874b26dc46499137bf22e1ca163874ef2dd5e7a` (0.5.1). Ensure the adopter has `.content-system/` listing all seven modules.
+6. Run:
 
 ```bash
-python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
+  --cgm-root "$CGM_ROOT" --adopter-root "$ADOPTER_ROOT"
 ```
+
+`hotload_check` runs `validate_content_system.py` and **fails** unless stdout starts with `VALID`. No HSW-only shortcut.
+7. **After VALID:** load CGM modules per [`docs/WRITING_ROUTING.md`](https://github.com/Pukujan/content-generation-modules/blob/9874b26dc46499137bf22e1ca163874ef2dd5e7a/docs/WRITING_ROUTING.md) (README/product → writing-direction; posts/prose → hsw). Titles/bodies are agent discipline — validate does not score prose.
 
 ## Binding owner rules (summary)
 

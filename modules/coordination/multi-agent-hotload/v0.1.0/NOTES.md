@@ -44,6 +44,12 @@ Branched from ACS policy / multi-setup registry lineage (PR #10 / `POLICY.md` + 
 ## Verify
 
 ```bash
-python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py
+export CGM_ROOT=/path/to/content-generation-modules  # HEAD must be 9874b26… (0.5.1)
+export ADOPTER_ROOT=/path/to/working-repo            # must include .content-system/
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
+  --cgm-root "$CGM_ROOT" --adopter-root "$ADOPTER_ROOT"
+# must print hotload_check: OK and cgm_validate=VALID
 python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```
+
+After VALID: load modules per CGM `docs/WRITING_ROUTING.md` (README→writing-direction; posts→hsw). Validate does not enforce prose quality.

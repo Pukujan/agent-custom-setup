@@ -1,0 +1,15 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.5.1",
+  "assets": [
+    {
+      "id": "acs-adapter-placeholder",
+      "path": ".content-system/assets/adapter-placeholder.txt",
+      "role": "documentation",
+      "description": "Non-narrative placeholder so the CGM adapter validates while ACS narrative art remains deferred.",
+      "usage": "adapter completeness only; not a README hero",
+      "review_decision": "accepted-as-placeholder",
+      "status_note": "Replace with narrative raster under IMAGE_GUIDE when ACS root README gets art."
+    }
+  ]
+}

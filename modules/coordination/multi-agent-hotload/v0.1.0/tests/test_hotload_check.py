@@ -118,14 +118,24 @@ def test_watchdog_runner_must_be_agentless(tmp_path: Path):
 
 
 def test_cli_ok():
-    proc = subprocess.run(
-        [sys.executable, str(SCRIPT)],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    import os
+    cgm = Path("/workspace/cgm-051")
+    adopter = MODULE_ROOT.parents[3]
+    args = [sys.executable, str(SCRIPT)]
+    if (cgm / "scripts" / "validate_content_system.py").is_file():
+        args.extend(["--cgm-root", str(cgm), "--adopter-root", str(adopter)])
+    else:
+        # Schema-only fallback when CGM pin tree is absent on the runner
+        env = os.environ.copy()
+        env["HOTLOAD_SKIP_CGM_VALIDATE"] = "1"
+        proc = subprocess.run(args, capture_output=True, text=True, check=False, env=env)
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert "hotload_check: OK" in proc.stdout or "WARN skip_cgm_validate" in proc.stdout
+        return
+    proc = subprocess.run(args, capture_output=True, text=True, check=False)
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert "hotload_check: OK" in proc.stdout
+    assert "cgm_validate=VALID" in proc.stdout
 
 
 def test_watchdog_evaluate_paths():
@@ -216,3 +226,33 @@ def test_example_pins_are_full_stacks():
             for m in data["pins"]["cgm"]["modules"]
         }
     )
+
+
+def test_cli_ok_with_cgm_validate():
+    """Install check must run CGM validate_content_system (no HSW-only script)."""
+    import os
+    cgm = Path("/workspace/cgm-051")
+    if not (cgm / "scripts" / "validate_content_system.py").is_file():
+        import pytest
+        pytest.skip("cgm-051 checkout not present on this machine")
+    adopter = MODULE_ROOT.parents[3]
+    env = os.environ.copy()
+    env.pop("HOTLOAD_SKIP_CGM_VALIDATE", None)
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--cgm-root",
+            str(cgm),
+            "--adopter-root",
+            str(adopter),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "hotload_check: OK" in proc.stdout
+    assert "cgm_validate=VALID" in proc.stdout
+    assert "WRITING_ROUTING" in proc.stdout
