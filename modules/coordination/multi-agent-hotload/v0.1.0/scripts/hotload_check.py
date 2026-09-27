@@ -457,6 +457,38 @@ def validate_assignment(schema_path: Path, assignment_path: Path) -> list[str]:
     return errors
 
 
+
+# Binding doc gate: section heading presence only (no phrase laundry list).
+EXTERNAL_RESEARCH_GATE_HEADING = "External research gate"
+EXTERNAL_RESEARCH_GATE_FILES = (
+    "BEHAVIOR.md",
+    "HOTLOAD.md",
+)
+
+
+def check_external_research_gate(root: Path, *, policy_path: Path | None = None) -> list[str]:
+    """Assert External research gate heading exists in pack BEHAVIOR/HOTLOAD + root POLICY."""
+    errors: list[str] = []
+    targets: list[tuple[str, Path]] = [(rel, root / rel) for rel in EXTERNAL_RESEARCH_GATE_FILES]
+    if policy_path is None:
+        policy_path = root.parents[3] / "POLICY.md"
+    targets.append(("POLICY.md", policy_path))
+    for label, path in targets:
+        if not path.is_file():
+            errors.append(f"external research gate: missing {label} at {path}")
+            continue
+        try:
+            body = path.read_text(encoding="utf-8-sig")
+        except OSError as exc:
+            errors.append(f"external research gate: unreadable {label}: {exc}")
+            continue
+        if EXTERNAL_RESEARCH_GATE_HEADING not in body:
+            errors.append(
+                f"external research gate: {label} missing heading '{EXTERNAL_RESEARCH_GATE_HEADING}'"
+            )
+    return errors
+
+
 def run(
     root: Path,
     assignment: Path | None = None,
@@ -469,6 +501,7 @@ def run(
     missing = check_required_files(root)
     if missing:
         problems.extend(f"missing file: {m}" for m in missing)
+    problems.extend(check_external_research_gate(root))
     schema_path = root / "schema" / "assignment.schema.json"
     example_path = assignment or (root / "examples" / "assignment.example.json")
     if schema_path.is_file() and example_path.is_file():
