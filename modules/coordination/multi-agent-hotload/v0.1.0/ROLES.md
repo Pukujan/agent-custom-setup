@@ -18,7 +18,7 @@ An assignment document may **seed** a preferred agent list. Seeding is a hint fo
 - **May also implement tasks** on accepted work.
 - If "decide" and "do" conflict in the same moment, **deciding wins** — rule first, then optionally execute.
 - Holds the authoritative seat only under a valid **lease** (minutes — see below) **and** while GitHub-canonical `who_is_boss_now` / claim file names them.
-- Uses human-readable titles (CGM HSW / writing-direction).
+- Uses human-readable titles (FULL CGM (README→writing-direction; prose→hsw)).
 
 ## Workers (coder1, coder2, …)
 
@@ -90,13 +90,13 @@ Schema fields `lease_ttl_minutes`, `claim_queue`, `watchdog_interval_minutes`, a
 
 | System | Role |
 | --- | --- |
-| PCM | Continuity / checkpoints — **not** boss, not proposal store, not lease store of record (GitHub issue comments / claim preferred) |
-| CGM | Writing quality for titles/UX — **not** ownership |
+| PCM | **Full** continuity + PR-only/gates/protection/auto-merge preference — **not** boss, not proposal store, not lease store of record |
+| CGM | **Full** 0.5.1 stack (seven modules + contracts) for titles/README/UX — **not** ownership |
 | Tool brand (Grok/Claude/Codex/…) | Irrelevant to seat assignment |
 | Watchdog | Liveness flags only — not failover |
 | Local SQLite / device DBs | Execution aids — GitHub issues / claim win on disagreement |
 | Out-of-band DM | **Forbidden** for lease handoff |
-| ACS this pack | Install surface that hot-loads PCM + CGM + these role rules |
+| ACS this pack | Install surface that hot-loads FULL PCM + FULL CGM 0.5.1 + these role rules |
 
 ## Example fill (illustrative)
 

@@ -4,11 +4,13 @@ When an agent starts on Agent Custom Setup (or is told to load the **agent hot-l
 
 ## Done when
 
-Install is complete only when all three are wired:
+Install is complete only when all three are wired as **full stacks** (slim subsets fail):
 
-1. PCM available for checkout / continuity / checkpoints
-2. CGM pinned for HSW + writing-direction
-3. This runtime loaded (join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR)
+1. **FULL PCM** — continuity/checkpoints **and** GitHub-owned progression: PR-only to default branch, required CI gates, adopter branch-protection + auto-merge preference, fail-closed on missing/failed/skipped gates, leaf/parent receipts (see SPEC §8 / TARGET_ADOPTION). Still **not** the proposal/ACCEPT layer.
+2. **FULL CGM 0.5.1** — all seven modules + `human_output_contract` docs (not HSW + writing-direction only). Route README/product entry via `writing-direction`; posts/papers via `human-sounding-writing` (hsw).
+3. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR
+
+Missing any of the three, or substituting a thin PCM/CGM subset, is an **incomplete install**.
 
 ## Load order
 
@@ -18,27 +20,59 @@ Install is complete only when all three are wired:
 2. `registry.json` — confirm this module is registered (`multi-agent-hotload` @ `0.1.0`).
 3. This pack's `module.json` and `NOTES.md`.
 
-### 2. PCM (continuity only)
+### 2. FULL PCM (continuity + GitHub governance)
 
-- Checkout / worktree / continuity / checkpoints.
-- **Not** for proposals, ACCEPT/REJECT, or work locks — those live in [PROPOSALS.md](PROPOSALS.md) and GitHub issues.
-- Pin or check out `project-continuity-modules` per the working repo's PCM instructions; do not copy PCM source into ACS.
+Pin [Pukujan/project-continuity-modules](https://github.com/Pukujan/project-continuity-modules) at:
 
-### 3. CGM (human titles and UX)
+- **Commit:** `4e2385474b4af9249ca009cbdcb38c4498932475`
+- **CLI:** `0.6.0` · **Protocol:** `0.1.0-draft`
+- Do **not** silently follow moving `main`. Do **not** copy PCM source into ACS.
+
+Wire the **complete** adopter surface (see PCM `docs/TARGET_ADOPTION.md`, `SPEC.md` §8, `AGENTS.md`):
+
+| Required | Meaning |
+| --- | --- |
+| Continuity files + CLI | checkout / worktree / checkpoints / `continuity` validate+preflight when the target uses PCM |
+| Issues own progression | GitHub issues own scope, acceptance, owner, deps, lifecycle; docs are projections |
+| PR-only | never commit straight to the protected default branch; branch → PR → squash merge when required |
+| Required CI gates | protected required checks on the exact candidate; missing/failed/skipped/stale = fail-closed |
+| Branch protection | adopters should enable protection on default branch (ACS tracks its own gates in [#5](https://github.com/Pukujan/agent-custom-setup/issues/5)) |
+| Auto-merge preference | enable GitHub auto-merge so green required checks can merge without skipping gates |
+| Receipts | leaf issue receipt keyed by push SHA + parent progression link after pushes |
+
+**Still not PCM's job:** proposals, ACCEPT/REJECT, or work locks — those live in [PROPOSALS.md](PROPOSALS.md) and GitHub issues.
+
+### 3. FULL CGM 0.5.1 (all modules + contracts)
 
 Pin [Pukujan/content-generation-modules](https://github.com/Pukujan/content-generation-modules) at:
 
-- **Current:** `c7d9c3f6b5b301d3a3bc89642d2f92fd08748979` (HSW **0.5.0**)
-- **After CGM PR #17 merges:** re-pin to **0.5.1**
+- **Version:** `0.5.1`
+- **Commit:** `9874b26dc46499137bf22e1ca163874ef2dd5e7a`
+- Do **not** silently follow moving `main`. Do **not** copy CGM source into ACS.
+- Adapter shape: target `.content-system/system-version.json` lists all seven module ids; validate with `python scripts/validate_content_system.py --root <cgm> --adapter <target>/.content-system --project-root <target>`.
 
-Load:
+**Required modules** (complete stack — a two-module pin is incomplete):
 
-| Module | Path in CGM |
-| --- | --- |
-| Human-sounding writing (HSW) | `modules/human-sounding-writing` (see also `SKILL.md`) |
-| Writing direction | `modules/writing-direction` |
+| Module id | Path | Load when |
+| --- | --- | --- |
+| `brand-foundation` | `modules/brand-foundation` | audience, promise, boundaries, brand-language |
+| `content-context` | `modules/content-context` | evidence-bounded project brief / claim records |
+| `writing-direction` | `modules/writing-direction` | README / product entry (scan-first selective bold) |
+| `human-sounding-writing` | `modules/human-sounding-writing` | posts, blogs, papers, general prose (short name **hsw** / HSW) |
+| `visual-direction` | `modules/visual-direction` | visual system / rejection conditions |
+| `image-generation` | `modules/image-generation` | narrative assets + asset-manifest records |
+| `html-demo` | `modules/html-demo` | responsive HTML demos when requested |
 
-Use these for issue titles, commit subjects, PR titles, and human-facing UX prose. Do not copy CGM source into ACS.
+**human_output_contract** (always available at the pin; apply for README/product entry):
+
+- `docs/README_PLAYBOOK.md`, `templates/README.template.md`, `templates/readme-contract.json`, `schemas/readme-contract.schema.json`
+- `docs/README_QUALITY_{PDD,SDD,TDD}.md`, `docs/PROVENANCE_AND_CITATION.md`
+- `docs/WRITING_ROUTING.md`, `docs/HUMAN_SOUNDING_WRITING.md`, `docs/human-sounding-rules.json`
+- `docs/IMAGE_GUIDE.md`, `docs/CONTENT_RESEARCH.md`, `docs/BRAND_DIRECTION.md`
+- scanability + claim-evidence contracts in `system-version.json` / readme-contract
+- `AGENTS.md`
+
+**Routing (binding):** README/product entry → `writing-direction` (keep scan/bold). Posts/papers/general prose → `human-sounding-writing`. Do **not** apply HSW bold restraints to READMEs. Titles for issues/commits/PRs stay human-readable under this stack.
 
 ### 4. This runtime (roles + lease + queue + watchdog + proposals + claim)
 
@@ -91,8 +125,8 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py
 
 ## Minimal session checklist
 
-- [ ] PCM ready (continuity only)
-- [ ] CGM pinned (HSW + writing-direction)
+- [ ] FULL PCM pinned (`4e23854…` / CLI 0.6.0) — continuity **and** PR-only + required gates + protection/auto-merge preference
+- [ ] FULL CGM 0.5.1 pinned (`9874b26…`) — all seven modules + human_output_contract (not HSW+WD only)
 - [ ] Join order understood; I know boss / coderN for this session
 - [ ] Re-read GitHub claim / `who_is_boss_now` / `claim_queue` on wake
 - [ ] Boss lease checked or renewed (or enqueued after vacancy) — lease is **minutes** (default 30)

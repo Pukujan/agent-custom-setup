@@ -94,6 +94,107 @@ def validate_failover_watchdog(data: object) -> list[str]:
     return errors
 
 
+REQUIRED_CGM_MODULES = (
+    "brand-foundation",
+    "content-context",
+    "writing-direction",
+    "human-sounding-writing",
+    "visual-direction",
+    "image-generation",
+    "html-demo",
+)
+
+REQUIRED_PCM_FEATURES = (
+    "checkout_continuity_checkpoints",
+    "github_issues_own_task_progression",
+    "pr_only_to_default_branch",
+    "required_ci_gates",
+    "branch_protection_preference",
+    "github_auto_merge_preference",
+    "fail_closed_on_missing_gates",
+    "leaf_parent_dependency_receipts",
+)
+
+CGM_PIN_VERSION = "0.5.1"
+CGM_PIN_REVISION_PREFIX = "9874b26"
+PCM_PIN_REVISION_PREFIX = "4e23854"
+
+
+def validate_pins(data: object) -> list[str]:
+    """Require FULL PCM + FULL CGM pins (Alex binding: no slim subsets)."""
+    errors: list[str] = []
+    if not isinstance(data, dict):
+        return ["assignment must be an object"]
+    pins = data.get("pins")
+    if not isinstance(pins, dict):
+        errors.append("pins: required object missing (FULL PCM + FULL CGM)")
+        return errors
+
+    pcm = pins.get("pcm")
+    if not isinstance(pcm, dict):
+        errors.append("pins.pcm: required (FULL PCM stack)")
+    else:
+        rev = str(pcm.get("revision") or "")
+        if not rev.startswith(PCM_PIN_REVISION_PREFIX):
+            errors.append(
+                f"pins.pcm.revision: must pin FULL PCM at {PCM_PIN_REVISION_PREFIX}… "
+                "(CLI 0.6.0); slim/unpinned PCM is incomplete"
+            )
+        feats = pcm.get("required_features")
+        if not isinstance(feats, list):
+            errors.append("pins.pcm.required_features: required list of FULL PCM features")
+        else:
+            missing = [f for f in REQUIRED_PCM_FEATURES if f not in feats]
+            if missing:
+                errors.append(
+                    "pins.pcm.required_features: missing FULL PCM features: "
+                    + ", ".join(missing)
+                )
+
+    cgm = pins.get("cgm")
+    if not isinstance(cgm, dict):
+        errors.append("pins.cgm: required (FULL CGM 0.5.1 stack)")
+    else:
+        ver = str(cgm.get("version") or "")
+        if ver != CGM_PIN_VERSION:
+            errors.append(
+                f"pins.cgm.version: must be {CGM_PIN_VERSION} (FULL stack; not 0.5.0 HSW-only)"
+            )
+        rev = str(cgm.get("revision") or "")
+        if not rev.startswith(CGM_PIN_REVISION_PREFIX):
+            errors.append(
+                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.1)"
+            )
+        mods = cgm.get("modules")
+        if not isinstance(mods, list):
+            errors.append("pins.cgm.modules: required list of all seven CGM module ids")
+        else:
+            # accept either bare ids or modules/<id> paths
+            normalized = []
+            for m in mods:
+                s = str(m).strip().rstrip("/")
+                if s.startswith("modules/"):
+                    s = s[len("modules/") :]
+                normalized.append(s)
+            missing = [m for m in REQUIRED_CGM_MODULES if m not in normalized]
+            if missing:
+                errors.append(
+                    "pins.cgm.modules: FULL CGM requires all seven modules; missing: "
+                    + ", ".join(missing)
+                )
+            if len(normalized) < 7:
+                errors.append(
+                    "pins.cgm.modules: slim subset incomplete — need all seven CGM modules"
+                )
+        hoc = cgm.get("human_output_contract")
+        if not isinstance(hoc, list) or len(hoc) < 5:
+            errors.append(
+                "pins.cgm.human_output_contract: required list (playbook/template/contract/"
+                "quality/provenance/routing) — README contract is part of FULL CGM"
+            )
+    return errors
+
+
 def validate_assignment(schema_path: Path, assignment_path: Path) -> list[str]:
     errors: list[str] = []
     schema = load_json(schema_path)
@@ -106,6 +207,7 @@ def validate_assignment(schema_path: Path, assignment_path: Path) -> list[str]:
         loc = ".".join(str(p) for p in err.path) or "<root>"
         errors.append(f"{loc}: {err.message}")
     errors.extend(validate_failover_watchdog(data))
+    errors.extend(validate_pins(data))
     return errors
 
 
@@ -128,7 +230,7 @@ def run(root: Path, assignment: Path | None = None) -> int:
     print("hotload_check: OK")
     print(f"  module_root={root}")
     print(f"  assignment={example_path}")
-    print("  install_surface=PCM + CGM + this runtime")
+    print("  install_surface=FULL PCM + FULL CGM 0.5.1 + this runtime")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
     print("  claim_queue=FIFO after vacancy; zombie re-reads GitHub claim")
     return 0

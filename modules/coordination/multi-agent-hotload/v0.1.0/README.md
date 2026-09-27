@@ -2,11 +2,11 @@
 
 **Install surface** for agents told to load the agent hot-loader into a working repo. This ACS module does **not** replace PCM or CGM. It hot-loads **all three** together:
 
-1. **PCM** — checkout / continuity / checkpoints
-2. **CGM** — human-sounding writing (HSW) + writing-direction
+1. **FULL PCM** (`4e2385474b4af9249ca009cbdcb38c4498932475`, CLI **0.6.0**) — continuity/checkpoints **plus** PR-only workflow, required CI gates, branch-protection + auto-merge preference, fail-closed gates, issue receipts
+2. **FULL CGM 0.5.1** (`9874b26dc46499137bf22e1ca163874ef2dd5e7a`) — all seven modules + `human_output_contract` (not HSW + writing-direction only)
 3. **This runtime** — join-order roles, boss lease (**minutes**, default 30), GitHub-canonical claim queue, agent-less watchdog (~10m), proposals, claim → PR
 
-Pin and reference PCM/CGM only — **do not copy** their source into ACS.
+Pin and reference PCM/CGM only — **do not copy** their source into ACS. A slim subset is an **incomplete install** for ACS and every hotloader adopter.
 
 **Version:** 0.1.0  
 **Harness:** `coordination`  
@@ -19,12 +19,12 @@ ACS is the source of truth for this pack. Desktop paths are deploy mirrors only 
 
 An agent that was told to load this hot-loader into a working repo has finished only when **all** of the following are true:
 
-- [ ] **PCM** is available and used for checkout/continuity/checkpoints (not for proposals).
-- [ ] **CGM** is pinned and used for titles/UX: HSW + writing-direction at pin `c7d9c3f6b5b301d3a3bc89642d2f92fd08748979` (HSW 0.5.0). After CGM PR #17 merges, re-pin to **0.5.1**. Paths: `modules/human-sounding-writing`, `modules/writing-direction`.
-- [ ] **This runtime** is loaded: [HOTLOAD.md](HOTLOAD.md), [ROLES.md](ROLES.md), [BEHAVIOR.md](BEHAVIOR.md), [PROPOSALS.md](PROPOSALS.md), and a valid assignment with **boss_failover** (minutes + `claim_queue`) + **watchdog** (agent-less).
-- [ ] `hotload_check` passes.
+- [ ] **FULL PCM** pinned and used: continuity/checkpoints **and** GitHub governance (PR-only, required CI, protection/auto-merge preference, fail-closed). Still not the proposal layer.
+- [ ] **FULL CGM 0.5.1** pinned at `9874b26…` with **all seven** module ids + human_output_contract docs. Route README via writing-direction; posts/papers via hsw. Not a two-module subset.
+- [ ] **This runtime** is loaded: [HOTLOAD.md](HOTLOAD.md), [ROLES.md](ROLES.md), [BEHAVIOR.md](BEHAVIOR.md), [PROPOSALS.md](PROPOSALS.md), and a valid assignment with **boss_failover** (minutes + `claim_queue`) + **watchdog** (agent-less) + full `pins.pcm` / `pins.cgm`.
+- [ ] `hotload_check` passes (enforces full pin module lists on the assignment example).
 
-Missing any of the three is an incomplete install.
+Missing any of the three, or using a slim PCM/CGM subset, is an incomplete install.
 
 ## Role fill order (binding)
 
@@ -75,8 +75,8 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py
 4. After vacancy: **GitHub-canonical FIFO `claim_queue`**; front takes boss; returning boss joins at **end**.
 5. **Zombie:** re-read GitHub claim on wake; reject boss actions if not named; worker or re-queue; optional issue comment; no DM.
 6. **Watchdog is agent-less** (cron/Action/script, ~10m); agents only emit stamps.
-7. Reuse **PCM** and **CGM** as pins — never vendor their trees here.
-8. Human-readable titles (CGM HSW / writing-direction).
+7. Reuse **FULL PCM** and **FULL CGM 0.5.1** as pins — never vendor their trees; never ship a slim subset.
+8. Human-readable titles under the CGM stack (README → writing-direction; other prose → hsw).
 9. Ticket parent/child notes only — no DAG engine.
 10. Never commit secrets; never force-push; never commit straight to `main`.
 
@@ -102,8 +102,8 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py
 
 | Pin | Role |
 | --- | --- |
-| PCM | Continuity only — not proposals |
-| CGM @ `c7d9c3f…` (0.5.0); re-pin 0.5.1 after PR #17 | HSW + writing-direction |
+| PCM @ `4e23854…` (CLI 0.6.0) | **Full** continuity + PR-only + required CI + protection/auto-merge preference — not proposals |
+| CGM @ `9874b26…` (**0.5.1**) | **Full** seven modules + human_output_contract — not HSW+WD only |
 | Project pattern docs (e.g. Jev proposals/authority/naming) | Read via GitHub; do not copy wholesale |
 
 ## Related ACS docs

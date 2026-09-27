@@ -68,7 +68,7 @@ Agents **only emit stamps**. The agent-less watchdog reads stamps + GitHub activ
 ## 4. PR and release
 
 - Open a small PR; link with `Refs #N` for progress-only, or a closing keyword only when merge should complete the issue.
-- Human-readable PR title (CGM HSW).
+- Human-readable PR title (FULL CGM / hsw).
 - Claim releases on merge or issue close, or when you explicitly mark the claim released on handoff.
 
 ## Anti-patterns

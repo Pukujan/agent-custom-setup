@@ -168,3 +168,51 @@ def test_watchdog_evaluate_paths():
         )
         == "nudge_keep_boss"
     )
+
+
+def test_pins_reject_slim_cgm_subset(tmp_path: Path):
+    """Alex binding: HSW+writing-direction only is an incomplete install."""
+    mod = _load_mod()
+    good = json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
+    good["pins"]["cgm"]["modules"] = [
+        "human-sounding-writing",
+        "writing-direction",
+    ]
+    path = tmp_path / "slim.json"
+    path.write_text(json.dumps(good), encoding="utf-8")
+    errors = mod.validate_assignment(
+        MODULE_ROOT / "schema" / "assignment.schema.json", path
+    )
+    assert any("FULL CGM" in e or "seven" in e or "missing" in e for e in errors), errors
+
+
+def test_pins_require_full_pcm_features(tmp_path: Path):
+    mod = _load_mod()
+    good = json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
+    good["pins"]["pcm"]["required_features"] = ["checkout_continuity_checkpoints"]
+    path = tmp_path / "thin-pcm.json"
+    path.write_text(json.dumps(good), encoding="utf-8")
+    errors = mod.validate_assignment(
+        MODULE_ROOT / "schema" / "assignment.schema.json", path
+    )
+    assert any("required_features" in e or "FULL PCM" in e for e in errors), errors
+
+
+def test_example_pins_are_full_stacks():
+    mod = _load_mod()
+    data = json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
+    assert data["pins"]["cgm"]["version"] == "0.5.1"
+    assert data["pins"]["cgm"]["revision"].startswith("9874b26")
+    assert data["pins"]["pcm"]["revision"].startswith("4e23854")
+    assert set(mod.REQUIRED_CGM_MODULES).issubset(
+        {
+            (m[len("modules/") :] if str(m).startswith("modules/") else str(m))
+            for m in data["pins"]["cgm"]["modules"]
+        }
+    )

@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "project": "Example three-lane hotload (Jev-style)",
   "recorded_at": "2026-09-27T00:00:00-04:00",
-  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease default 30 minutes (15–120); watchdog agent-less ~10m. After vacancy, GitHub-canonical claim_queue is FIFO; old boss rejoins at end.",
+  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease default 30 minutes (15\u2013120); watchdog agent-less ~10m. After vacancy, GitHub-canonical claim_queue is FIFO; old boss rejoins at end. FULL PCM + FULL CGM 0.5.1 required \u2014 not a slim HSW/writing-direction-only subset.",
   "role_fill": {
     "mode": "join_continue_order",
     "seed_is_hint_only": true,
@@ -54,7 +54,7 @@
         "as_of": "2026-09-27T00:00:00-04:00",
         "boss_agent_id": "claude-code-main",
         "ended_at": null,
-        "notes": "Illustrative seed; append on failover — do not rewrite."
+        "notes": "Illustrative seed; append on failover \u2014 do not rewrite."
       }
     ]
   },
@@ -79,18 +79,59 @@
   "pins": {
     "pcm": {
       "repo": "https://github.com/Pukujan/project-continuity-modules",
-      "role": "continuity_only",
-      "notes": "Checkout/continuity/checkpoints. Not the proposal layer."
+      "revision": "4e2385474b4af9249ca009cbdcb38c4498932475",
+      "cli_version": "0.6.0",
+      "protocol": "0.1.0-draft",
+      "role": "full_stack",
+      "required_features": [
+        "checkout_continuity_checkpoints",
+        "github_issues_own_task_progression",
+        "pr_only_to_default_branch",
+        "required_ci_gates",
+        "branch_protection_preference",
+        "github_auto_merge_preference",
+        "fail_closed_on_missing_gates",
+        "leaf_parent_dependency_receipts"
+      ],
+      "notes": "Full PCM for adopters. Continuity/checkpoints yes; still NOT the proposal/ACCEPT layer (that stays GitHub + PROPOSALS.md). Pin commit SHA; do not silently follow moving main. Do not vendor PCM source into ACS."
     },
     "cgm": {
       "repo": "https://github.com/Pukujan/content-generation-modules",
-      "revision": "c7d9c3f6b5b301d3a3bc89642d2f92fd08748979",
-      "version": "0.5.0",
+      "revision": "9874b26dc46499137bf22e1ca163874ef2dd5e7a",
+      "version": "0.5.1",
+      "role": "full_stack",
       "modules": [
-        "modules/human-sounding-writing",
-        "modules/writing-direction"
+        "brand-foundation",
+        "content-context",
+        "writing-direction",
+        "human-sounding-writing",
+        "visual-direction",
+        "image-generation",
+        "html-demo"
       ],
-      "repin_after": "After CGM PR #17 merges, re-pin to 0.5.1"
+      "human_output_contract": [
+        "docs/README_PLAYBOOK.md",
+        "templates/README.template.md",
+        "templates/readme-contract.json",
+        "schemas/readme-contract.schema.json",
+        "docs/README_QUALITY_PDD.md",
+        "docs/README_QUALITY_SDD.md",
+        "docs/README_QUALITY_TDD.md",
+        "docs/PROVENANCE_AND_CITATION.md",
+        "docs/WRITING_ROUTING.md",
+        "docs/HUMAN_SOUNDING_WRITING.md",
+        "docs/human-sounding-rules.json",
+        "docs/IMAGE_GUIDE.md",
+        "docs/CONTENT_RESEARCH.md",
+        "docs/BRAND_DIRECTION.md",
+        "AGENTS.md",
+        "system-version.json"
+      ],
+      "routing": {
+        "readme_product_entry": "writing-direction (scan-first selective bold; do not apply HSW bold restraints)",
+        "posts_blogs_papers": "human-sounding-writing (hsw / HSW)"
+      },
+      "notes": "FULL CGM 0.5.1 required for ACS and all hotloader adopters. Not HSW+writing-direction only. Load modules by task; README uses writing-direction + human_output_contract. Pin SHA; validate with scripts/validate_content_system.py. Do not vendor CGM source into ACS."
     }
   },
   "ticket_links": {

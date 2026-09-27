@@ -4,15 +4,15 @@ Normative operating rules for agents hot-loading this ACS pack. This is **behavi
 
 Owning issue: [#11](https://github.com/Pukujan/agent-custom-setup/issues/11).
 
-## Triple wire (required)
+## Triple wire (required — full stacks)
 
-When told to load the agent hot-loader into a working repo, wire **all three**:
+When told to load the agent hot-loader into a working repo, wire **all three** as **complete** stacks (slim subsets fail closed):
 
-1. **PCM** — checkout / continuity / checkpoints (not proposals)
-2. **CGM** — HSW + writing-direction at pin `c7d9c3f6b5b301d3a3bc89642d2f92fd08748979` (0.5.0); re-pin **0.5.1** after CGM PR #17
+1. **FULL PCM** @ `4e2385474b4af9249ca009cbdcb38c4498932475` (CLI **0.6.0**, protocol `0.1.0-draft`) — continuity/checkpoints **and** PR-only + required CI + branch-protection/auto-merge preference + fail-closed gates + receipts. Still not proposals/ACCEPT.
+2. **FULL CGM 0.5.1** @ `9874b26dc46499137bf22e1ca163874ef2dd5e7a` — all seven modules + `human_output_contract` (not HSW + writing-direction only). README → writing-direction; posts/papers → hsw.
 3. **This runtime** — join-order roles, boss lease (minutes), GitHub-canonical claim queue, agent-less watchdog, proposals → claim → PR
 
-ACS installs them together; it does **not** replace or vendor PCM/CGM source.
+ACS installs them together; it does **not** replace or vendor PCM/CGM source. ACS and **all** hotloader adopters must use the full stacks.
 
 ## Role fill
 
@@ -43,7 +43,7 @@ ACS installs them together; it does **not** replace or vendor PCM/CGM source.
 - Local telemetry secondary only — never sole cross-machine truth
 - Flow: propose → boss ACCEPT/REJECT → claim branch → PR
 - Parent/child ticket **notes only** — no full DAG engine
-- Human-readable issue / commit / PR titles (CGM HSW / writing-direction)
+- Human-readable issue / commit / PR titles under FULL CGM (README → writing-direction; other prose → hsw)
 - PR-only to `main`; never force-push; never print secrets
 - **ACS is SoT**; Desktop is deploy mirror only
 
@@ -55,7 +55,7 @@ Read these in [Pukujan/jev-classifier](https://github.com/Pukujan/jev-classifier
 | --- | --- |
 | [`docs/AUTHORITY.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/AUTHORITY.md) | Who decides; project does not stop; GitHub canonical |
 | [`docs/AGENT_PROPOSALS.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/AGENT_PROPOSALS.md) | Propose / verdict / claim / receipt mechanics |
-| [`docs/HUMAN_NAMING.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/HUMAN_NAMING.md) | Human-readable titles; CGM HSW pins |
+| [`docs/HUMAN_NAMING.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/HUMAN_NAMING.md) | Human-readable titles; align with FULL CGM 0.5.1 pins |
 
 This pack's local projections of those ideas: [ROLES.md](ROLES.md), [PROPOSALS.md](PROPOSALS.md), [HOTLOAD.md](HOTLOAD.md).
 
