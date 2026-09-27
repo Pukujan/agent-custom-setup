@@ -45,16 +45,21 @@ It is **not** a secrets vault (keys never enter git), not a hosted agent platfor
 
 Working-repo scope: adopters may write code only on the repo they hot-loaded into; foreign repos get proposal-style issue comments only. Details: [`BEHAVIOR.md`](modules/coordination/multi-agent-hotload/v0.1.0/BEHAVIOR.md).
 
+**Cold-start example:** clone ACS, open [`POLICY.md`](POLICY.md) and [`registry.json`](registry.json) to see which modules are active, then from a working repo that points at this checkout run `python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py` and fix until it passes.
+
 ## Evidence and boundaries
 
 | Claim | Status | Supports | Limits | Source |
 |---|---|---|---|---|
-| ACS registry indexes versioned modules with temporal metadata | shipped | `registry.json` lists active modules with paths and versions | Index accuracy depends on PR discipline | [`registry.json`](registry.json) |
-| InferHub LiteLLM Claude Code launcher sealed at 0.2.0 | shipped | Module tree + secrets policy (env names only) | Needs local LiteLLM + runtime `.env` | [`modules/claude-code/inferhub-litellm/v0.2.0/`](modules/claude-code/inferhub-litellm/v0.2.0/) |
-| Multi-agent hotload pack registered @ 0.1.0 with lease/queue/watchdog rules | shipped (on PR branch; see #11 / #12) | Pack docs, schema, `hotload_check`, tests | Not merged to default branch until PR #12 lands | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) |
-| ACS is SoT; Desktop is deploy mirror; no secrets in git | shipped (policy) | [`POLICY.md`](POLICY.md) authority + secrets rules | Policy text, not a runtime enforcer | [`POLICY.md`](POLICY.md) |
+| ACS registry indexes versioned modules with temporal metadata | shipped | `registry.json` lists active modules with paths and versions | Index accuracy depends on PR discipline | [registry.json @ 7455df5](https://github.com/Pukujan/agent-custom-setup/blob/7455df515712fa4c18931a099cacddcd861528ee/registry.json) |
+| InferHub LiteLLM Claude Code launcher sealed at 0.2.0 | shipped | Module tree + secrets policy (env names only) | Needs local LiteLLM + runtime `.env` | [inferhub-litellm v0.2.0 @ 7455df5](https://github.com/Pukujan/agent-custom-setup/tree/7455df515712fa4c18931a099cacddcd861528ee/modules/claude-code/inferhub-litellm/v0.2.0) |
+| Multi-agent hotload pack registered @ 0.1.0 with lease/queue/watchdog rules | shipped (merged PR [#12](https://github.com/Pukujan/agent-custom-setup/pull/12)) | Pack docs, schema, `hotload_check`, tests on `main` | Does not prove every adopter has run the check | [HOTLOAD.md @ 7455df5](https://github.com/Pukujan/agent-custom-setup/blob/7455df515712fa4c18931a099cacddcd861528ee/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) |
+| ACS is SoT; Desktop is deploy mirror; no secrets in git | shipped (policy) | POLICY.md authority + secrets rules | Policy text, not a runtime enforcer | [POLICY.md @ 7455df5](https://github.com/Pukujan/agent-custom-setup/blob/7455df515712fa4c18931a099cacddcd861528ee/POLICY.md) |
+| External research gate for hotload adopters | planned | Open PR proposes binding research gate | Not merged; do not treat as shipped | [PR #14](https://github.com/Pukujan/agent-custom-setup/pull/14) |
+| JEV architecture knowledge pack | planned | Open PR proposes knowledge pack module | Not merged; not on `main` | [PR #16](https://github.com/Pukujan/agent-custom-setup/pull/16) |
+| Optional jev-gate-pin stub | planned | Open PR (Refs [#17](https://github.com/Pukujan/agent-custom-setup/issues/17)) proposes stub + Fish fixtures | Not merged; not in registry on `main` | [PR #18](https://github.com/Pukujan/agent-custom-setup/pull/18) |
 
-**Boundaries:** no API keys, tokens, cookies, or `.env` contents ever land here; do not force-push shared branches; do not merge your own work unless the owner asks; pending PRs stay labeled pending.
+**Boundaries:** no API keys, tokens, cookies, or `.env` contents ever land here; do not force-push shared branches; do not merge your own work unless the owner asks; planned PRs stay labeled planned until merge.
 
 ## Try it
 

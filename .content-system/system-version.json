@@ -2,14 +2,15 @@
   "schema_version": "content-generation.adapter.v1",
   "system": "content-generation-modules",
   "helper_repository": "https://github.com/Pukujan/content-generation-modules",
-  "helper_version": "0.5.4",
-  "helper_commit": "c95d73a0ce072a6d7173ce4848621a25cdf1cc7e",
-  "helper_pin_note": "FULL CGM 0.5.4 required for ACS + all hotloader adopters. Slim HSW+WD-only fails. Validate with scripts/validate_content_system.py; then MUST load modules per docs/writing-routing.json / docs/ACS_VERIFY.md (acs_prompt_inject). Adopter root README stays product-only (CGM #25).",
+  "helper_version": "0.5.5",
+  "helper_commit": "060b2f187840db72d32043c80c43c2c7b4cfaa6e",
+  "helper_pin_note": "FULL CGM 0.5.5 for ACS + hotload adopters (eight modules including human-output-naming). Slim subsets fail. Validate via scripts/validate_content_system.py helper+adapter and --mode writing (ACS_VERIFY). Adopter root README stays product-only.",
   "modules": [
     "brand-foundation",
     "content-context",
     "writing-direction",
     "human-sounding-writing",
+    "human-output-naming",
     "visual-direction",
     "image-generation",
     "html-demo"
@@ -22,5 +23,5 @@
     "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
   ],
   "review_outputs": [],
-  "adoption_status": "adapter pinned at 0.5.4; hotload install requires FULL stack validate + acs_prompt_inject; root README product-only (Refs #11)"
+  "adoption_status": "adapter pinned at full 0.5.5; product-only README; validate via ACS_VERIFY (helper+adapter + writing mode)"
 }
