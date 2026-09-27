@@ -134,7 +134,7 @@ def discover_cgm_root(explicit: Path | None = None) -> Path | None:
         candidates.append(Path(env))
     here = Path(__file__).resolve()
     # ACS repo root = parents[4] from scripts/ under v0.1.0 pack
-    acs_root = MODULE_ROOT.parents[3]  # v0.1.0 → multi-agent-hotload → coordination → modules → repo
+    acs_root = MODULE_ROOT.parents[3]  # v0.1.0 -> multi-agent-hotload -> coordination -> modules -> repo
     candidates.extend(
         [
             Path("/workspace/cgm-051"),
@@ -416,7 +416,7 @@ def run(
     print("  claim_queue=FIFO after vacancy; zombie re-reads GitHub claim")
     print(
         "  next: load CGM modules per docs/WRITING_ROUTING.md "
-        "(README/product → writing-direction; posts/prose → hsw). "
+        "(README/product -> writing-direction; posts/prose -> hsw). "
         "Titles/bodies remain agent discipline — validate does not score prose."
     )
     return 0

@@ -117,25 +117,39 @@ def test_watchdog_runner_must_be_agentless(tmp_path: Path):
     assert any("runner" in e for e in errors)
 
 
+def _find_cgm_for_tests() -> Path | None:
+    candidates = [
+        Path("/workspace/cgm-051"),
+        Path(r"D:\claude\content-generation-modules"),
+        Path.home() / "content-generation-modules",
+    ]
+    env = __import__("os").environ.get("CGM_ROOT")
+    if env:
+        candidates.insert(0, Path(env))
+    for cand in candidates:
+        if (cand / "scripts" / "validate_content_system.py").is_file():
+            return cand
+    return None
+
+
 def test_cli_ok():
     import os
-    cgm = Path("/workspace/cgm-051")
+    cgm = _find_cgm_for_tests()
     adopter = MODULE_ROOT.parents[3]
     args = [sys.executable, str(SCRIPT)]
-    if (cgm / "scripts" / "validate_content_system.py").is_file():
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    if cgm is not None:
         args.extend(["--cgm-root", str(cgm), "--adopter-root", str(adopter)])
-    else:
-        # Schema-only fallback when CGM pin tree is absent on the runner
-        env = os.environ.copy()
-        env["HOTLOAD_SKIP_CGM_VALIDATE"] = "1"
         proc = subprocess.run(args, capture_output=True, text=True, check=False, env=env)
         assert proc.returncode == 0, proc.stdout + proc.stderr
-        assert "hotload_check: OK" in proc.stdout or "WARN skip_cgm_validate" in proc.stdout
+        assert "hotload_check: OK" in proc.stdout
+        assert "cgm_validate=VALID" in proc.stdout
         return
-    proc = subprocess.run(args, capture_output=True, text=True, check=False)
+    env["HOTLOAD_SKIP_CGM_VALIDATE"] = "1"
+    proc = subprocess.run(args, capture_output=True, text=True, check=False, env=env)
     assert proc.returncode == 0, proc.stdout + proc.stderr
-    assert "hotload_check: OK" in proc.stdout
-    assert "cgm_validate=VALID" in proc.stdout
+    assert "hotload_check: OK" in proc.stdout or "WARN skip_cgm_validate" in proc.stdout
 
 
 def test_watchdog_evaluate_paths():
@@ -231,8 +245,8 @@ def test_example_pins_are_full_stacks():
 def test_cli_ok_with_cgm_validate():
     """Install check must run CGM validate_content_system (no HSW-only script)."""
     import os
-    cgm = Path("/workspace/cgm-051")
-    if not (cgm / "scripts" / "validate_content_system.py").is_file():
+    cgm = _find_cgm_for_tests()
+    if cgm is None:
         import pytest
         pytest.skip("cgm-051 checkout not present on this machine")
     adopter = MODULE_ROOT.parents[3]
