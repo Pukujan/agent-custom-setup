@@ -16,10 +16,10 @@ except ImportError:  # pragma: no cover
 MODULE_ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_FILES = (
     "README.md",
-    "BEHAVIOR.md",
     "ROLES.md",
     "PROPOSALS.md",
     "HOTLOAD.md",
+    "BEHAVIOR.md",
     "NOTES.md",
     "module.json",
     "schema/assignment.schema.json",
@@ -44,13 +44,20 @@ def validate_failover_watchdog(data: object) -> list[str]:
     if not isinstance(data, dict):
         return ["assignment must be an object"]
     bf = data.get("boss_failover")
+    ttl = None
     if not isinstance(bf, dict):
         errors.append("boss_failover: required object missing")
     else:
-        ttl = bf.get("lease_ttl_hours")
-        if not isinstance(ttl, (int, float)) or ttl < 4 or ttl > 24:
+        ttl = bf.get("lease_ttl_minutes")
+        if not isinstance(ttl, (int, float)) or ttl < 15 or ttl > 120:
             errors.append(
-                "boss_failover.lease_ttl_hours: must be a number in 4..24 (hours; not ~30m)"
+                "boss_failover.lease_ttl_minutes: must be a number in 15..120 "
+                "(default 30; short leases OK)"
+            )
+        if "lease_ttl_hours" in bf:
+            errors.append(
+                "boss_failover.lease_ttl_hours: removed — use lease_ttl_minutes "
+                "(default 30; range 15–120)"
             )
         check_in = bf.get("check_in")
         if not isinstance(check_in, dict) or "mechanism" not in check_in:
@@ -59,6 +66,12 @@ def validate_failover_watchdog(data: object) -> list[str]:
             errors.append("boss_failover.check_in.mechanism: must be issue_comment or claim_file")
         if "standby" in bf and not isinstance(bf.get("standby"), list):
             errors.append("boss_failover.standby: must be an array when present")
+        if "claim_queue" in bf and not isinstance(bf.get("claim_queue"), list):
+            errors.append("boss_failover.claim_queue: must be an array when present (FIFO)")
+        elif isinstance(bf.get("claim_queue"), list):
+            for i, item in enumerate(bf["claim_queue"]):
+                if not isinstance(item, str) or not item.strip():
+                    errors.append(f"boss_failover.claim_queue[{i}]: must be non-empty string agent_id")
     wd = data.get("watchdog")
     if not isinstance(wd, dict):
         errors.append("watchdog: required object missing (agent-less liveness)")
@@ -72,11 +85,11 @@ def validate_failover_watchdog(data: object) -> list[str]:
         runner = wd.get("runner")
         if runner not in ("cron", "github_action", "script"):
             errors.append("watchdog.runner: must be cron|github_action|script (agent-less; no LLM)")
-        if isinstance(bf, dict) and isinstance(ttl := bf.get("lease_ttl_hours"), (int, float)):
-            if isinstance(interval, (int, float)) and interval >= ttl * 60:
+        if isinstance(ttl, (int, float)) and isinstance(interval, (int, float)):
+            if interval >= ttl:
                 errors.append(
-                    "watchdog.watchdog_interval_minutes must stay below lease_ttl_hours "
-                    "(watchdog != failover)"
+                    "watchdog.watchdog_interval_minutes must stay below lease_ttl_minutes "
+                    "(watchdog != failover; ~10m liveness only)"
                 )
     return errors
 
@@ -116,7 +129,8 @@ def run(root: Path, assignment: Path | None = None) -> int:
     print(f"  module_root={root}")
     print(f"  assignment={example_path}")
     print("  install_surface=PCM + CGM + this runtime")
-    print("  watchdog=agent-less; lease_ttl=hours")
+    print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
+    print("  claim_queue=FIFO after vacancy; zombie re-reads GitHub claim")
     return 0
 
 

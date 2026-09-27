@@ -1,7 +1,7 @@
 {
   "id": "multi-agent-hotload",
   "name": "Multi-agent hotload coordination",
-  "purpose": "Install surface: hot-load PCM + CGM + coordination runtime (join-order roles, hour-scale boss lease, agent-less watchdog, proposals/claim/PR)",
+  "purpose": "Install surface: hot-load PCM + CGM + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
   "harness": "coordination",
   "created": "2026-09-27",
   "updated": "2026-09-27",
@@ -29,16 +29,16 @@
       "role": "install-overview"
     },
     {
-      "path": "BEHAVIOR.md",
-      "role": "gold-standard-ops"
-    },
-    {
       "path": "HOTLOAD.md",
       "role": "startup-load-order"
     },
     {
       "path": "ROLES.md",
       "role": "boss-worker-rules"
+    },
+    {
+      "path": "BEHAVIOR.md",
+      "role": "normative-ops"
     },
     {
       "path": "PROPOSALS.md",
@@ -93,5 +93,5 @@
     "CGM @ c7d9c3f6b5b301d3a3bc89642d2f92fd08748979 (0.5.0); re-pin 0.5.1 after CGM PR #17",
     "Python 3 + jsonschema for hotload_check"
   ],
-  "summary": "Hot-load PCM + CGM + this runtime. Join order fills roles. Boss lease ~12h. Agent-less watchdog ~10m. GitHub primary progress. No DAG."
+  "summary": "Hot-load PCM + CGM + this runtime. Join order fills roles. Boss lease default 30m (15\u2013120). GitHub-canonical claim_queue after vacancy; returning boss joins end; zombie re-reads claim. Agent-less watchdog ~10m. GitHub primary progress. No DAG."
 }

@@ -1,7 +1,8 @@
 # AGENT-LESS boss-seat watchdog stub.
 # Copy into a consuming repo as .github/workflows/boss-watchdog.yml if desired.
 # No secrets embedded. Uses default GITHUB_TOKEN only if you enable gh API steps.
-# Watchdog != failover. Lease TTL stays in hours (assignment boss_failover).
+# Watchdog != failover. Lease TTL is in minutes (assignment boss_failover.lease_ttl_minutes; default 30).
+# After vacancy, agents enqueue on GitHub-canonical claim_queue — this job does not appoint a boss.
 
 name: boss-seat-watchdog
 

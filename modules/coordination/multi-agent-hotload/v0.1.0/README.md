@@ -4,7 +4,7 @@
 
 1. **PCM** — checkout / continuity / checkpoints
 2. **CGM** — human-sounding writing (HSW) + writing-direction
-3. **This runtime** — join-order roles, boss lease (hours), agent-less watchdog, proposals, claim → PR
+3. **This runtime** — join-order roles, boss lease (**minutes**, default 30), GitHub-canonical claim queue, agent-less watchdog (~10m), proposals, claim → PR
 
 Pin and reference PCM/CGM only — **do not copy** their source into ACS.
 
@@ -21,7 +21,7 @@ An agent that was told to load this hot-loader into a working repo has finished 
 
 - [ ] **PCM** is available and used for checkout/continuity/checkpoints (not for proposals).
 - [ ] **CGM** is pinned and used for titles/UX: HSW + writing-direction at pin `c7d9c3f6b5b301d3a3bc89642d2f92fd08748979` (HSW 0.5.0). After CGM PR #17 merges, re-pin to **0.5.1**. Paths: `modules/human-sounding-writing`, `modules/writing-direction`.
-- [ ] **This runtime** is loaded: [HOTLOAD.md](HOTLOAD.md), [ROLES.md](ROLES.md), [PROPOSALS.md](PROPOSALS.md), and a valid assignment with **boss_failover** + **watchdog** (agent-less).
+- [ ] **This runtime** is loaded: [HOTLOAD.md](HOTLOAD.md), [ROLES.md](ROLES.md), [BEHAVIOR.md](BEHAVIOR.md), [PROPOSALS.md](PROPOSALS.md), and a valid assignment with **boss_failover** (minutes + `claim_queue`) + **watchdog** (agent-less).
 - [ ] `hotload_check` passes.
 
 Missing any of the three is an incomplete install.
@@ -40,16 +40,18 @@ Assignment list may **seed** order; live join/continue order **fills** roles. Se
 
 | | Boss lease / failover | Watchdog |
 | --- | --- | --- |
-| Cadence | **Hours** (default 12; range 4–24) | ~**10 minutes** |
-| Runner | Agents emit check-in stamps; next continuer claims when vacant | **Cron / GitHub Action / script only** — no LLM, no peer agent |
-| Effect | Vacant seat after TTL; next continuer (or standby) claims boss | Liveness flags; may write `vacant` in claim file after lease TTL |
-| Must not | Use ~30m as failover | Make product decisions or appoint a new boss agent |
+| Cadence | **Minutes** (default **30**; range **15–120**) | ~**10 minutes** |
+| Runner | Agents emit check-in stamps; after vacancy, FIFO `claim_queue` on GitHub | **Cron / GitHub Action / script only** — no LLM, no peer agent |
+| Effect | Vacant seat after TTL; **front of queue** takes boss; old boss rejoins at **end** | Liveness flags; may write `vacant` in claim file after lease TTL |
+| Must not | Auto-reclaim for returning boss; skip zombie re-read | Make product decisions or appoint a new boss agent |
 
-**Watchdog ≠ failover.** Schema separates `lease_ttl_hours`, `watchdog_interval_minutes`, and `idle_window`.
+**Watchdog ≠ failover.** Schema separates `lease_ttl_minutes`, `claim_queue`, `watchdog_interval_minutes`, and `idle_window`.
 
-Progress signals: **GitHub primary** (commits on claim branch, PR updates, dated progress comments). Optional local telemetry secondary only.
+**Zombie:** on wake, re-read GitHub claim. If vacant/not you → reject boss actions; worker or re-queue; optional issue comment `lost lease → rejoining queue`; no out-of-band DM.
 
-Logic: fresh heartbeat → noop; stale + recent git/PR → nudge, keep boss; stale + idle past window → at risk; past lease TTL → write vacant; agents claim afterward.
+Progress signals: **GitHub primary** (commits on claim branch, PR updates, dated progress comments, claim/`claim_queue`). Optional local telemetry secondary only.
+
+Logic: fresh heartbeat → noop; stale + recent git/PR → nudge, keep boss; stale + idle past window → at risk; past lease TTL → write vacant; agents enqueue afterward.
 
 Details: [HOTLOAD.md](HOTLOAD.md). Skeleton: `scripts/watchdog_check.py`, `workflow-stubs/watchdog.yml`.
 
@@ -58,7 +60,7 @@ Details: [HOTLOAD.md](HOTLOAD.md). Skeleton: `scripts/watchdog_check.py`, `workf
 1. Ensure ACS is checked out and current (`git fetch`, re-read `POLICY.md` + `registry.json`).
 2. Point the agent (or session brief) at this module path.
 3. On start, follow **[HOTLOAD.md](HOTLOAD.md)** (PCM → CGM → this pack).
-4. Confirm join order / lease / watchdog config via assignment example or project live assignment.
+4. Confirm join order / lease / queue / watchdog config via assignment example or project live assignment.
 5. Run:
 
 ```bash
@@ -69,25 +71,28 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py
 
 1. **Join/continue order fills roles** (first = decision boss; next = coder1…). Seed list optional; live fill wins.
 2. Decision boss **may also do tasks**; deciding wins on conflict.
-3. Boss seat is a **lease in hours** with check-in stamps; missed check-in past TTL vacates the seat.
-4. **Watchdog is agent-less** (cron/Action/script); agents only emit stamps.
-5. Reuse **PCM** and **CGM** as pins — never vendor their trees here.
-6. Human-readable titles (CGM HSW / writing-direction).
-7. Ticket parent/child notes only — no DAG engine.
-8. Never commit secrets; never force-push; never commit straight to `main`.
+3. Boss seat is a **lease in minutes** (default 30; 15–120) with check-in stamps; missed check-in past TTL vacates the seat.
+4. After vacancy: **GitHub-canonical FIFO `claim_queue`**; front takes boss; returning boss joins at **end**.
+5. **Zombie:** re-read GitHub claim on wake; reject boss actions if not named; worker or re-queue; optional issue comment; no DM.
+6. **Watchdog is agent-less** (cron/Action/script, ~10m); agents only emit stamps.
+7. Reuse **PCM** and **CGM** as pins — never vendor their trees here.
+8. Human-readable titles (CGM HSW / writing-direction).
+9. Ticket parent/child notes only — no DAG engine.
+10. Never commit secrets; never force-push; never commit straight to `main`.
 
 ## Layout
 
 | Path | Role |
 | --- | --- |
-| `HOTLOAD.md` | Startup load order + lease vs agent-less watchdog |
-| `ROLES.md` | Join-order fill, boss vs workers, failover |
+| `HOTLOAD.md` | Startup load order + lease vs agent-less watchdog + queue |
+| `ROLES.md` | Join-order fill, boss vs workers, failover, zombie |
+| `BEHAVIOR.md` | Normative ops summary |
 | `PROPOSALS.md` | Propose → ACCEPT/REJECT → claim → PR |
 | `README.md` | This file |
 | `NOTES.md` | Operator notes |
 | `module.json` | ACS multi-setup metadata |
-| `schema/assignment.schema.json` | Assignment + boss_failover + watchdog |
-| `examples/assignment.example.json` | Example with lease/watchdog/standby |
+| `schema/assignment.schema.json` | Assignment + boss_failover + claim_queue + watchdog |
+| `examples/assignment.example.json` | Example with lease/queue/watchdog/standby |
 | `scripts/hotload_check.py` | Validate pack + assignment |
 | `scripts/watchdog_check.py` | Agent-less watchdog skeleton |
 | `workflow-stubs/watchdog.yml` | GH Action stub (copy into consuming repos) |
@@ -104,13 +109,3 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py
 ## Related ACS docs
 
 - [`POLICY.md`](../../../../POLICY.md) · [`registry.json`](../../../../registry.json) · [`AGENTS.md`](../../../../AGENTS.md)
-
-## Gold-standard behavior
-
-Normative ops rules (not epistemic claim-graph): [BEHAVIOR.md](BEHAVIOR.md). Cites Jev AUTHORITY / AGENT_PROPOSALS / HUMAN_NAMING as references only.
-
-
-## Canary / proof (join-order)
-
-Proof of join-order fill requires **at least 2** shadow agents (prefer **3**) in a throwaway canary lane — never claim the real boss seat on production ACS work. Exercises: join-order roles, claim/heartbeat stamps, lease renewals vs HOTLOAD. Log observed vs expected; summarize on the owning issue.
-

@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "project": "Example three-lane hotload (Jev-style)",
   "recorded_at": "2026-09-27T00:00:00-04:00",
-  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease in hours; watchdog agent-less in minutes.",
+  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease default 30 minutes (15–120); watchdog agent-less ~10m. After vacancy, GitHub-canonical claim_queue is FIFO; old boss rejoins at end.",
   "role_fill": {
     "mode": "join_continue_order",
     "seed_is_hint_only": true,
@@ -35,32 +35,33 @@
     }
   ],
   "boss_failover": {
-    "lease_ttl_hours": 12,
+    "lease_ttl_minutes": 30,
     "check_in": {
       "mechanism": "issue_comment",
-      "interval_hint_hours": 6,
+      "interval_hint_minutes": 15,
       "issue_url": "https://github.com/Pukujan/agent-custom-setup/issues/11",
       "claim_file_path": ".coord/boss_claim.json"
     },
+    "claim_queue": [],
     "standby": [
       "jev-classifier@teresa",
       "omp@macbookpro"
     ],
-    "grace_minutes": 30,
+    "grace_minutes": 10,
     "who_is_boss_now": "claude-code-main",
     "as_of_history": [
       {
         "as_of": "2026-09-27T00:00:00-04:00",
         "boss_agent_id": "claude-code-main",
         "ended_at": null,
-        "notes": "Illustrative seed; append on failover \u2014 do not rewrite."
+        "notes": "Illustrative seed; append on failover — do not rewrite."
       }
     ]
   },
   "watchdog": {
     "watchdog_interval_minutes": 10,
     "idle_window": {
-      "minutes": 45
+      "minutes": 20
     },
     "runner": "github_action",
     "inputs": [
@@ -73,7 +74,7 @@
     "on_stale_with_github_activity": "nudge_check_in_keep_boss",
     "on_stale_idle": "flag_seat_at_risk",
     "on_past_lease_ttl": "write_vacant_in_claim_file",
-    "notes": "AGENT-LESS. Cron/Action/script only. No LLM. No peer agent. Watchdog != failover."
+    "notes": "AGENT-LESS. Cron/Action/script only. No LLM. No peer agent. Watchdog != failover. ~10m liveness/nudge only."
   },
   "pins": {
     "pcm": {

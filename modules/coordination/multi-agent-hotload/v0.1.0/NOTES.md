@@ -13,11 +13,18 @@
 | PCM | Reference checkout for continuity only |
 | CGM | `c7d9c3f6b5b301d3a3bc89642d2f92fd08748979` (0.5.0). Re-pin **0.5.1** after CGM PR #17 merges. Modules: `human-sounding-writing`, `writing-direction` |
 
+## Boss lease + claim queue
+
+- Lease failover is in **minutes** (default **30**; range **15–120** via `lease_ttl_minutes`).
+- After vacancy, **GitHub-canonical `claim_queue`** is FIFO; front takes boss; returning boss joins at end.
+- Zombie: re-read GitHub claim on wake; reject boss actions if not named; optional issue comment `lost lease → rejoining queue`; no out-of-band DM.
+- Keep as-of history append-only.
+
 ## Watchdog
 
 - **Agent-less only** (cron / GitHub Action / `scripts/watchdog_check.py`).
 - No secrets in workflow stubs; consuming repos supply their own `GITHUB_TOKEN` via Actions defaults if they enable the stub.
-- Lease failover stays in **hours** (4–24). Watchdog interval stays in **minutes** (~10). Do not conflate them.
+- Watchdog interval stays in **minutes** (~10) for liveness/nudge only. Do not conflate with lease failover.
 
 ## Secrets
 

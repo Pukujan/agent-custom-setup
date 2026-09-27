@@ -3,7 +3,7 @@
 
 Run via cron, GitHub Action, or plain script — NEVER via an LLM or peer agent.
 Reads claim heartbeat + optional GitHub stamps. Writes vacant after lease TTL.
-No product decisions. No boss appointment.
+No product decisions. No boss appointment. Claimants enqueue via GitHub-canonical queue.
 """
 
 from __future__ import annotations
@@ -26,32 +26,31 @@ def parse_dt(value: str | None) -> datetime | None:
         return None
 
 
-def hours_since(ts: datetime | None, now: datetime) -> float | None:
+def minutes_since(ts: datetime | None, now: datetime) -> float | None:
     if ts is None:
         return None
-    return (now - ts).total_seconds() / 3600.0
+    return (now - ts).total_seconds() / 60.0
 
 
 def evaluate(
     *,
     last_heartbeat: datetime | None,
     last_github_activity: datetime | None,
-    lease_ttl_hours: float,
+    lease_ttl_minutes: float,
     idle_window_minutes: float,
     now: datetime | None = None,
 ) -> str:
     """Return noop | nudge_keep_boss | flag_at_risk | vacant."""
     now = now or datetime.now(timezone.utc)
-    age_h = hours_since(last_heartbeat, now)
-    if age_h is None:
+    age_m = minutes_since(last_heartbeat, now)
+    if age_m is None:
         return "vacant"
-    if age_h <= lease_ttl_hours:
+    if age_m <= lease_ttl_minutes:
         # Within lease: distinguish fresh vs stale-idle vs stale-with-activity
-        idle_h = idle_window_minutes / 60.0
-        if age_h <= idle_h:
+        if age_m <= idle_window_minutes:
             return "noop"
-        gh_age_h = hours_since(last_github_activity, now)
-        if gh_age_h is not None and gh_age_h <= idle_h:
+        gh_age_m = minutes_since(last_github_activity, now)
+        if gh_age_m is not None and gh_age_m <= idle_window_minutes:
             return "nudge_keep_boss"
         return "flag_at_risk"
     return "vacant"
@@ -59,10 +58,10 @@ def evaluate(
 
 def load_claim(path: Path) -> dict:
     if not path.is_file():
-        return {"status": "vacant", "last_heartbeat": None}
+        return {"status": "vacant", "last_heartbeat": None, "claim_queue": []}
     with path.open(encoding="utf-8-sig") as fh:
         data = json.load(fh)
-    return data if isinstance(data, dict) else {"status": "vacant"}
+    return data if isinstance(data, dict) else {"status": "vacant", "claim_queue": []}
 
 
 def write_vacant(path: Path, claim: dict) -> None:
@@ -70,6 +69,9 @@ def write_vacant(path: Path, claim: dict) -> None:
     claim["status"] = "vacant"
     claim["vacated_at"] = datetime.now(timezone.utc).isoformat()
     claim["who_is_boss_now"] = None
+    # Preserve claim_queue; agents enqueue via GitHub-canonical updates — watchdog never appoints.
+    if "claim_queue" not in claim or not isinstance(claim.get("claim_queue"), list):
+        claim["claim_queue"] = []
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
 
@@ -99,8 +101,12 @@ def main(argv: list[str] | None = None) -> int:
         assignment = json.load(fh)
     bf = assignment.get("boss_failover") or {}
     wd = assignment.get("watchdog") or {}
-    ttl = float(bf.get("lease_ttl_hours", 12))
-    idle = float((wd.get("idle_window") or {}).get("minutes", 45))
+    # Prefer minutes; reject legacy hours-only configs by falling through to default 30.
+    if "lease_ttl_minutes" in bf:
+        ttl = float(bf["lease_ttl_minutes"])
+    else:
+        ttl = 30.0
+    idle = float((wd.get("idle_window") or {}).get("minutes", 20))
     check_in = bf.get("check_in") or {}
     claim_path = args.claim_file or Path(
         check_in.get("claim_file_path") or ".coord/boss_claim.json"
@@ -115,16 +121,16 @@ def main(argv: list[str] | None = None) -> int:
     decision = evaluate(
         last_heartbeat=last_hb,
         last_github_activity=last_gh,
-        lease_ttl_hours=ttl,
+        lease_ttl_minutes=ttl,
         idle_window_minutes=idle,
     )
     print(f"watchdog_check: {decision}")
     print("  runner=agent-less (cron|action|script); no LLM")
-    print(f"  lease_ttl_hours={ttl} idle_window_minutes={idle}")
+    print(f"  lease_ttl_minutes={ttl} idle_window_minutes={idle}")
     print(f"  claim_file={claim_path}")
     if decision == "vacant" and not args.dry_run:
         write_vacant(claim_path, claim)
-        print("  wrote status=vacant (agents may claim; watchdog does not appoint)")
+        print("  wrote status=vacant (agents enqueue on GitHub claim_queue; watchdog does not appoint)")
     return 0
 
 

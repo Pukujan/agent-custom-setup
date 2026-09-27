@@ -41,7 +41,7 @@
     {
       "id": "multi-agent-hotload",
       "name": "Multi-agent hotload coordination",
-      "purpose": "Install surface that hot-loads PCM + CGM + coordination runtime (roles, proposals, claim to PR) without replacing or vendoring PCM/CGM",
+      "purpose": "Install surface: hot-load PCM + CGM + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
       "harness": "coordination",
       "created": "2026-09-27",
       "updated": "2026-09-27",
@@ -62,7 +62,7 @@
         "end": null
       },
       "status": "active",
-      "summary": "When told to load the agent hot-loader, wire PCM + CGM + this runtime together. ACS does not replace PCM/CGM."
+      "summary": "When told to load the agent hot-loader, wire PCM + CGM + this runtime. Boss lease default 30m (15-120); GitHub-canonical claim_queue after vacancy; returning boss joins end; zombie re-reads claim. Agent-less watchdog ~10m."
     }
   ]
 }

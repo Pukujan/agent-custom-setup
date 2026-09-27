@@ -35,18 +35,72 @@ def test_example_validates_against_schema():
     assert errors == [], errors
 
 
-def test_lease_ttl_rejects_short_window(tmp_path: Path):
+def test_lease_ttl_accepts_default_30(tmp_path: Path):
     mod = _load_mod()
     good = json.loads(
         (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
     )
-    good["boss_failover"]["lease_ttl_hours"] = 0.5  # ~30m — forbidden
-    path = tmp_path / "bad.json"
+    assert good["boss_failover"]["lease_ttl_minutes"] == 30
+    path = tmp_path / "ok.json"
     path.write_text(json.dumps(good), encoding="utf-8")
     errors = mod.validate_assignment(
         MODULE_ROOT / "schema" / "assignment.schema.json", path
     )
-    assert any("lease_ttl_hours" in e for e in errors)
+    assert errors == [], errors
+
+
+def test_lease_ttl_rejects_too_short_and_legacy_hours(tmp_path: Path):
+    mod = _load_mod()
+    good = json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
+    good["boss_failover"]["lease_ttl_minutes"] = 5  # below 15
+    path = tmp_path / "short.json"
+    path.write_text(json.dumps(good), encoding="utf-8")
+    errors = mod.validate_assignment(
+        MODULE_ROOT / "schema" / "assignment.schema.json", path
+    )
+    assert any("lease_ttl_minutes" in e for e in errors)
+
+    legacy = json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
+    legacy["boss_failover"]["lease_ttl_hours"] = 12
+    del legacy["boss_failover"]["lease_ttl_minutes"]
+    path2 = tmp_path / "legacy.json"
+    path2.write_text(json.dumps(legacy), encoding="utf-8")
+    errors2 = mod.validate_assignment(
+        MODULE_ROOT / "schema" / "assignment.schema.json", path2
+    )
+    assert any("lease_ttl" in e for e in errors2)
+
+
+def test_lease_ttl_rejects_too_long(tmp_path: Path):
+    mod = _load_mod()
+    good = json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
+    good["boss_failover"]["lease_ttl_minutes"] = 180  # above 120
+    path = tmp_path / "long.json"
+    path.write_text(json.dumps(good), encoding="utf-8")
+    errors = mod.validate_assignment(
+        MODULE_ROOT / "schema" / "assignment.schema.json", path
+    )
+    assert any("lease_ttl_minutes" in e for e in errors)
+
+
+def test_claim_queue_must_be_string_list(tmp_path: Path):
+    mod = _load_mod()
+    good = json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
+    good["boss_failover"]["claim_queue"] = ["ok-agent", 123]
+    path = tmp_path / "badq.json"
+    path.write_text(json.dumps(good), encoding="utf-8")
+    errors = mod.validate_assignment(
+        MODULE_ROOT / "schema" / "assignment.schema.json", path
+    )
+    assert any("claim_queue" in e for e in errors)
 
 
 def test_watchdog_runner_must_be_agentless(tmp_path: Path):
@@ -88,19 +142,29 @@ def test_watchdog_evaluate_paths():
         mod.evaluate(
             last_heartbeat=now - timedelta(minutes=5),
             last_github_activity=now,
-            lease_ttl_hours=12,
-            idle_window_minutes=45,
+            lease_ttl_minutes=30,
+            idle_window_minutes=20,
             now=now,
         )
         == "noop"
     )
     assert (
         mod.evaluate(
-            last_heartbeat=now - timedelta(hours=13),
+            last_heartbeat=now - timedelta(minutes=35),
             last_github_activity=None,
-            lease_ttl_hours=12,
-            idle_window_minutes=45,
+            lease_ttl_minutes=30,
+            idle_window_minutes=20,
             now=now,
         )
         == "vacant"
+    )
+    assert (
+        mod.evaluate(
+            last_heartbeat=now - timedelta(minutes=22),
+            last_github_activity=now - timedelta(minutes=2),
+            lease_ttl_minutes=30,
+            idle_window_minutes=20,
+            now=now,
+        )
+        == "nudge_keep_boss"
     )

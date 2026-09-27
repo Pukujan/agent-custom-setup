@@ -84,19 +84,19 @@
     },
     "boss_failover": {
       "type": "object",
-      "description": "Authoritative seat lease in HOURS. Not the watchdog.",
+      "description": "Authoritative seat lease in MINUTES (short leases). Not the watchdog. Vacancy uses a FIFO claim_queue.",
       "required": [
-        "lease_ttl_hours",
+        "lease_ttl_minutes",
         "check_in"
       ],
       "additionalProperties": true,
       "properties": {
-        "lease_ttl_hours": {
+        "lease_ttl_minutes": {
           "type": "number",
-          "minimum": 4,
-          "maximum": 24,
-          "default": 12,
-          "description": "Boss lease TTL in hours (default 12; range 4-24). Do NOT use ~30m."
+          "minimum": 15,
+          "maximum": 120,
+          "default": 30,
+          "description": "Boss lease TTL in minutes (default 30; range 15-120). Short leases are intentional. Watchdog (~10m) stays liveness-only."
         },
         "check_in": {
           "type": "object",
@@ -111,14 +111,15 @@
                 "claim_file"
               ]
             },
-            "interval_hint_hours": {
+            "interval_hint_minutes": {
               "type": "number",
-              "minimum": 1,
-              "maximum": 24
+              "minimum": 5,
+              "maximum": 120,
+              "description": "How often the sitting boss should renew (typically <= lease_ttl_minutes)"
             },
             "claim_file_path": {
               "type": "string",
-              "description": "Required when mechanism is claim_file"
+              "description": "Required when mechanism is claim_file; also authoritative for zombie rejection"
             },
             "issue_url": {
               "type": "string",
@@ -126,22 +127,29 @@
             }
           }
         },
+        "claim_queue": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "FIFO of agent_ids waiting to take boss after vacancy. Front takes next. Old boss rejoining appends at end — no auto-reclaim."
+        },
         "standby": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Preferred agent_id order when seat vacant"
+          "description": "Optional preferred agent_id order when enqueueing after vacancy (hints only; live claim_queue order wins)"
         },
         "grace_minutes": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 180,
-          "description": "Optional takeover refute window AFTER lease TTL expiry \u2014 not the lease itself"
+          "maximum": 60,
+          "description": "Optional takeover refute window AFTER lease TTL expiry — not the lease itself"
         },
         "as_of_history": {
           "type": "array",
-          "description": "Append-only who-was-boss-at-T; separate from who-is-boss-now",
+          "description": "Append-only who-was-boss-at-T; separate from who-is-boss-now. Never rewrite on zombie or re-queue.",
           "items": {
             "type": "object",
             "required": [
@@ -172,13 +180,13 @@
             "string",
             "null"
           ],
-          "description": "Current lease holder agent_id, or null if vacant"
+          "description": "Current lease holder agent_id, or null if vacant. Authoritative with claim file — zombies must re-queue."
         }
       }
     },
     "watchdog": {
       "type": "object",
-      "description": "AGENT-LESS liveness only (cron/Action/script). Not failover. No LLM.",
+      "description": "AGENT-LESS liveness only (cron/Action/script). Not failover. No LLM. ~10m typical.",
       "required": [
         "watchdog_interval_minutes",
         "idle_window",
@@ -191,7 +199,7 @@
           "minimum": 5,
           "maximum": 30,
           "default": 10,
-          "description": "How often the agent-less watcher runs (~10m). NOT boss failover."
+          "description": "How often the agent-less watcher runs (~10m). NOT boss failover. Liveness/nudge only."
         },
         "idle_window": {
           "type": "object",
@@ -201,8 +209,8 @@
           "properties": {
             "minutes": {
               "type": "number",
-              "minimum": 15,
-              "description": "No GitHub activity for this long + stale heartbeat => at risk (flag only)"
+              "minimum": 10,
+              "description": "No GitHub activity for this long + stale heartbeat => at risk (flag only). Prefer <= lease_ttl_minutes."
             }
           }
         },
@@ -213,7 +221,7 @@
             "github_action",
             "script"
           ],
-          "description": "Must be agent-less infrastructure \u2014 never an LLM or peer agent"
+          "description": "Must be agent-less infrastructure — never an LLM or peer agent"
         },
         "inputs": {
           "type": "array",
@@ -242,7 +250,7 @@
         },
         "on_past_lease_ttl": {
           "type": "string",
-          "description": "write vacant in claim file; do not appoint boss"
+          "description": "write vacant in claim file; do not appoint boss; claimants enqueue"
         },
         "notes": {
           "type": "string"
@@ -264,7 +272,7 @@
     },
     "ticket_links": {
       "type": "object",
-      "description": "Parent/child notes only \u2014 no DAG engine",
+      "description": "Parent/child notes only — no DAG engine",
       "properties": {
         "parent_issue": {
           "type": [
