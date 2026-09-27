@@ -71,6 +71,10 @@ Agents **only emit stamps**. The agent-less watchdog reads stamps + GitHub activ
 - Human-readable PR title (FULL CGM / hsw).
 - Claim releases on merge or issue close, or when you explicitly mark the claim released on handoff.
 
+## Working-repo scope
+
+Proposals, ACCEPT/REJECT, claims, and PRs run **only** on the hot-loaded working repo. To report a finding elsewhere, open or comment a **Proposal-style issue/ticket** on that foreign repo's issue log — no code, claim, PR, or boss actions on the foreign repo. See [BEHAVIOR.md](BEHAVIOR.md).
+
 ## Anti-patterns
 
 - Using PCM / continuity files as the proposal board.
@@ -79,3 +83,4 @@ Agents **only emit stamps**. The agent-less watchdog reads stamps + GitHub activ
 - Skipping the marker push and discovering collision only at PR time.
 - Leading titles with `feat:` / ticket-code stacks instead of a plain sentence.
 - Committing to `main`, force-pushing, or printing secrets.
+- Mutating another project's repo (push/PR/claim/ACCEPT) instead of filing a Proposal-style ticket there.

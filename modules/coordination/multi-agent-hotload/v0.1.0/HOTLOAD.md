@@ -12,6 +12,14 @@ Install is complete only when all three are wired as **full stacks** (slim subse
 
 Missing any of the three, or substituting a thin PCM/CGM subset, is an **incomplete install**.
 
+## Working-repo scope (binding)
+
+- **MUST** write code (commits, branches, PRs, claims, boss actions) only on the **hot-loaded working repo** (the adopter project you loaded into).
+- **MUST NOT** push, open PRs, claim, ACCEPT/REJECT, or mutate **other projects' repos**.
+- **Exception:** MAY open/comment a **Proposal-style issue/ticket** on a foreign repo's issue log only — no code, claim, PR, or boss actions there.
+
+See [BEHAVIOR.md](BEHAVIOR.md) — Working-repo scope.
+
 ## Load order
 
 ### 1. ACS policy and registry (always)
@@ -171,4 +179,5 @@ Cite: [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modul
 - [ ] Titles will be human-readable
 - [ ] I will not treat PCM as the proposal layer
 - [ ] Parent/child ticket notes only (no DAG engine)
+- [ ] Working-repo scope: code/claims/PRs/boss actions only on this hot-loaded repo; foreign repos = proposed issue only
 - [ ] No secrets in commits, logs, or comments

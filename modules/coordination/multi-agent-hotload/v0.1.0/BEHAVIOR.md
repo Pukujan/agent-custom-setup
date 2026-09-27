@@ -49,6 +49,18 @@ ACS installs them together; it does **not** replace or vendor PCM/CGM source. AC
 - PR-only to `main`; never force-push; never print secrets
 - **ACS is SoT**; Desktop is deploy mirror only
 
+## Working-repo scope (binding)
+
+Adopters using ACS / this multi-agent hotloader may only write code on **their own working repo** — the GitHub repo they hot-loaded into / own as the adopter project.
+
+| Rule | Binding |
+| --- | --- |
+| **MUST** | Commits, branches, PRs, claims, and boss actions (ACCEPT/REJECT, lease renew as boss, queue mutations) only on the hot-loaded working repo |
+| **MUST NOT** | Push code, open PRs, claim branches, ACCEPT/REJECT, or otherwise mutate **other projects' repositories** |
+| **Exception (narrow)** | MAY report findings to another repo's **issue log only** as a **proposed ticket** (open or comment a Proposal-style issue/ticket). Issue-log only — no code, no claim, no PR, no boss actions on the foreign repo |
+
+Cross-repo help stays at the ticket/proposal layer until that foreign project's own agents accept and implement on **their** working repo.
+
 ## Citations (patterns — do not copy wholesale)
 
 Read these in [Pukujan/jev-classifier](https://github.com/Pukujan/jev-classifier) for proven ops patterns. They are **references**, not files to vendor into ACS:

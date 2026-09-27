@@ -86,6 +86,10 @@ Automated **no-agent watchdog** (~every **10 minutes**, `watchdog_interval_minut
 
 Schema fields `lease_ttl_minutes`, `claim_queue`, `watchdog_interval_minutes`, and `idle_window` are distinct on purpose. See [HOTLOAD.md](HOTLOAD.md).
 
+## Working-repo scope
+
+Claims, branches, PRs, and boss actions (ACCEPT/REJECT) are **only** on the hot-loaded working repo; a foreign repo may receive a **proposed issue/ticket** only — no code, claim, PR, or boss actions there. See [BEHAVIOR.md](BEHAVIOR.md).
+
 ## What is not a role authority
 
 | System | Role |

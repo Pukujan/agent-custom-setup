@@ -54,3 +54,7 @@ Until those land and are verified live, treat missing/failed/skipped/unverified 
 - One primary writer per task branch. Prefer **new files** under `modules/`, `schemas/`, `POLICY.md`, and `registry.json` when another agent may touch shared docs.
 - Minimize edits to `PROJECT.md` / `AGENTS.md` unless PCM markers require it.
 - Re-read live issues and current base before resuming. Link PRs with `Refs #N` for progress-only; use closing keywords only when merge should complete the issue.
+
+### Working-repo scope (hotload adopters)
+
+Adopters using ACS / the multi-agent hotloader may only write code (commits, branches, PRs, claims, boss actions) on **their own working repo** — the GitHub repo they hot-loaded into. They **must not** push, open PRs, claim, ACCEPT/REJECT, or otherwise mutate other projects' repositories. **Exception:** they may report findings to another repo's issue log **only** as a proposed ticket (open/comment a Proposal-style issue) — issue-log only; no code, claim, PR, or boss actions on the foreign repo. Normative detail: `modules/coordination/multi-agent-hotload/v0.1.0/BEHAVIOR.md`.

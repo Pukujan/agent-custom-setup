@@ -84,6 +84,7 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 8. Human-readable titles under the CGM stack (README → writing-direction; other prose → hsw).
 9. Ticket parent/child notes only — no DAG engine.
 10. Never commit secrets; never force-push; never commit straight to `main`.
+11. **Working-repo scope (binding):** code, claims, PRs, and boss actions only on the hot-loaded working repo; foreign repos = proposed issue/ticket only (no code/claim/PR/boss there).
 
 ## Layout
 
