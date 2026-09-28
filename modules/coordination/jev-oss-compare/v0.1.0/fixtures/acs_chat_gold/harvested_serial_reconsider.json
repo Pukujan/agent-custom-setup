@@ -32,5 +32,20 @@
       "text": "wha tabout user.md and memory.md do they act like db too or just md? but they do store user data why are they not treated as db?"
     }
   ],
-  "expected": "ambiguity hold / do-not-harden unify-DB pin; supersede when taken back; DELAYED 15m/2hr wait-why same class"
+  "expected": "ambiguity hold / do-not-harden unify-DB or FAISS-in pin; supersede when taken back; DELAYED 15m/2hr wait-why same class; FAISS exploring = SERIAL RECONSIDER",
+  "faiss_burst_USER_gold": [
+    "what about faiss",
+    "would faiss help or hurt for ACS embeds",
+    "huge n vs small n — does FAISS matter then",
+    "what about huge transcripts — does that force FAISS",
+    "explain harvest tool — what does it actually extract",
+    "why tool events not prose for the gate",
+    "can LLM lie in prose so we should not trust it as gold",
+    "wont huge tool/code take too long for walk-forward"
+  ],
+  "faiss_locked_answers_NOT_explore": {
+    "FAISS": "out of scope for ACS embeds (SQLite+BLOB+offline numpy)",
+    "huge_transcript": "!= huge N; harvest = thin tool events",
+    "gate": "trusts tools not prose; tiny packs"
+  }
 }
