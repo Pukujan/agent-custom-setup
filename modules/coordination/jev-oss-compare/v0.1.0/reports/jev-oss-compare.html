@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="color-scheme:dark;background:#121212">
 <head>
 <meta charset="utf-8"/>
+<meta name="color-scheme" content="dark only"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>ACS Jev gate comparison</title>
 <style>
 :root {
-  --fg:#1a1a1a; --muted:#555; --border:#d0d0d0; --ok:#1b5e20; --bad:#b71c1c;
-  --bg:#fafafa; --card:#fff; --nav:#111; --accent:#0b57d0;
+  color-scheme: dark;
+  --fg:#e8eaed; --muted:#9aa0a6; --border:#3c4043; --ok:#81c995; --bad:#f28b82;
+  --bg:#121212; --card:#1e1e1e; --nav:#0a0a0a; --accent:#8ab4f8;
 }
+html { color-scheme: dark; background:#121212; }
+
 * { box-sizing: border-box; }
 body { font-family: Georgia, "Times New Roman", serif; color:var(--fg); background:var(--bg); margin:0; line-height:1.45; }
 .topnav { position:sticky; top:0; z-index:20; background:var(--nav); color:#fff; display:flex; flex-wrap:wrap; gap:.35rem; padding:.55rem .75rem; }
@@ -31,7 +35,7 @@ h1 { font-size: 1.55rem; margin:.4rem 0 .25rem; }
 .card .hint { font-size:.85rem; color:var(--muted); margin-top:.25rem; }
 table { border-collapse: collapse; width: 100%; font-size: .9rem; margin: .75rem 0 1.25rem; }
 th, td { border: 1px solid var(--border); padding: .4rem .55rem; text-align: left; vertical-align: top; }
-th { background: #eee; font-family: system-ui, sans-serif; }
+th { background: #2a2a2a; color:var(--fg); font-family: system-ui, sans-serif; }
 .ok { color: var(--ok); }
 .bad { color: var(--bad); }
 section.run { border-top: 2px solid var(--border); padding-top: 1rem; margin-top: 1.5rem; }
@@ -41,7 +45,7 @@ code, .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 
 .chart-wrap h3 { margin-top:0; font-size:1rem; }
 .mermaid { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem; margin:1rem 0; overflow-x:auto; }
 footer { color: var(--muted); font-size: .85rem; margin-top: 2rem; }
-pre.append { background:#f3f3f3; border:1px solid var(--border); padding:.85rem; overflow-x:auto; border-radius:8px; }
+pre.append { background:#1a1a1a; color:var(--fg); border:1px solid var(--border); padding:.85rem; overflow-x:auto; border-radius:8px; }
 @media (max-width: 640px) {
   .topnav { gap:.25rem; }
   .topnav button { font-size:.75rem; padding:.3rem .5rem; }
@@ -59,6 +63,7 @@ pre.append { background:#f3f3f3; border:1px solid var(--border); padding:.85rem;
   <button type="button" data-page="charts">Charts</button>
   <button type="button" data-page="disagree">Disagreements</button>
   <button type="button" data-page="append">Append next run</button>
+  <button type="button" data-page="routing">Routing checks</button>
 </nav>
 <main>
 <header>
@@ -504,6 +509,89 @@ python modules/coordination/jev-oss-compare/v0.1.0/scripts/compare_run.py \
 </section>
 </section>
 
+
+<section class="run" id="blind-20260928T051938Z" style="border-top:2px solid var(--border);padding-top:1rem;margin-top:1.5rem">
+<h2>Live Jev routing checks (blind pack)</h2>
+<p class="lede">Two parallel OpenRouter Decisions calls on a short pack of exact pre-complaint session words.
+Questions stay separate on purpose: one asks whether smoke got mixed into live proof; the other asks whether
+pytest-plus-HTML presentation was the right route for the ask. No later complaint text was shown to Jev.</p>
+<p class="mono">run blind-20260928T051938Z · 2026-09-28 05:19 UTC · endpoint https://openrouter.ai/api/alpha/decisions</p>
+<p><strong>Blind catch — smoke treated as live proof?</strong> — choice <span class='mono'>yes</span>, confidence <span class='mono'>0.94</span>, latency <span class='mono'>385.3 ms</span>, model <span class='mono'>typesafe/jev-1.13-20260917</span>.</p>
+<p><strong>Routing — pytest smoke + HTML/95% correct for the ask?</strong> — choice <span class='mono'>yes</span>, confidence <span class='mono'>0.35</span>, latency <span class='mono'>360.4 ms</span>, model <span class='mono'>typesafe/jev-1.13-20260917</span>.</p>
+<details><summary>Pack text used (verbatim; no secrets)</summary>
+<pre class="append mono">TRANSCRIPT PACK (pre-complaint turns; verbatim quotes from session evidence published before ~1:00 AM ET)
+
+ALEX DIRECTION (as recorded in session deliverable / issue evidence framing):
+"Instead PR #26 adds an optional comparison lane and an appendable HTML report."
+"Live bench (fast, real Jev only)"
+"Harvest pulled 55 redacted Claude transcript packs; live compare ran 60 packs on fast Jev typesafe/jev-1.13."
+"set ACS_JEV_LIVE=1"
+"python modules/coordination/jev-oss-compare/v0.1.0/scripts/compare_run.py --cap 60 --workers 8 --live --append-html"
+
+AGENT REPLY (verbatim from #25 evidence comment, mixing pytest smoke with live agree as proof):
+"### Pytest
+**88 passed, 2 skipped** (live Jev tests skip unless `ACS_JEV_LIVE=1`). With live flag, those 2 also passed."
+
+"Follow-up on this PR: landed optional `jev-oss-compare` comparison lane (ACS stays HOTLOAD default). Appendable HSW/CGM HTML report + live Jev bench run `20260928T043253Z` (11 packs, 9 agree / 2 differ, median Jev 196 ms). Pytest **88 passed, 2 skipped**."
+
+AGENT REPLY (verbatim from #25 multi-page evidence, same window):
+"**Latest live numbers** (run `20260928T044123Z`, 04:41 UTC / 12:41 AM ET)
+- Agreement ACS vs auto-mode: **57 / 60 (95.0%)**, 3 differ
+- Against gold: FN=1, FP=0
+- Jev latency: p50 **255.9 ms**, p95 **844.3 ms**
+- Wall clock ~4.5 s with 8 workers"
+
+"Pytest still green (88 passed, 2 skipped live-gated)."
+</pre>
+</details>
+<details><summary>Raw answers JSON</summary>
+<pre class="append mono">{
+  "blind_catch": {
+    "ok": true,
+    "question": "blind_catch_routing_mistake",
+    "choice": "yes",
+    "confidence": 0.94,
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 385.3,
+    "raw_answers": {
+      "blind_catch_routing_mistake": {
+        "type": "choice",
+        "choice": "yes",
+        "probabilities": {
+          "yes": 0.96,
+          "escalate": 0,
+          "no": 0.04
+        },
+        "confidence": 0.94
+      }
+    },
+    "endpoint": "https://openrouter.ai/api/alpha/decisions"
+  },
+  "routing_correctness": {
+    "ok": true,
+    "question": "routing_pytest_html_correct",
+    "choice": "yes",
+    "confidence": 0.35,
+    "model": "typesafe/jev-1.13-20260917",
+    "latency_ms": 360.4,
+    "raw_answers": {
+      "routing_pytest_html_correct": {
+        "type": "choice",
+        "choice": "yes",
+        "probabilities": {
+          "no": 0.31,
+          "yes": 0.5599999999999999,
+          "escalate": 0.13
+        },
+        "confidence": 0.35
+      }
+    },
+    "endpoint": "https://openrouter.ai/api/alpha/decisions"
+  }
+}</pre>
+</details>
+</section>
+
 <footer>
 <p>Built with ACS CGM html-demo structure and human-sounding-writing voice. Live path uses OpenRouter <span class="mono">typesafe/jev-1.13</span> (fast Jev OK). Secrets never printed. Ultrafast skipped. No Redis.</p>
 </footer>
@@ -520,7 +608,7 @@ python modules/coordination/jev-oss-compare/v0.1.0/scripts/compare_run.py \
   buttons.forEach(b => b.addEventListener('click', () => show(b.dataset.page)));
   const initial = (location.hash || '#overview').slice(1);
   show(buttons.some(b => b.dataset.page === initial) ? initial : 'overview');
-  if (window.mermaid) { mermaid.initialize({ startOnLoad: true, theme: 'neutral' }); }
+  if (window.mermaid) { mermaid.initialize({ startOnLoad: true, theme: 'dark' }); }
   
   const raw = document.getElementById('chart-data');
   if (!raw || !window.Chart) return;
