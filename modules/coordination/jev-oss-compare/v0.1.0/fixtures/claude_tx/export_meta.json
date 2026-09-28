@@ -1,7 +1,15 @@
 {
+  "n_user": 388,
+  "n_tool": 7797,
+  "n_events": 8185,
   "n": 7797,
   "gold": false,
   "files": 81,
-  "path": "D:\\claude\\agent-custom-setup\\modules\\coordination\\jev-oss-compare\\v0.1.0\\fixtures\\claude_tx\\tools.jsonl",
-  "source": "machine-parse ~/.claude/projects/D--claude-hades-v2/**/*.jsonl tool_use"
+  "first_ts": "2026-09-24T23:24:46.534Z",
+  "last_ts": "2026-09-28T06:42:13.597Z",
+  "span_hours": 79.291,
+  "path_users": "D:\\claude\\agent-custom-setup\\modules\\coordination\\jev-oss-compare\\v0.1.0\\fixtures\\claude_tx\\users.jsonl",
+  "path_tools": "D:\\claude\\agent-custom-setup\\modules\\coordination\\jev-oss-compare\\v0.1.0\\fixtures\\claude_tx\\tools.jsonl",
+  "source": "machine-parse ~/.claude/projects/D--claude-hades-v2/**/*.jsonl users+tool_use+thin tool_result",
+  "raw_sessions_copied": false
 }
