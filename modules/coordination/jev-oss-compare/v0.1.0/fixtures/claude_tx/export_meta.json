@@ -1,0 +1,7 @@
+{
+  "n": 7797,
+  "gold": false,
+  "files": 81,
+  "path": "D:\\claude\\agent-custom-setup\\modules\\coordination\\jev-oss-compare\\v0.1.0\\fixtures\\claude_tx\\tools.jsonl",
+  "source": "machine-parse ~/.claude/projects/D--claude-hades-v2/**/*.jsonl tool_use"
+}
