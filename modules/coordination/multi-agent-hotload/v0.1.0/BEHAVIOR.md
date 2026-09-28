@@ -61,6 +61,28 @@ Adopters using ACS / this multi-agent hotloader may only write code on **their o
 
 Cross-repo help stays at the ticket/proposal layer until that foreign project's own agents accept and implement on **their** working repo.
 
+## External research gate (binding)
+
+Selective + version-pinned official docs — **not** always-on research. Same strength as Working-repo scope.
+
+| Rule | Binding |
+| --- | --- |
+| **MUST research** when | (1) First use / introduce of external OSS, SDK, CLI, API, framework, or cloud service; (2) Version bump of such a dependency; (3) Install / runtime / API failure involving that external surface |
+| **MUST** when triggered | Exact version in use; official primary docs + changelog/migration notes **for that version**; on failure also skim public issue tracker / release notes for matching version/error; paste the checklist below onto the GitHub issue/PR |
+| **MUST NOT** | Require research for every trivial in-repo edit of already-known patterns |
+
+### Provenance checklist (paste into issue/PR when gate triggers)
+
+```markdown
+### External research provenance
+- Artifact / surface:
+- Exact version (source: lockfile | package metadata | image tag | git tag | CLI --version):
+- Official docs URL (this version):
+- Changelog / migration notes URL (this version):
+- Issue tracker / release notes skimmed? (required on failure): yes/no — URL(s):
+- Learned (2–5 lines):
+```
+
 ## Citations (patterns — do not copy wholesale)
 
 Read these in [Pukujan/jev-classifier](https://github.com/Pukujan/jev-classifier) for proven ops patterns. They are **references**, not files to vendor into ACS:
