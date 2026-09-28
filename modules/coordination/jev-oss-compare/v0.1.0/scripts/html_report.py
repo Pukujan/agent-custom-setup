@@ -40,6 +40,29 @@ SHELL = """<!DOCTYPE html>
   .ok {{ color: var(--tblr-success); }}
   .bad {{ color: var(--tblr-danger); }}
   .navbar-vertical .navbar-brand {{ font-weight: 700; letter-spacing: .01em; }}
+  .fish-timeline {{ display: flex; flex-wrap: wrap; gap: .5rem; align-items: stretch; }}
+  .fish-step {{
+    flex: 1 1 4.5rem; min-width: 4.2rem; max-width: 7rem;
+    border-radius: .5rem; padding: .55rem .4rem; text-align: center;
+    border: 1px solid var(--tblr-border-color); background: var(--tblr-bg-surface-secondary);
+  }}
+  .fish-step.allow {{ border-color: rgba(47,179,68,.55); background: rgba(47,179,68,.12); }}
+  .fish-step.deny {{ border-color: rgba(214,57,57,.85); background: rgba(214,57,57,.22); box-shadow: 0 0 0 2px rgba(214,57,57,.35); }}
+  .fish-step.escalate {{ border-color: rgba(247,183,49,.7); background: rgba(247,183,49,.15); }}
+  .fish-step .step-i {{ font-size: .7rem; color: var(--tblr-secondary); }}
+  .fish-step .step-tool {{ font-size: .72rem; font-weight: 600; word-break: break-word; }}
+  .fish-step .step-verdict {{ font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }}
+  .peer-card .h1 {{ font-variant-numeric: tabular-nums; }}
+  .heat-cell {{
+    display: inline-block; min-width: 2.4rem; padding: .2rem .35rem; margin: .1rem;
+    border-radius: .3rem; text-align: center; font-variant-numeric: tabular-nums; font-size: .8rem;
+  }}
+  .heat-allow {{ background: rgba(47,179,68,.25); }}
+  .heat-deny {{ background: rgba(214,57,57,.28); }}
+  .heat-escalate {{ background: rgba(247,183,49,.28); }}
+  .chart-takeaway {{ font-size: .95rem; margin-bottom: .35rem; }}
+  details.full-data {{ margin-top: 1rem; border: 1px solid var(--tblr-border-color); border-radius: .5rem; padding: .5rem .75rem; }}
+  details.full-data > summary {{ cursor: pointer; font-weight: 600; }}
 </style>
 <script>
   (function () {{
@@ -244,6 +267,222 @@ def _ms(v: Any) -> str:
         return "—"
 
 
+
+LANE_ORDER = ("L1_acs", "L2_auto", "L3_pi", "L4_all_jev", "L5_compaction")
+LANE_LABELS = {
+    "L1_acs": "L1 ACS",
+    "L2_auto": "L2 auto",
+    "L3_pi": "L3 pi",
+    "L4_all_jev": "L4 all-Jev",
+    "L5_compaction": "L5 compaction",
+}
+
+
+def _runs_dir() -> Path:
+    return Path(__file__).resolve().parents[1] / "reports" / "runs"
+
+
+def _load_latest_mlwf() -> Optional[Dict[str, Any]]:
+    """Newest multi-lane walk-forward JSON (multi-lane-walkforward-latest or newest mlwf-*)."""
+    runs = _runs_dir()
+    candidates: List[Path] = []
+    latest = runs / "multi-lane-walkforward-latest.json"
+    if latest.is_file():
+        candidates.append(latest)
+    candidates.extend(sorted(runs.glob("mlwf-*.json"), reverse=True))
+    seen = set()
+    for p in candidates:
+        try:
+            key = p.resolve()
+        except OSError:
+            key = p
+        if key in seen:
+            continue
+        seen.add(key)
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(data, dict) and isinstance(data.get("summary"), dict):
+            return data
+    return None
+
+
+def _mlwf_summary_rows(data: Optional[Dict[str, Any]]) -> tuple[Optional[Dict[str, Any]], List[Dict[str, Any]]]:
+    if not data:
+        return None, []
+    summary = dict(data.get("summary") or {})
+    rows = list(data.get("rows") or [])
+    # Flatten L1 vs L2 for older overview/results cards
+    flat: List[Dict[str, Any]] = []
+    for r in rows:
+        l1 = (r.get("lanes") or {}).get("L1_acs") or {}
+        l2 = (r.get("lanes") or {}).get("L2_auto") or {}
+        flat.append(
+            {
+                "id": r.get("id"),
+                "gold": r.get("gold"),
+                "acs_decision": l1.get("decision"),
+                "acs_layer": l1.get("layer"),
+                "acs_ms": ((r.get("raw") or {}).get("L1_acs") or {}).get("latency_ms"),
+                "auto_decision": l2.get("decision"),
+                "auto_layer": l2.get("layer"),
+                "auto_ms": ((r.get("raw") or {}).get("L2_auto") or {}).get("latency_ms"),
+                "jev_ms": max(float(l1.get("jev_ms") or 0), float(l2.get("jev_ms") or 0)),
+                "agree": bool(l1.get("agree")),
+                "fn": l1.get("fn") or 0,
+                "fp": l1.get("fp") or 0,
+            }
+        )
+    l1 = (summary.get("per_lane") or {}).get("L1_acs") or {}
+    summary_for_html = {
+        **summary,
+        "agree": l1.get("agree") or 0,
+        "disagree": (l1.get("n_scored") or 0) - (l1.get("agree") or 0),
+        "agree_pct": l1.get("agree_pct"),
+        "fn_vs_gold": l1.get("fn") or 0,
+        "fp_vs_gold": l1.get("fp") or 0,
+        "n_packs": summary.get("n_events"),
+        "p50_jev_ms": l1.get("p50_jev_ms"),
+        "p95_jev_ms": l1.get("p50_jev_ms"),
+    }
+    return summary_for_html, flat
+
+
+def _peer_same_differ(rows: List[Dict[str, Any]]) -> Dict[str, int]:
+    same = differ = 0
+    for r in rows:
+        l1 = (r.get("lanes") or {}).get("L1_acs") or {}
+        l2 = (r.get("lanes") or {}).get("L2_auto") or {}
+        a, b = l1.get("decision"), l2.get("decision")
+        if not a or not b:
+            # flat compare rows
+            a = r.get("acs_decision")
+            b = r.get("auto_decision")
+        if not a or not b:
+            continue
+        if a == b:
+            same += 1
+        else:
+            differ += 1
+    return {"same": same, "differ": differ}
+
+
+def _dont_pin_deny_miss(rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> Dict[str, Any]:
+    """Per-lane deny vs missed-allow on SERIAL+DELAYED don't-pin gold."""
+    dont = [
+        r
+        for r in rows
+        if r.get("stream") == "acs_chat_gold"
+        and (
+            ((r.get("gold_meta") or {}).get("class") in ("serial_reconsider", "delayed_reconsider"))
+            or ((r.get("gold_meta") or {}).get("tool") == "deny_hasty_unify_pin")
+        )
+    ]
+    if not dont:
+        # fall back to summary counts (caught = deny+escalate; miss = missed_allow)
+        dp = summary.get("dont_pin") or {}
+        labels, deny, miss = [], [], []
+        for lid in LANE_ORDER:
+            st = (dp.get("per_lane") or {}).get(lid) or {}
+            labels.append(LANE_LABELS.get(lid, lid))
+            deny.append(int(st.get("caught") or 0))
+            miss.append(int(st.get("missed_allow") or 0))
+        return {"n": int(dp.get("n") or 0), "labels": labels, "deny": deny, "miss": miss}
+    labels, deny_l, miss_l = [], [], []
+    for lid in LANE_ORDER:
+        deny = miss = 0
+        for r in dont:
+            d = ((r.get("lanes") or {}).get(lid) or {}).get("decision")
+            if d in ("deny", "escalate"):
+                deny += 1
+            elif d == "allow":
+                miss += 1
+        labels.append(LANE_LABELS.get(lid, lid))
+        deny_l.append(deny)
+        miss_l.append(miss)
+    return {"n": len(dont), "labels": labels, "deny": deny_l, "miss": miss_l}
+
+
+def _lane_verdict_counts(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    labels, allow, deny, escalate = [], [], [], []
+    for lid in LANE_ORDER:
+        a = d = e = 0
+        for r in rows:
+            v = ((r.get("lanes") or {}).get(lid) or {}).get("decision")
+            if v == "allow":
+                a += 1
+            elif v == "deny":
+                d += 1
+            elif v == "escalate":
+                e += 1
+        labels.append(LANE_LABELS.get(lid, lid))
+        allow.append(a)
+        deny.append(d)
+        escalate.append(e)
+    return {"labels": labels, "allow": allow, "deny": deny, "escalate": escalate}
+
+
+def _chart_payload(summary: Optional[Dict[str, Any]], rows: List[Dict[str, Any]], mlwf_rows: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    summary = summary or {}
+    src_rows = mlwf_rows if mlwf_rows is not None else rows
+    per = summary.get("per_lane") or {}
+    lane_labels, agree_pct, n_scored, agree_n = [], [], [], []
+    for lid in LANE_ORDER:
+        st = per.get(lid) or {}
+        lane_labels.append(LANE_LABELS.get(lid, lid))
+        pct = st.get("agree_pct")
+        agree_pct.append(float(pct) if pct is not None else 0.0)
+        n_scored.append(int(st.get("n_scored") or 0))
+        agree_n.append(int(st.get("agree") or 0))
+    # sort lanes by agree% desc for the bar chart
+    order = sorted(range(len(lane_labels)), key=lambda i: agree_pct[i], reverse=True)
+    sorted_labels = [lane_labels[i] for i in order]
+    sorted_pct = [round(agree_pct[i], 1) for i in order]
+    sorted_n = [n_scored[i] for i in order]
+    sorted_agree = [agree_n[i] for i in order]
+
+    dp = _dont_pin_deny_miss(src_rows, summary) if src_rows or per else {"n": 0, "labels": [], "deny": [], "miss": []}
+    peer = _peer_same_differ(src_rows if src_rows else rows)
+    verdicts = _lane_verdict_counts(src_rows) if src_rows else {"labels": [], "allow": [], "deny": [], "escalate": []}
+
+    fish = _load_fish_replay() or {}
+    fish_steps = []
+    for s in fish.get("steps") or []:
+        fish_steps.append(
+            {
+                "i": s.get("step_i"),
+                "tool": str(s.get("tool") or ""),
+                "verdict": str(s.get("verdict") or ""),
+                "selfhost": bool(s.get("selfhost_offline")),
+            }
+        )
+
+    # legacy latency sparkline (first 40 flat rows)
+    lat_ids = [str(r.get("id") or "")[:18] for r in rows[:40]]
+    lat_jev = [float(r.get("jev_ms") or 0) for r in rows[:40]]
+    lat_acs = [float(r.get("acs_ms") or 0) for r in rows[:40]]
+
+    return {
+        "run_id": summary.get("run_id"),
+        "lane_agree": {
+            "labels": sorted_labels,
+            "pct": sorted_pct,
+            "n_scored": sorted_n,
+            "agree": sorted_agree,
+        },
+        "dont_pin": dp,
+        "peer": peer,
+        "verdicts": verdicts,
+        "fish_steps": fish_steps,
+        "agree": int(summary.get("agree") or peer.get("same") or 0),
+        "disagree": int(summary.get("disagree") or peer.get("differ") or 0),
+        "labels": lat_ids,
+        "jev": lat_jev,
+        "acs": lat_acs,
+    }
+
+
 def _overview_block(summary: Optional[Dict[str, Any]]) -> str:
     if not summary:
         return (
@@ -252,56 +491,98 @@ def _overview_block(summary: Optional[Dict[str, Any]]) -> str:
             "<span class='mono'>compare_run.py --cap 60 --live --append-html</span>, "
             "and reopen this page.</div>"
         )
-    n = int(summary.get("n_packs") or 0)
-    agree = int(summary.get("agree") or 0)
-    disagree = int(summary.get("disagree") or 0)
-    agree_pct = summary.get("agree_pct")
-    if agree_pct is None and n:
-        agree_pct = round(100.0 * agree / n, 1)
-    live = "talking to real Jev" if summary.get("live") else "mock answers only"
+    # Prefer freshest mlwf on disk for the lead example + lane numbers
+    mlwf = _load_latest_mlwf()
+    ml_sum = (mlwf or {}).get("summary") if mlwf else None
+    use = ml_sum if (ml_sum and ml_sum.get("per_lane")) else summary
+    per = use.get("per_lane") or {}
+    l1 = per.get("L1_acs") or {}
+    dp = use.get("dont_pin") or {}
+    live = "talking to real Jev" if use.get("live") else "mock answers only"
+    rid = use.get("run_id") or summary.get("run_id")
+    when = use.get("started_at") or summary.get("started_at")
+    n_scored = int(l1.get("n_scored") or 0)
+    agree = int(l1.get("agree") or summary.get("agree") or 0)
+    agree_pct = l1.get("agree_pct")
+    if agree_pct is None:
+        agree_pct = summary.get("agree_pct")
+    n_events = int(use.get("n_events") or summary.get("n_packs") or 0)
+    dp_n = int(dp.get("n") or 0)
+    l1_dp = (dp.get("per_lane") or {}).get("L1_acs") or {}
+    l5_dp = (dp.get("per_lane") or {}).get("L5_compaction") or {}
+
+    example = """
+<div class="alert alert-primary" role="status">
+  <strong>One concrete example.</strong>
+  Alex said Fish is a hosted API and we do not self-host.
+  On the Fish replay, step 3 tried a self-host/offline path and the gate
+  <strong>denied</strong> it (steps 0–2 and 4–8 stayed allow).
+  That is the shape of call this page is checking: allow the hosted path, block the clone.
+</div>
+"""
+    lane_bits = []
+    for lid in LANE_ORDER:
+        st = per.get(lid) or {}
+        pct = st.get("agree_pct")
+        ns = st.get("n_scored")
+        if pct is None:
+            continue
+        lane_bits.append(f"{LANE_LABELS.get(lid, lid)} {_esc(pct)}% (n={_esc(ns)})")
+    lane_line = "; ".join(lane_bits) if lane_bits else "lane breakdown not on this run"
+
+    dont_line = ""
+    if dp_n:
+        dont_line = (
+            f"<p>On <strong>{dp_n} don't-pin</strong> gold turns (SERIAL or DELAYED reconsider — "
+            "human take-backs that must not harden a hasty unify pin), "
+            f"L1 ACS caught <strong>{_esc(l1_dp.get('caught_pct'))}%</strong>; "
+            f"L5 compaction caught <strong>{_esc(l5_dp.get('caught_pct'))}%</strong>.</p>"
+        )
+
     return f"""
+{example}
 <p>We care about one simple question: when an agent tries a risky tool, do our checkers say
-<strong>allow</strong>, <strong>deny</strong>, or <strong>ask a human</strong> — and do they agree with each other?</p>
-<p>The Fish voice-lab story kicked this off: the brief said use the hosted Fish API, not a self-hosted clone.
-ACS blocked the clone before it ever asked a model. This page checks whether a second, auto-mode-style
-checker makes the same call, and what real Jev says on the leftover hard cases.</p>
-<p>Latest run <span class="mono">{_esc(summary.get('run_id'))}</span>
-({_esc(summary.get('started_at'))}, {live}) looked at <strong>{n} tool requests</strong>.
-The two checkers matched on <strong>{agree} of {n}</strong> ({_esc(agree_pct)}%) and differed on {disagree}.</p>
+<strong>allow</strong>, <strong>deny</strong>, or <strong>ask a human</strong> — and do they match human gold?</p>
+<p>Latest walk-forward <span class="mono">{_esc(rid)}</span>
+({_esc(when)}, {live}) scored <strong>{n_scored} gold-labeled turns</strong>
+across {n_events} events. ACS (L1) matched human gold on
+<strong>{agree} of {n_scored}</strong> ({_esc(agree_pct)}%).
+Lane agree% vs gold: {lane_line}.</p>
+{dont_line}
 <div class="row row-cards mb-3">
   <div class="col-sm-6 col-lg-4"><div class="card card-sm"><div class="card-body">
-    <div class="text-secondary">Packs compared</div>
-    <div class="h1 mb-0">{n}</div>
-    <div class="text-secondary small">Fish cases, hard blocks, research claims, and redacted Claude tool uses</div>
-  </div></div></div>
-  <div class="col-sm-6 col-lg-4"><div class="card card-sm"><div class="card-body">
-    <div class="text-secondary">How often they matched</div>
+    <div class="text-secondary">ACS agree with gold</div>
     <div class="h1 mb-0 text-success">{_esc(agree_pct)}%</div>
-    <div class="text-secondary small">{agree} same answer · {disagree} different</div>
+    <div class="text-secondary small">{agree} of {n_scored} scored · run {_esc(rid)}</div>
   </div></div></div>
   <div class="col-sm-6 col-lg-4"><div class="card card-sm"><div class="card-body">
-    <div class="text-secondary">Missed blocks</div>
-    <div class="h1 mb-0">{_esc(summary.get('fn_vs_gold'))}</div>
+    <div class="text-secondary">Don't-pin catch (L1)</div>
+    <div class="h1 mb-0">{_esc(l1_dp.get('caught_pct') if dp_n else '—')}{"%" if dp_n else ""}</div>
+    <div class="text-secondary small">{dp_n} SERIAL/DELAYED gold turns · miss {_esc(l1_dp.get('missed_allow') if dp_n else '—')}</div>
+  </div></div></div>
+  <div class="col-sm-6 col-lg-4"><div class="card card-sm"><div class="card-body">
+    <div class="text-secondary">Events in latest run</div>
+    <div class="h1 mb-0">{n_events}</div>
+    <div class="text-secondary small">ACS gold {_esc(use.get('n_acs_gold'))} · Claude tools {_esc(use.get('n_claude_tx'))}</div>
+  </div></div></div>
+  <div class="col-sm-6 col-lg-4"><div class="card card-sm"><div class="card-body">
+    <div class="text-secondary">Missed blocks (L1)</div>
+    <div class="h1 mb-0">{_esc(l1.get('fn') if l1 else summary.get('fn_vs_gold'))}</div>
     <div class="text-secondary small">Should have blocked; ACS did not</div>
   </div></div></div>
   <div class="col-sm-6 col-lg-4"><div class="card card-sm"><div class="card-body">
-    <div class="text-secondary">Over-blocks</div>
-    <div class="h1 mb-0">{_esc(summary.get('fp_vs_gold'))}</div>
+    <div class="text-secondary">Over-blocks (L1)</div>
+    <div class="h1 mb-0">{_esc(l1.get('fp') if l1 else summary.get('fp_vs_gold'))}</div>
     <div class="text-secondary small">Should have allowed; ACS blocked</div>
   </div></div></div>
   <div class="col-sm-6 col-lg-4"><div class="card card-sm"><div class="card-body">
-    <div class="text-secondary">Typical Jev wait</div>
-    <div class="h1 mb-0">{_esc(_ms(summary.get('p50_jev_ms') or summary.get('median_jev_ms')))}</div>
+    <div class="text-secondary">Typical Jev wait (L1)</div>
+    <div class="h1 mb-0">{_esc(_ms(l1.get('p50_jev_ms') or summary.get('p50_jev_ms') or summary.get('median_jev_ms')))}</div>
     <div class="text-secondary small">Half of live Jev answers came back this fast or faster</div>
   </div></div></div>
-  <div class="col-sm-6 col-lg-4"><div class="card card-sm"><div class="card-body">
-    <div class="text-secondary">Slow-tail Jev wait</div>
-    <div class="h1 mb-0">{_esc(_ms(summary.get('p95_jev_ms')))}</div>
-    <div class="text-secondary small">Only 1 in 20 live Jev calls was slower than this</div>
-  </div></div></div>
 </div>
+<p class="text-secondary small mb-0">Charts use this latest walk-forward. Older runs stay under <em>Add another run → Past runs</em>.</p>
 """
-
 
 
 def _load_fish_replay() -> Optional[Dict[str, Any]]:
@@ -344,6 +625,21 @@ def _fish_live_results_html(data: Dict[str, Any]) -> str:
     else:
         self_line = "No self-host/offline Fish step was in this replay."
 
+    timeline = ['<div class="fish-timeline mb-3" role="list" aria-label="Fish replay timeline">']
+    for s in steps:
+        v = str(s.get("verdict") or "")
+        cls = v if v in ("allow", "deny", "escalate") else ""
+        mark = " · self-host" if s.get("selfhost_offline") else ""
+        timeline.append(
+            f'<div class="fish-step {cls}" role="listitem">'
+            f'<div class="step-i">Step {_esc(s.get("step_i"))}{mark}</div>'
+            f'<div class="step-tool">{_esc(str(s.get("tool") or ""))}</div>'
+            f'<div class="step-verdict">{_esc(v)}</div>'
+            f"</div>"
+        )
+    timeline.append("</div>")
+    timeline_html = "\n".join(timeline)
+
     rows = []
     for s in steps:
         mark = s.get("mark") or ""
@@ -380,17 +676,22 @@ def _fish_live_results_html(data: Dict[str, Any]) -> str:
       <li><strong>Run:</strong> <span class="mono">{_esc(str(data.get('run_id') or ''))}</span>
         / <strong>SHA:</strong> <span class="mono">{_esc(str(data.get('sha') or '')[:12])}</span></li>
     </ul>
-    <div class="table-responsive">
-      <table class="table table-vcenter table-striped">
-        <thead><tr>
-          <th>Step</th><th>Tool</th><th>Pin hit?</th><th>Jev called?</th><th>Verdict</th><th>Latency</th>
-        </tr></thead>
-        <tbody>
+    <p class="chart-takeaway mb-2"><strong>Nine-step timeline — step 3 deny is the callout.</strong></p>
+    {timeline_html}
+    <details class="full-data">
+      <summary>Full data — step table</summary>
+      <div class="table-responsive mt-2">
+        <table class="table table-vcenter table-striped">
+          <thead><tr>
+            <th>Step</th><th>Tool</th><th>Pin hit?</th><th>Jev called?</th><th>Verdict</th><th>Latency</th>
+          </tr></thead>
+          <tbody>
 {table}
-        </tbody>
-      </table>
-    </div>
-    <p class="text-secondary small mb-0">Pins always include hosted-only + key path. Secrets never printed.</p>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <p class="text-secondary small mb-0 mt-2">Pins always include hosted-only + key path. Secrets never printed.</p>
   </div>
 </div>
 """
@@ -468,27 +769,62 @@ python tools/run_selfhost_server.py</pre>
 def _results_block(summary: Optional[Dict[str, Any]], rows: List[Dict[str, Any]]) -> str:
     if not summary:
         return "<p>No results yet.</p>"
-    n = int(summary.get("n_packs") or len(rows))
-    agree = int(summary.get("agree") or 0)
-    disagree = int(summary.get("disagree") or 0)
+    mlwf = _load_latest_mlwf()
+    ml_sum = (mlwf or {}).get("summary") if mlwf else None
+    use = ml_sum if (ml_sum and ml_sum.get("per_lane")) else summary
+    per = use.get("per_lane") or {}
+    l1 = per.get("L1_acs") or {}
+    n = int(l1.get("n_scored") or summary.get("n_packs") or len(rows))
+    agree = int(l1.get("agree") or summary.get("agree") or 0)
+    disagree = int((l1.get("n_scored") or 0) - (l1.get("agree") or 0)) if l1 else int(summary.get("disagree") or 0)
+    agree_pct = l1.get("agree_pct") if l1 else summary.get("agree_pct")
     parts = [
-        "<p>These numbers are from the newest run on this page. If a label looks technical, the Meaning column says it in everyday words.</p>",
-        "<div class='table-responsive'><table class='table table-vcenter table-striped'>",
-        "<thead><tr><th>What we measured</th><th>Value</th><th>Meaning</th></tr></thead><tbody>",
-        f"<tr><td>Packs compared</td><td class='mono'>{n}</td><td>How many tool requests both checkers saw</td></tr>",
-        f"<tr><td>Same answer</td><td class='mono text-success'>{agree} ({_pct(agree, n)})</td><td>ACS and the auto-mode checker said the same thing</td></tr>",
-        f"<tr><td>Different answer</td><td class='mono'>{disagree} ({_pct(disagree, n)})</td><td>The two checkers did not match</td></tr>",
-        f"<tr><td>Missed blocks</td><td class='mono'>{_esc(summary.get('fn_vs_gold'))}</td><td>We expected a block; ACS let it through</td></tr>",
-        f"<tr><td>Over-blocks</td><td class='mono'>{_esc(summary.get('fp_vs_gold'))}</td><td>We expected allow; ACS blocked</td></tr>",
-        f"<tr><td>Typical Jev wait</td><td class='mono'>{_esc(_ms(summary.get('p50_jev_ms') or summary.get('median_jev_ms')))}</td><td>Median time for a live Jev answer</td></tr>",
-        f"<tr><td>Slow-tail Jev wait</td><td class='mono'>{_esc(_ms(summary.get('p95_jev_ms')))}</td><td>Almost all live Jev answers were faster than this</td></tr>",
-        f"<tr><td>ACS wait (typical / slow)</td><td class='mono'>{_esc(_ms(summary.get('p50_acs_ms')))} / {_esc(_ms(summary.get('p95_acs_ms')))}</td><td>Full ACS check time per request</td></tr>",
-        f"<tr><td>Whole run clock</td><td class='mono'>{_esc(_ms(summary.get('wall_ms')))}</td><td>Wall time for the whole compare ({_esc(summary.get('workers'))} workers)</td></tr>",
-        f"<tr><td>Mode</td><td class='mono'>{'live Jev' if summary.get('live') else 'mock only'}</td><td>Judge model {_esc(summary.get('model') or 'typesafe/jev-1.13')}</td></tr>",
-        "</tbody></table></div>",
+        f"<p>Newest walk-forward <span class='mono'>{_esc(use.get('run_id') or summary.get('run_id'))}</span>. "
+        "Headline numbers first; dense tables stay collapsed.</p>",
+        "<div class='row row-cards mb-3'>",
+        f"<div class='col-md-4'><div class='card card-sm'><div class='card-body'>"
+        f"<div class='text-secondary'>ACS agree with gold</div><div class='h1 mb-0 text-success'>{_esc(agree_pct)}%</div>"
+        f"<div class='text-secondary small'>{agree} of {n} scored</div></div></div></div>",
+        f"<div class='col-md-4'><div class='card card-sm'><div class='card-body'>"
+        f"<div class='text-secondary'>Events</div><div class='h1 mb-0'>{_esc(use.get('n_events') or n)}</div>"
+        f"<div class='text-secondary small'>ACS gold {_esc(use.get('n_acs_gold'))} · Claude {_esc(use.get('n_claude_tx'))}</div></div></div></div>",
+        f"<div class='col-md-4'><div class='card card-sm'><div class='card-body'>"
+        f"<div class='text-secondary'>Don't-pin n</div><div class='h1 mb-0'>{_esc((use.get('dont_pin') or {}).get('n'))}</div>"
+        f"<div class='text-secondary small'>SERIAL + DELAYED reconsider gold</div></div></div></div>",
+        "</div>",
     ]
-    if summary.get("notes"):
-        parts.append(f"<p class='text-secondary mt-2'>{_esc(summary['notes'])}</p>")
+    if per:
+        parts.append("<div class='table-responsive mb-3'><table class='table table-vcenter table-striped'>")
+        parts.append("<thead><tr><th>Lane</th><th>n_scored</th><th>Agree with gold</th><th>FN</th><th>FP</th><th>Jev p50</th></tr></thead><tbody>")
+        for lid in LANE_ORDER:
+            st = per.get(lid) or {}
+            pct = st.get("agree_pct")
+            pct_s = f"{pct}%" if pct is not None else "—"
+            parts.append(
+                "<tr>"
+                f"<td>{_esc(LANE_LABELS.get(lid, lid))}</td>"
+                f"<td class='mono'>{_esc(st.get('n_scored'))}</td>"
+                f"<td class='mono'>{_esc(st.get('agree'))} ({_esc(pct_s)})</td>"
+                f"<td class='mono'>{_esc(st.get('fn'))}</td>"
+                f"<td class='mono'>{_esc(st.get('fp'))}</td>"
+                f"<td class='mono'>{_esc(_ms(st.get('p50_jev_ms')))}</td>"
+                "</tr>"
+            )
+        parts.append("</tbody></table></div>")
+    parts.append("<details class='full-data'><summary>Full data — pack-level metrics</summary>")
+    parts.append("<div class='table-responsive mt-2'><table class='table table-vcenter table-striped'>")
+    parts.append("<thead><tr><th>What we measured</th><th>Value</th><th>Meaning</th></tr></thead><tbody>")
+    parts.append(f"<tr><td>Packs / events</td><td class='mono'>{_esc(use.get('n_events') or n)}</td><td>Tool requests and gold turns in the latest run</td></tr>")
+    parts.append(f"<tr><td>Same answer (L1 vs gold)</td><td class='mono text-success'>{agree} ({_esc(agree_pct)}%)</td><td>ACS matched human gold</td></tr>")
+    parts.append(f"<tr><td>Different from gold (L1)</td><td class='mono'>{disagree}</td><td>ACS did not match human gold</td></tr>")
+    parts.append(f"<tr><td>Missed blocks</td><td class='mono'>{_esc(l1.get('fn') if l1 else summary.get('fn_vs_gold'))}</td><td>We expected a block; ACS let it through</td></tr>")
+    parts.append(f"<tr><td>Over-blocks</td><td class='mono'>{_esc(l1.get('fp') if l1 else summary.get('fp_vs_gold'))}</td><td>We expected allow; ACS blocked</td></tr>")
+    parts.append(f"<tr><td>Typical Jev wait</td><td class='mono'>{_esc(_ms(l1.get('p50_jev_ms') or summary.get('p50_jev_ms') or summary.get('median_jev_ms')))}</td><td>Median time for a live Jev answer</td></tr>")
+    parts.append(f"<tr><td>Whole run clock</td><td class='mono'>{_esc(_ms(use.get('wall_ms') or summary.get('wall_ms')))}</td><td>Wall time ({_esc(use.get('workers') or summary.get('workers'))} workers)</td></tr>")
+    parts.append(f"<tr><td>Mode</td><td class='mono'>{'live Jev' if use.get('live') or summary.get('live') else 'mock only'}</td><td>Judge model {_esc(use.get('model') or summary.get('model') or 'typesafe/jev-1.13')}</td></tr>")
+    parts.append("</tbody></table></div></details>")
+    if use.get("notes") or summary.get("notes"):
+        parts.append(f"<p class='text-secondary mt-2'>{_esc(use.get('notes') or summary.get('notes'))}</p>")
     return "\n".join(parts)
 
 
@@ -498,7 +834,8 @@ def _disagree_block(rows: List[Dict[str, Any]]) -> str:
         return "<p>No disagreements in the newest run. Both checkers matched on every request.</p>"
     parts = [
         f"<p>{len(bad)} request(s) where ACS and the auto-mode checker differed. Useful for triage, not a scoreboard.</p>",
-        "<div class='table-responsive'><table class='table table-vcenter table-striped'>",
+        "<details class='full-data' open><summary>Full data — disagreement rows</summary>",
+        "<div class='table-responsive mt-2'><table class='table table-vcenter table-striped'>",
         "<thead><tr><th>Pack</th><th>Gold</th><th>ACS</th><th>Auto-mode</th><th>Jev ms</th></tr></thead><tbody>",
     ]
     for r in bad:
@@ -511,47 +848,143 @@ def _disagree_block(rows: List[Dict[str, Any]]) -> str:
             f"<td>{_esc(r.get('jev_ms'))}</td>"
             "</tr>"
         )
-    parts.append("</tbody></table></div>")
+    parts.append("</tbody></table></div></details>")
     return "\n".join(parts)
 
 
 def _charts_markup(summary: Optional[Dict[str, Any]], rows: List[Dict[str, Any]]) -> str:
-    if not summary:
+    mlwf = _load_latest_mlwf()
+    ml_sum, ml_flat = _mlwf_summary_rows(mlwf)
+    use_sum = ml_sum if (ml_sum and ml_sum.get("per_lane")) else summary
+    ml_rows = (mlwf or {}).get("rows") if mlwf else None
+    if not use_sum:
         return "<p class='text-secondary'>Charts appear after the first appended run.</p>"
-    agree = int(summary.get("agree") or 0)
-    disagree = int(summary.get("disagree") or 0)
-    lat_ids = [str(r.get("id") or "")[:18] for r in rows[:40]]
-    lat_jev = [float(r.get("jev_ms") or 0) for r in rows[:40]]
-    lat_acs = [float(r.get("acs_ms") or 0) for r in rows[:40]]
-    payload = json.dumps({
-        "agree": agree,
-        "disagree": disagree,
-        "labels": lat_ids,
-        "jev": lat_jev,
-        "acs": lat_acs,
-    }).replace("<", "\\u003c")
-    nshow = min(40, len(rows))
+    payload = _chart_payload(use_sum, rows or ml_flat, mlwf_rows=ml_rows)
+    payload_json = json.dumps(payload).replace("<", "\\u003c")
+    rid = _esc(payload.get("run_id") or use_sum.get("run_id"))
+    peer = payload.get("peer") or {}
+    same = int(peer.get("same") or 0)
+    differ = int(peer.get("differ") or 0)
+    total_peer = same + differ
+    same_pct = round(100.0 * same / total_peer, 1) if total_peer else "—"
+    dp = payload.get("dont_pin") or {}
+    fish_steps = payload.get("fish_steps") or []
+
+    # Fish timeline HTML (also on Charts so Overview readers who jump here see it)
+    fish_html_parts = ['<div class="fish-timeline" role="list" aria-label="Fish replay nine steps">']
+    for s in fish_steps:
+        v = str(s.get("verdict") or "")
+        cls = v if v in ("allow", "deny", "escalate") else ""
+        mark = " · self-host" if s.get("selfhost") else ""
+        fish_html_parts.append(
+            f'<div class="fish-step {cls}" role="listitem">'
+            f'<div class="step-i">Step {_esc(s.get("i"))}{mark}</div>'
+            f'<div class="step-tool">{_esc(s.get("tool"))}</div>'
+            f'<div class="step-verdict">{_esc(v)}</div>'
+            f"</div>"
+        )
+    fish_html_parts.append("</div>")
+    fish_block = "\n".join(fish_html_parts) if fish_steps else "<p class='text-secondary'>No Fish replay steps on disk yet.</p>"
+
+    # Heatmap / small-multiples table of allow/deny/escalate
+    verd = payload.get("verdicts") or {}
+    heat_rows = []
+    for i, lab in enumerate(verd.get("labels") or []):
+        a = (verd.get("allow") or [0])[i]
+        d = (verd.get("deny") or [0])[i]
+        e = (verd.get("escalate") or [0])[i]
+        heat_rows.append(
+            "<tr>"
+            f"<td>{_esc(lab)}</td>"
+            f"<td><span class='heat-cell heat-allow'>{a}</span></td>"
+            f"<td><span class='heat-cell heat-deny'>{d}</span></td>"
+            f"<td><span class='heat-cell heat-escalate'>{e}</span></td>"
+            "</tr>"
+        )
+    heat_table = "\n".join(heat_rows) if heat_rows else "<tr><td colspan='4'>No lane verdict counts.</td></tr>"
+
     return f"""
+<p class="text-secondary">Latest walk-forward <span class="mono">{rid}</span>. Bars are sorted by value. Counts use at most one decimal.</p>
 <div class="row row-cards">
-  <div class="col-lg-5">
-    <div class="card">
-      <div class="card-header"><h3 class="card-title">How often the two checkers matched</h3></div>
+  <div class="col-lg-6">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3 class="card-title chart-takeaway">ACS still leads the pack on matching human gold</h3>
+      </div>
       <div class="card-body chart-wrap">
-        <canvas id="agreeChart" aria-label="Agree versus disagree counts"></canvas>
+        <canvas id="laneAgreeChart" aria-label="Agree percent versus human gold by lane"></canvas>
+        <p class="text-secondary small mt-2 mb-0">Agree% vs human gold by lane (n_scored labeled on each bar).</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3 class="card-title chart-takeaway">Don't-pin gold: deny the hasty pin, do not miss it</h3>
+      </div>
+      <div class="card-body chart-wrap">
+        <canvas id="dontPinChart" aria-label="Dont pin catch deny versus miss by lane"></canvas>
+        <p class="text-secondary small mt-2 mb-0">SERIAL + DELAYED reconsider gold (n={_esc(dp.get('n'))}). Stacked: deny/hold catch vs missed allow.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3 class="card-title chart-takeaway">Fish replay: nine steps, self-host deny on step 3</h3>
+      </div>
+      <div class="card-body">
+        {fish_block}
+        <p class="text-secondary small mt-3 mb-0">Allow stays quiet green. Step 3 self-host/offline is the red deny callout.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card mb-3 peer-card">
+      <div class="card-header">
+        <h3 class="card-title chart-takeaway">ACS and auto usually say the same thing</h3>
+      </div>
+      <div class="card-body">
+        <div class="row text-center mb-3">
+          <div class="col-6">
+            <div class="text-secondary">Same answer</div>
+            <div class="h1 text-success mb-0">{same}</div>
+            <div class="text-secondary small">{_esc(same_pct)}% of paired calls</div>
+          </div>
+          <div class="col-6">
+            <div class="text-secondary">Differ</div>
+            <div class="h1 mb-0">{differ}</div>
+            <div class="text-secondary small">ACS vs auto-mode peer</div>
+          </div>
+        </div>
+        <div class="chart-wrap" style="min-height:180px">
+          <canvas id="peerChart" aria-label="Same answer versus differ ACS vs auto"></canvas>
+        </div>
       </div>
     </div>
   </div>
   <div class="col-lg-7">
-    <div class="card">
-      <div class="card-header"><h3 class="card-title">How long each check took</h3></div>
-      <div class="card-body chart-wrap">
-        <canvas id="latChart" aria-label="Latency per pack"></canvas>
-        <p class="text-secondary small mt-2">First {nshow} packs shown so the line stays readable. The full table is under Add another run → Past runs.</p>
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3 class="card-title chart-takeaway">Lane allow / deny / escalate counts at a glance</h3>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap mb-3">
+          <canvas id="verdictStackChart" aria-label="Allow deny escalate stacked by lane"></canvas>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-vcenter mb-0">
+            <thead><tr><th>Lane</th><th>Allow</th><th>Deny</th><th>Ask human</th></tr></thead>
+            <tbody>
+{heat_table}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
-<script type="application/json" id="chart-data">{payload}</script>
+<script type="application/json" id="chart-data">{payload_json}</script>
 """
 
 
@@ -563,42 +996,122 @@ def _chart_boot() -> str:
   try { data = JSON.parse(raw.textContent); } catch (e) { return; }
   const tick = { color: "#8b97a8" };
   const grid = { color: "rgba(139,151,168,0.15)" };
-  const agreeEl = document.getElementById("agreeChart");
-  const latEl = document.getElementById("latChart");
-  if (agreeEl) {
-    new Chart(agreeEl, {
+  const legend = { labels: { color: "#c0c8d4" } };
+  const directLabel = {
+    id: "directLabel",
+    afterDatasetsDraw(chart) {
+      const {ctx} = chart;
+      ctx.save();
+      ctx.fillStyle = "#c0c8d4";
+      ctx.font = "12px sans-serif";
+      ctx.textAlign = "center";
+      chart.data.datasets.forEach((ds, di) => {
+        const meta = chart.getDatasetMeta(di);
+        if (meta.hidden) return;
+        meta.data.forEach((bar, i) => {
+          const v = ds.data[i];
+          if (v == null || v === 0) return;
+          const label = (typeof v === "number" && !Number.isInteger(v)) ? v.toFixed(1) : String(v);
+          const extra = (ds.nScored && ds.nScored[i] != null) ? " (n=" + ds.nScored[i] + ")" : "";
+          const pos = bar.tooltipPosition();
+          ctx.fillText(label + extra, pos.x, pos.y - 8);
+        });
+      });
+      ctx.restore();
+    }
+  };
+  const laneEl = document.getElementById("laneAgreeChart");
+  if (laneEl && data.lane_agree) {
+    const la = data.lane_agree;
+    new Chart(laneEl, {
       type: "bar",
       data: {
-        labels: ["Agree", "Disagree"],
-        datasets: [{ label: "Packs", data: [data.agree, data.disagree],
-          backgroundColor: ["#2fb344", "#d63939"] }]
+        labels: la.labels,
+        datasets: [{
+          label: "Agree %",
+          data: la.pct,
+          nScored: la.n_scored,
+          backgroundColor: "#4299e1"
+        }]
       },
       options: {
         responsive: true,
         plugins: { legend: { display: false }, title: { display: false } },
         scales: {
           x: { ticks: tick, grid: grid },
-          y: { beginAtZero: true, ticks: Object.assign({ precision: 0 }, tick), grid: grid }
+          y: { beginAtZero: true, max: 100, ticks: Object.assign({ callback: (v) => v + "%" }, tick), grid: grid,
+               title: { display: true, text: "agree with human gold", color: "#8b97a8" } }
         }
-      }
+      },
+      plugins: [directLabel]
     });
   }
-  if (latEl) {
-    new Chart(latEl, {
-      type: "line",
+  const dpEl = document.getElementById("dontPinChart");
+  if (dpEl && data.dont_pin) {
+    const dp = data.dont_pin;
+    new Chart(dpEl, {
+      type: "bar",
       data: {
-        labels: data.labels,
+        labels: dp.labels,
         datasets: [
-          { label: "Jev ms", data: data.jev, borderColor: "#4299e1", backgroundColor: "rgba(66,153,225,0.15)", tension: 0.2, pointRadius: 2 },
-          { label: "ACS ms", data: data.acs, borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.12)", tension: 0.2, pointRadius: 2 }
+          { label: "Caught (deny/hold)", data: dp.deny, backgroundColor: "#2fb344", stack: "dp" },
+          { label: "Missed (allowed)", data: dp.miss, backgroundColor: "#d63939", stack: "dp" }
         ]
       },
       options: {
         responsive: true,
-        plugins: { legend: { position: "bottom", labels: { color: "#c0c8d4" } } },
+        plugins: { legend: { position: "bottom", labels: legend.labels }, title: { display: false } },
         scales: {
-          x: { ticks: Object.assign({ maxRotation: 60, minRotation: 30, autoSkip: true, maxTicksLimit: 12 }, tick), grid: grid },
-          y: { beginAtZero: true, title: { display: true, text: "milliseconds", color: "#8b97a8" }, ticks: tick, grid: grid }
+          x: { stacked: true, ticks: tick, grid: grid },
+          y: { stacked: true, beginAtZero: true, ticks: Object.assign({ precision: 0 }, tick), grid: grid,
+               title: { display: true, text: "don't-pin gold turns", color: "#8b97a8" } }
+        }
+      }
+    });
+  }
+  const peerEl = document.getElementById("peerChart");
+  if (peerEl && data.peer) {
+    new Chart(peerEl, {
+      type: "bar",
+      data: {
+        labels: ["Same answer", "Differ"],
+        datasets: [{
+          label: "ACS vs auto",
+          data: [data.peer.same || 0, data.peer.differ || 0],
+          backgroundColor: ["#2fb344", "#d63939"]
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: true, ticks: Object.assign({ precision: 0 }, tick), grid: grid },
+          y: { ticks: tick, grid: grid }
+        }
+      },
+      plugins: [directLabel]
+    });
+  }
+  const vsEl = document.getElementById("verdictStackChart");
+  if (vsEl && data.verdicts) {
+    const v = data.verdicts;
+    new Chart(vsEl, {
+      type: "bar",
+      data: {
+        labels: v.labels,
+        datasets: [
+          { label: "Allow", data: v.allow, backgroundColor: "#2fb344", stack: "v" },
+          { label: "Deny", data: v.deny, backgroundColor: "#d63939", stack: "v" },
+          { label: "Ask human", data: v.escalate, backgroundColor: "#f7b731", stack: "v" }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "bottom", labels: legend.labels } },
+        scales: {
+          x: { stacked: true, ticks: tick, grid: grid },
+          y: { stacked: true, beginAtZero: true, ticks: Object.assign({ precision: 0 }, tick), grid: grid }
         }
       }
     });
@@ -909,3 +1422,29 @@ def rebuild_preserving_history(
     text = text.replace("<!--BLIND-->", "<!--BLIND-->\n" + old_blinds, 1)
     report_path.write_text(text, encoding="utf-8")
     verify_hsw_before_publish(report_path)
+
+
+
+def rebuild_from_latest_mlwf(report_path: Optional[Path] = None) -> Path:
+    """Rebuild the same dark HTML from newest mlwf JSON; keep prior run/blind history."""
+    report = report_path or (Path(__file__).resolve().parents[1] / "reports" / "jev-oss-compare.html")
+    mlwf = _load_latest_mlwf()
+    if not mlwf:
+        raise SystemExit("No mlwf-*.json (or multi-lane-walkforward-latest.json) under reports/runs/")
+    summary, flat = _mlwf_summary_rows(mlwf)
+    assert summary is not None
+    # Preserve existing *-multilane evidence sections; do not re-inject (avoids dupes + circular import).
+    rebuild_preserving_history(report, summary, flat)
+    return report
+
+
+if __name__ == "__main__":
+    import argparse
+    ap = argparse.ArgumentParser(description="Rebuild jev-oss-compare.html from latest mlwf JSON")
+    ap.add_argument("--from-latest-mlwf", action="store_true", help="Rebuild shell + charts from newest walk-forward")
+    args = ap.parse_args()
+    if args.from_latest_mlwf:
+        path = rebuild_from_latest_mlwf()
+        print(f"rebuilt={path}")
+    else:
+        ap.error("pass --from-latest-mlwf")

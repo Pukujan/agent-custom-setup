@@ -31,7 +31,9 @@ def test_html_append_newest_first(tmp_path):
     for page in ("overview", "fish", "method", "pipeline", "results", "charts", "disagree", "routing", "append"):
         assert f'data-page="{page}"' in text
     assert "mermaid" in text
-    assert "agreeChart" in text and "latChart" in text
+    assert "laneAgreeChart" in text or "peerChart" in text or "agreeChart" in text
+    assert "chart-data" in text
+    assert "fish-timeline" in text or "One concrete example" in text
     assert "Append next run" in text or "append" in text
 
 def test_shell_has_hsw_concrete_lede():
