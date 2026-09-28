@@ -26,9 +26,9 @@ def test_html_append_newest_first(tmp_path):
     text = report.read_text(encoding="utf-8")
     assert 'data-run-id="B"' in text and 'data-run-id="A"' in text
     assert text.index('data-run-id="B"') < text.index('data-run-id="A"')
-    assert "How we compared" in text
-    assert "ADAPT_PATTERN" in text or "What we kept" in text
-    for page in ("overview", "method", "pipeline", "results", "charts", "disagree", "append"):
+    assert "How we tested" in text or "How we compared" in text
+    assert "ADAPT_PATTERN" in text
+    for page in ("overview", "fish", "method", "pipeline", "results", "charts", "disagree", "routing", "append"):
         assert f'data-page="{page}"' in text
     assert "mermaid" in text
     assert "agreeChart" in text and "latChart" in text
@@ -40,7 +40,8 @@ def test_shell_has_hsw_concrete_lede():
     assert "delve" not in shell.lower()
     assert "showcase" not in shell.lower()
     assert "Packs compared" in shell or "No compare run" in shell
-
+    assert "self-host" in shell.lower() or "self host" in shell.lower()
+    assert 'data-page="fish"' in shell
 
 def test_shell_hard_dark_only():
     shell = build_shell()
@@ -48,4 +49,3 @@ def test_shell_hard_dark_only():
     assert "#fafafa" not in shell
     assert "#0b0f14" in shell or "#121212" in shell
     assert "tabler" in shell.lower() or "theme: 'dark'" in shell or 'theme: "dark"' in shell
-
