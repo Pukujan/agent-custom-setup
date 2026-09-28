@@ -3,7 +3,9 @@ import sys
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
-sys.path.insert(0, str(SCRIPTS))
+# Prefer this module's ops_db over jev-shared/scripts/ops_db if both are on path.
+sys.path = [str(SCRIPTS)] + [x for x in sys.path if Path(x).resolve() != SCRIPTS.resolve()]
+sys.modules.pop("ops_db", None)
 from ops_db import (  # noqa: E402
     append_gate_event,
     append_claim_snapshot,

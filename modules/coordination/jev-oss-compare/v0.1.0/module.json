@@ -1,0 +1,16 @@
+{
+  "id": "jev-oss-compare",
+  "name": "JEV OSS comparison lane",
+  "purpose": "Optional eval/compare: ACS gates (HOTLOAD default) vs pi-jev-auto-mode-shaped policy + jev-gate post-run stub. Appendable HTML report (CGM html-demo + HSW). Real Jev benches; skip ultrafast; no Redis.",
+  "harness": "coordination",
+  "created": "2026-09-28",
+  "updated": "2026-09-28",
+  "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
+  "owning_agent": "agent-custom-setup",
+  "version": "0.1.0",
+  "path": "modules/coordination/jev-oss-compare/v0.1.0/",
+  "recorded_at": "2026-09-28T04:35:00Z",
+  "valid_time": {"start": "2026-09-28T00:00:00-04:00", "end": null},
+  "status": "draft",
+  "summary": "Comparison lane only. Claude+Kilo keep ACS adapters. Appendable HTML under reports/."
+}

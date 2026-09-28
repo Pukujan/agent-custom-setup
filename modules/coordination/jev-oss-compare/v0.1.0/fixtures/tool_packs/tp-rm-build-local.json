@@ -1,0 +1,9 @@
+{
+  "id": "tp-rm-build-local",
+  "proposed_tool": {
+    "name": "Bash",
+    "args_summary": "rm -rf build"
+  },
+  "brief": "clean local build artifacts",
+  "gold_decision": null
+}

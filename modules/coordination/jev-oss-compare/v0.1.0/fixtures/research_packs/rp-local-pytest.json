@@ -1,0 +1,8 @@
+{
+  "id": "rp-local-pytest",
+  "claim_text": "Add unit test for pin_extract in-repo fixture only",
+  "known_docs": [
+    "modules/coordination/jev-gate-pin/v0.1.0/README.md"
+  ],
+  "gold_decision": "no"
+}

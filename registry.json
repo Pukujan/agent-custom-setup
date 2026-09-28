@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "created": "2026-09-25",
   "updated": "2026-09-28",
-  "recorded_at": "2026-09-28T04:20:00Z",
+  "recorded_at": "2026-09-28T04:35:00Z",
   "valid_time": {
     "start": "2026-09-25T00:00:00-04:00",
     "end": null
@@ -181,6 +181,25 @@
       },
       "status": "draft",
       "summary": "Transcript+OTLP+Pass2. HOTLOAD full. Shared DB ownership: ops-db module."
+    },
+    {
+      "id": "jev-oss-compare",
+      "name": "JEV OSS comparison lane",
+      "purpose": "Optional ACS vs auto-mode/jev-gate compare + appendable HTML report",
+      "harness": "coordination",
+      "created": "2026-09-28",
+      "updated": "2026-09-28",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
+      "owning_agent": "agent-custom-setup",
+      "version": "0.1.0",
+      "path": "modules/coordination/jev-oss-compare/v0.1.0/",
+      "recorded_at": "2026-09-28T04:35:00Z",
+      "valid_time": {
+        "start": "2026-09-28T00:00:00-04:00",
+        "end": null
+      },
+      "status": "draft",
+      "summary": "Comparison lane only; ACS remains HOTLOAD default for Claude+Kilo."
     }
   ]
 }
