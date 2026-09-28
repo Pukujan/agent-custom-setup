@@ -434,5 +434,10 @@
       "bytes": 737420,
       "mtime": "2026-09-25T08:54:42.210000Z"
     }
-  ]
+  ],
+  "sha": "c5d1bf3feea8fdf11a1377e5bfa6761051aeed31",
+  "commit": "c5d1bf3feea8fdf11a1377e5bfa6761051aeed31",
+  "branch": "task/ACS-25-dual-jev-gates",
+  "pr": 26,
+  "issue": 28
 }

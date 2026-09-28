@@ -11,5 +11,10 @@
   "path_users": "D:\\claude\\agent-custom-setup\\modules\\coordination\\jev-oss-compare\\v0.1.0\\fixtures\\claude_tx\\users.jsonl",
   "path_tools": "D:\\claude\\agent-custom-setup\\modules\\coordination\\jev-oss-compare\\v0.1.0\\fixtures\\claude_tx\\tools.jsonl",
   "source": "machine-parse ~/.claude/projects/D--claude-hades-v2/**/*.jsonl users+tool_use+thin tool_result",
-  "raw_sessions_copied": false
+  "raw_sessions_copied": false,
+  "sha": "c5d1bf3feea8fdf11a1377e5bfa6761051aeed31",
+  "commit": "c5d1bf3feea8fdf11a1377e5bfa6761051aeed31",
+  "branch": "task/ACS-25-dual-jev-gates",
+  "pr": 26,
+  "issue": 28
 }
