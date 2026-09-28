@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "project": "Example three-lane hotload (Jev-style)",
   "recorded_at": "2026-09-27T00:00:00-04:00",
-  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease default 30 minutes (15–120); watchdog agent-less ~10m. After vacancy, GitHub-canonical claim_queue is FIFO; old boss rejoins at end. FULL PCM + FULL CGM 0.5.4 required — not a slim HSW/writing-direction-only subset.",
+  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease default 30 minutes (15\u2013120); watchdog agent-less ~10m. After vacancy, GitHub-canonical claim_queue is FIFO; old boss rejoins at end. FULL PCM + FULL CGM 0.5.6 required \u2014 not a slim HSW/writing-direction-only subset.",
   "role_fill": {
     "mode": "join_continue_order",
     "seed_is_hint_only": true,
@@ -54,7 +54,7 @@
         "as_of": "2026-09-27T00:00:00-04:00",
         "boss_agent_id": "claude-code-main",
         "ended_at": null,
-        "notes": "Illustrative seed; append on failover — do not rewrite."
+        "notes": "Illustrative seed; append on failover \u2014 do not rewrite."
       }
     ]
   },
@@ -97,14 +97,15 @@
     },
     "cgm": {
       "repo": "https://github.com/Pukujan/content-generation-modules",
-      "revision": "c95d73a0ce072a6d7173ce4848621a25cdf1cc7e",
-      "version": "0.5.4",
+      "revision": "32de5cf9341b36673a05a4a17b1868b2178362f8",
+      "version": "0.5.6",
       "role": "full_stack",
       "modules": [
         "brand-foundation",
         "content-context",
         "writing-direction",
         "human-sounding-writing",
+        "human-output-naming",
         "visual-direction",
         "image-generation",
         "html-demo"
@@ -127,15 +128,19 @@
         "docs/CONTENT_RESEARCH.md",
         "docs/BRAND_DIRECTION.md",
         "AGENTS.md",
-        "system-version.json"
+        "system-version.json",
+        "docs/HUMAN_OUTPUT_NAMING.md",
+        "docs/human-output-naming.json"
       ],
       "routing": {
         "readme_product_entry": "writing-direction (MUST load; scan-first selective bold; do not apply HSW bold restraints)",
         "pr_issue_docs_commits": "human-sounding-writing / hsw (MUST load for PR/issue titles+bodies, docs, commits)",
         "posts_blogs_papers": "human-sounding-writing (hsw / HSW)",
-        "contract": "docs/writing-routing.json + docs/ACS_VERIFY.md — application=must_load; acs_prompt_inject after VALID"
+        "contract": "docs/writing-routing.json + docs/ACS_VERIFY.md \u2014 application=must_load; human_facing_default; acs_prompt_inject after VALID",
+        "html_reports_compare_appendable": "human-sounding-writing / hsw (MUST; default ON; no per-report opt-in)",
+        "generated_artifact_filenames": "human-output-naming / hon (MUST; basenames + legends)"
       },
-      "notes": "FULL CGM 0.5.4 required for ACS and all hotloader adopters. Not HSW+writing-direction only. MUST load modules per writing-routing.json (README→writing-direction; PR/issue/docs/commits→hsw). Pin SHA; validate with scripts/validate_content_system.py (full adapter); then apply acs_prompt_inject. Do not vendor CGM source into ACS."
+      "notes": "FULL CGM 0.5.6 required for ACS and all hotloader adopters. Eight modules including human-output-naming. Not HSW+writing-direction only. MUST load modules per writing-routing.json (README\u2192writing-direction; human-facing prose/HTML/compare/appendable\u2192hsw default ON; basenames\u2192hon). Pin SHA; validate with scripts/validate_content_system.py (full adapter); then apply acs_prompt_inject (application, human_facing_default, routes, apply_checklist). Do not vendor CGM source into ACS."
     }
   },
   "ticket_links": {

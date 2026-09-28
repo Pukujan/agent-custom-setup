@@ -113,6 +113,7 @@ REQUIRED_CGM_MODULES = (
     "content-context",
     "writing-direction",
     "human-sounding-writing",
+    "human-output-naming",
     "visual-direction",
     "image-generation",
     "html-demo",
@@ -129,10 +130,10 @@ REQUIRED_PCM_FEATURES = (
     "leaf_parent_dependency_receipts",
 )
 
-CGM_PIN_VERSION = "0.5.4"
-CGM_PIN_REVISION_PREFIX = "c95d73a"
+CGM_PIN_VERSION = "0.5.6"
+CGM_PIN_REVISION_PREFIX = "32de5cf"
 PCM_PIN_REVISION_PREFIX = "4e23854"
-CGM_PIN_REVISION = "c95d73a0ce072a6d7173ce4848621a25cdf1cc7e"
+CGM_PIN_REVISION = "32de5cf9341b36673a05a4a17b1868b2178362f8"
 CGM_HELPER_REPO = "https://github.com/Pukujan/content-generation-modules"
 
 
@@ -149,6 +150,8 @@ def discover_cgm_root(explicit: Path | None = None) -> Path | None:
     acs_root = MODULE_ROOT.parents[3]  # v0.1.0 -> multi-agent-hotload -> coordination -> modules -> repo
     candidates.extend(
         [
+            Path("/workspace/cgm-056"),
+            Path("/workspace/content-generation-modules"),
             Path("/workspace/cgm-054"),
             Path("/workspace/cgm-053"),
             Path("/workspace/cgm-051"),
@@ -208,7 +211,7 @@ def validate_cgm_live(
         if require:
             errors.append(
                 "CGM checkout not found: set CGM_ROOT or pass --cgm-root to a "
-                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.4)"
+                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.6)"
             )
         return errors
 
@@ -231,7 +234,7 @@ def validate_cgm_live(
             )
             return errors
 
-    # Confirm helper system-version.json reports 0.5.4 + seven modules
+    # Confirm helper system-version.json reports 0.5.4 + eight modules
     try:
         version = load_json(cgm_root / "system-version.json")
     except Exception as exc:  # noqa: BLE001
@@ -245,7 +248,7 @@ def validate_cgm_live(
     mods = version.get("modules") if isinstance(version, dict) else None
     if not isinstance(mods, list) or set(mods) != set(REQUIRED_CGM_MODULES):
         errors.append(
-            "CGM system-version.json modules must be exactly the seven FULL modules "
+            "CGM system-version.json modules must be exactly the eight FULL modules "
             "(slim HSW+WD-only fails)"
         )
 
@@ -311,33 +314,75 @@ def load_writing_routing(cgm_root: Path) -> dict | None:
 
 
 def render_prompt_inject_md(routing: dict, *, pin_sha: str, pin_version: str) -> str:
+    """Render PROMPT_INJECT.md from CGM writing-routing acs_prompt_inject fields.
+
+    Injects application, human_facing_default, routes, apply_checklist (see
+    acs_prompt_inject.fields). HSW is ON by default for every human-facing
+    deliverable including HTML reports/compare/appendable; basenames -> hon.
+    """
     inject = routing.get("acs_prompt_inject") if isinstance(routing.get("acs_prompt_inject"), dict) else {}
     instruction = str(inject.get("instruction") or "").strip()
+    when = str(inject.get("when") or "").strip()
+    application = str(routing.get("application") or "must_load").strip()
     checklist = routing.get("apply_checklist") if isinstance(routing.get("apply_checklist"), list) else []
     checklist_md = "\n".join(f"{i+1}. {c}" for i, c in enumerate(checklist))
+    hfd = routing.get("human_facing_default") if isinstance(routing.get("human_facing_default"), dict) else {}
+    hfd_load = str(hfd.get("load") or "human-sounding-writing")
+    hfd_covers = hfd.get("covers") if isinstance(hfd.get("covers"), list) else []
+    hfd_exc = hfd.get("exceptions") if isinstance(hfd.get("exceptions"), list) else []
+    covers_md = ", ".join(f"`{c}`" for c in hfd_covers) if hfd_covers else "(see CGM writing-routing.json)"
+    exc_md = ", ".join(f"`{e}`" for e in hfd_exc) if hfd_exc else "`readme_product_entry`, `generated_artifact_filenames`"
+    routes = routing.get("routes") if isinstance(routing.get("routes"), list) else []
+    route_rows = []
+    for r in routes:
+        if not isinstance(r, dict):
+            continue
+        surfaces = r.get("surfaces") if isinstance(r.get("surfaces"), list) else []
+        load = str(r.get("load") or "")
+        short = r.get("short_name") if isinstance(r.get("short_name"), list) else []
+        short_s = f" ({'/'.join(str(s) for s in short)})" if short else ""
+        surf = "; ".join(str(s) for s in surfaces[:8])
+        if len(surfaces) > 8:
+            surf += "; ..."
+        route_rows.append(f"| {surf} | `{load}`{short_s} |")
+    routes_table = "\n".join(route_rows) if route_rows else (
+        "| README / product entry | `writing-direction` |\n"
+        "| Human-facing prose + HTML reports/compare/appendable | `human-sounding-writing` (**hsw**) |\n"
+        "| Generated artifact basenames / legends | `human-output-naming` (**hon**) |"
+    )
+    when_block = when or (
+        "After `hotload_check` / CGM_VERIFY succeeds, before writing ANY human-facing "
+        "deliverable (GitHub/docs prose, HTML reports, compare HTML/UIs, appendable HTML, "
+        "posts, papers) — and before naming generated artifact / media paths."
+    )
     return (
         f"# PROMPT_INJECT — acs_prompt_inject (CGM {pin_version})\n\n"
         f"Generated / refreshed by `hotload_check` after full adapter `VALID`.\n"
         f"Source: CGM `docs/writing-routing.json` → `acs_prompt_inject` @ `{pin_sha}`.\n\n"
         f"Also see: CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/{pin_sha}/docs/ACS_VERIFY.md) "
         f"and [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/{pin_sha}/docs/writing-routing.json).\n\n"
+        f"**Pin:** CGM `{pin_version}` @ `{pin_sha}` (main). After any future CGM merge that "
+        f"moves the tip, re-pin ACS hotload to the new main SHA.\n\n"
+        f"## application\n\n`{application}` — agents MUST load the listed module before writing each surface.\n\n"
         "## When\n\n"
-        "After `hotload_check` / full adapter validate succeeds, **before** writing "
-        "PR/issue/docs/commits (or any routed surface).\n\n"
+        f"{when_block}\n\n"
+        "## human_facing_default\n\n"
+        f"- **load:** `{hfd_load}` (**hsw**) — `required_load: true`, `default_on: true`\n"
+        f"- **covers:** {covers_md}\n"
+        f"- **exceptions:** {exc_md} (README/product → writing-direction; basenames → **hon**)\n"
+        "- **rule:** HSW is ON by default for EVERY human-facing task/output including HTML "
+        "reports, compare HTML/UIs, and appendable HTML. Not optional. Not per-report opt-in. "
+        "Visible HTML prose → **hsw**; filesystem basenames → **hon**.\n\n"
         "## Instruction (MUST paste/apply into system or task prompts)\n\n"
         f"{instruction}\n\n"
         "## apply_checklist\n\n"
         f"{checklist_md}\n\n"
-        "## Surface → module (MUST load)\n\n"
-        "| Surface | MUST load |\n"
+        "## routes (Surface → module MUST load)\n\n"
+        "| Surfaces (sample) | MUST load |\n"
         "| --- | --- |\n"
-        "| README / product entry | `writing-direction` |\n"
-        "| PR titles/bodies, issue titles/bodies, issue-log titles, commit messages/subjects, "
-        "non-README docs, changelog prose, posts/blogs/social/general prose, papers/data writeups | "
-        "`human-sounding-writing` (**hsw**) |\n\n"
-        "Contract language is **MUST / APPLY**, not prefer. Soft enforcement = no NLP CI grade of prose.\n"
+        f"{routes_table}\n\n"
+        "Contract language is **MUST / APPLY / default_on**, not prefer. Soft enforcement = no NLP CI grade of prose.\n"
     )
-
 
 def apply_acs_prompt_inject(cgm_root: Path, pack_root: Path) -> tuple[str | None, list[str]]:
     """After VALID: load writing-routing.json, write PROMPT_INJECT.md, return instruction text."""
@@ -399,7 +444,7 @@ def validate_pins(data: object) -> list[str]:
 
     cgm = pins.get("cgm")
     if not isinstance(cgm, dict):
-        errors.append("pins.cgm: required (FULL CGM 0.5.4 stack)")
+        errors.append("pins.cgm: required (FULL CGM 0.5.6 stack)")
     else:
         ver = str(cgm.get("version") or "")
         if ver != CGM_PIN_VERSION:
@@ -409,7 +454,7 @@ def validate_pins(data: object) -> list[str]:
         rev = str(cgm.get("revision") or "")
         if not rev.startswith(CGM_PIN_REVISION_PREFIX):
             errors.append(
-                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.4)"
+                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.6)"
             )
         mods = cgm.get("modules")
         if not isinstance(mods, list):
@@ -425,7 +470,7 @@ def validate_pins(data: object) -> list[str]:
             missing = [m for m in REQUIRED_CGM_MODULES if m not in normalized]
             if missing:
                 errors.append(
-                    "pins.cgm.modules: FULL CGM requires all seven modules; missing: "
+                    "pins.cgm.modules: FULL CGM requires all eight modules; missing: "
                     + ", ".join(missing)
                 )
             if len(normalized) < 7:
@@ -504,7 +549,7 @@ def run(
     print(f"  cgm_root={resolved_cgm}")
     print(f"  adopter_root={resolved_adopter}")
     print(f"  cgm_pin={CGM_PIN_VERSION}@{CGM_PIN_REVISION}")
-    print("  install_surface=FULL PCM + FULL CGM 0.5.4 + this runtime")
+    print("  install_surface=FULL PCM + FULL CGM 0.5.6 + this runtime")
     print("  cgm_validate=VALID (validate_content_system.py)")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
     print("  claim_queue=FIFO after vacancy; zombie re-reads GitHub claim")

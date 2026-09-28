@@ -118,7 +118,10 @@ def test_watchdog_runner_must_be_agentless(tmp_path: Path):
 
 
 def _find_cgm_for_tests() -> Path | None:
+    import subprocess
     candidates = [
+        Path("/workspace/cgm-056"),
+        Path("/workspace/content-generation-modules"),
         Path("/workspace/cgm-054"),
         Path("/workspace/cgm-053"),
         Path("/workspace/cgm-051"),
@@ -128,10 +131,22 @@ def _find_cgm_for_tests() -> Path | None:
     env = __import__("os").environ.get("CGM_ROOT")
     if env:
         candidates.insert(0, Path(env))
+    pin_prefix = "32de5cf"
+    matched = None
     for cand in candidates:
-        if (cand / "scripts" / "validate_content_system.py").is_file():
+        if not (cand / "scripts" / "validate_content_system.py").is_file():
+            continue
+        try:
+            sha = subprocess.check_output(
+                ["git", "-C", str(cand), "rev-parse", "HEAD"], text=True
+            ).strip()
+        except Exception:
+            sha = ""
+        if sha.lower().startswith(pin_prefix):
             return cand
-    return None
+        if matched is None:
+            matched = cand
+    return matched
 
 
 def test_cli_ok():
@@ -233,8 +248,8 @@ def test_example_pins_are_full_stacks():
     data = json.loads(
         (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
     )
-    assert data["pins"]["cgm"]["version"] == "0.5.4"
-    assert data["pins"]["cgm"]["revision"].startswith("c95d73a")
+    assert data["pins"]["cgm"]["version"] == "0.5.6"
+    assert data["pins"]["cgm"]["revision"].startswith("32de5cf")
     assert data["pins"]["pcm"]["revision"].startswith("4e23854")
     assert set(mod.REQUIRED_CGM_MODULES).issubset(
         {
@@ -278,12 +293,12 @@ def test_cli_ok_with_cgm_validate():
     assert "MUST load" in inject or "required_load" in inject or "writing-direction" in inject
 
 
-def test_cgm_pin_constants_054():
+def test_cgm_pin_constants_056():
     mod = _load_mod()
-    assert mod.CGM_PIN_VERSION == "0.5.4"
-    assert mod.CGM_PIN_REVISION.startswith("c95d73a")
-    assert mod.CGM_PIN_REVISION == "c95d73a0ce072a6d7173ce4848621a25cdf1cc7e"
-    assert mod.CGM_PIN_REVISION_PREFIX == "c95d73a"
+    assert mod.CGM_PIN_VERSION == "0.5.6"
+    assert mod.CGM_PIN_REVISION.startswith("32de5cf")
+    assert mod.CGM_PIN_REVISION == "32de5cf9341b36673a05a4a17b1868b2178362f8"
+    assert mod.CGM_PIN_REVISION_PREFIX == "32de5cf"
 
 
 def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):

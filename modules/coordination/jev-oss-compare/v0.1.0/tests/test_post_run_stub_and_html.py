@@ -40,3 +40,12 @@ def test_shell_has_hsw_concrete_lede():
     assert "delve" not in shell.lower()
     assert "showcase" not in shell.lower()
     assert "Packs compared" in shell or "No compare run" in shell
+
+
+def test_shell_hard_dark_only():
+    shell = build_shell()
+    assert "dark only" in shell or 'data-bs-theme="dark"' in shell
+    assert "#fafafa" not in shell
+    assert "#0b0f14" in shell or "#121212" in shell
+    assert "tabler" in shell.lower() or "theme: 'dark'" in shell or 'theme: "dark"' in shell
+

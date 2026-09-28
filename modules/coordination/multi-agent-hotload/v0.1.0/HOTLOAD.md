@@ -7,7 +7,7 @@ When an agent starts on Agent Custom Setup (or is told to load the **agent hot-l
 Install is complete only when all three are wired as **full stacks** (slim subsets fail):
 
 1. **FULL PCM** — continuity/checkpoints **and** GitHub-owned progression: PR-only to default branch, required CI gates, adopter branch-protection + auto-merge preference, fail-closed on missing/failed/skipped gates, leaf/parent receipts (see SPEC §8 / TARGET_ADOPTION). Still **not** the proposal/ACCEPT layer.
-2. **FULL CGM 0.5.4** — all seven modules + `human_output_contract` docs (not HSW + writing-direction only). Route README/product entry via `writing-direction`; posts/papers via `human-sounding-writing` (hsw).
+2. **FULL CGM 0.5.6** — all eight modules + `human_output_contract` docs (not HSW + writing-direction only). Route README/product entry via `writing-direction`; posts/papers/HTML reports/compare/appendable via `human-sounding-writing` (hsw, default ON); basenames via `human-output-naming` (hon).
 3. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR
 
 Missing any of the three, or substituting a thin PCM/CGM subset, is an **incomplete install**.
@@ -50,12 +50,12 @@ Wire the **complete** adopter surface (see PCM [`docs/adopter-enforcement.md`](h
 
 **Still not PCM's job:** proposals, ACCEPT/REJECT, or work locks — those live in [PROPOSALS.md](PROPOSALS.md) and GitHub issues.
 
-### 3. FULL CGM 0.5.4 (all modules + contracts)
+### 3. FULL CGM 0.5.6 (all modules + contracts)
 
 Pin [Pukujan/content-generation-modules](https://github.com/Pukujan/content-generation-modules) at:
 
-- **Version:** `0.5.4`
-- **Commit:** `c95d73a0ce072a6d7173ce4848621a25cdf1cc7e`
+- **Version:** `0.5.6`
+- **Commit:** `32de5cf9341b36673a05a4a17b1868b2178362f8`
 - Do **not** silently follow moving `main`. Do **not** copy CGM source into ACS.
 - Adapter shape: target `.content-system/system-version.json` lists all seven module ids; validate with `python scripts/validate_content_system.py --root <cgm> --adapter <target>/.content-system --project-root <target>`.
 
@@ -127,7 +127,7 @@ Before acting as decision boss:
 
 ```bash
 # Pin CGM checkout first (example):
-#   git -C "$CGM_ROOT" fetch && git -C "$CGM_ROOT" checkout c95d73a0ce072a6d7173ce4848621a25cdf1cc7e
+#   git -C "$CGM_ROOT" fetch && git -C "$CGM_ROOT" checkout 32de5cf9341b36673a05a4a17b1868b2178362f8
 export CGM_ROOT=/path/to/content-generation-modules   # or pass --cgm-root
 export ADOPTER_ROOT=/path/to/working-repo             # must contain .content-system/
 
@@ -137,16 +137,16 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 
 `hotload_check` fails the install unless **all** of the following succeed:
 
-1. Assignment pins declare **FULL** PCM + **FULL** CGM 0.5.4 (seven modules; slim HSW+WD-only fails).
+1. Assignment pins declare **FULL** PCM + **FULL** CGM 0.5.6 (eight modules; slim HSW+WD-only fails).
 2. `boss_failover` / `watchdog` / `claim_queue` rules validate (lease **15–120** minutes, default 30).
-3. `CGM_ROOT` is a git checkout of `Pukujan/content-generation-modules` at `c95d73a0ce072a6d7173ce4848621a25cdf1cc7e` (0.5.4).
+3. `CGM_ROOT` is a git checkout of `Pukujan/content-generation-modules` at `32de5cf9341b36673a05a4a17b1868b2178362f8` (0.5.6).
 4. It runs `python "$CGM_ROOT/scripts/validate_content_system.py" --root "$CGM_ROOT" --adapter "$ADOPTER_ROOT/.content-system" --project-root "$ADOPTER_ROOT"` and the stdout **starts with `VALID`** (exit 0). There is **no** separate HSW-only script. On OK, `hotload_check` writes `PROMPT_INJECT.md` from `acs_prompt_inject` and prints the instruction (primary done-when remains full adapter VALID; `--mode writing` is optional secondary only).
 
 ### 8. After validate — MUST load writing modules + acs_prompt_inject
 
-`validate_content_system.py` (full adapter path) checks helper/adapter **structure** and prints `VALID`. That is the **primary** install done-when. Optional secondary: `--mode writing` (see CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/c95d73a0ce072a6d7173ce4848621a25cdf1cc7e/docs/ACS_VERIFY.md)) — not a substitute for full adapter VALID.
+`validate_content_system.py` (full adapter path) checks helper/adapter **structure** and prints `VALID`. That is the **primary** install done-when. Optional secondary: `--mode writing` (see CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/32de5cf9341b36673a05a4a17b1868b2178362f8/docs/ACS_VERIFY.md)) — not a substitute for full adapter VALID.
 
-After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/c95d73a0ce072a6d7173ce4848621a25cdf1cc7e/docs/writing-routing.json) / [`docs/WRITING_ROUTING.md`](https://github.com/Pukujan/content-generation-modules/blob/c95d73a0ce072a6d7173ce4848621a25cdf1cc7e/docs/WRITING_ROUTING.md) (`application: must_load`, `required_load: true`):
+After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/32de5cf9341b36673a05a4a17b1868b2178362f8/docs/writing-routing.json) / [`docs/WRITING_ROUTING.md`](https://github.com/Pukujan/content-generation-modules/blob/32de5cf9341b36673a05a4a17b1868b2178362f8/docs/WRITING_ROUTING.md) (`application: must_load`, `required_load: true`):
 
 | Situation | MUST load |
 | --- | --- |
@@ -161,9 +161,9 @@ After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-ro
 
 
 
-**Product-only adopter README (CGM 0.5.4 / #25):** Hotload docs may pin/reference CGM for install. The adopter/ACS **root README** must cover only the target product (audience, problem, features, evidence for their claims). Do **not** defend/cite CGM as methodology theater in the README body; do **not** add an image-generation section (image provenance stays in `.content-system/asset-manifest.json`). See CGM `docs/README_PLAYBOOK.md`.
+**Product-only adopter README (CGM 0.5.6 / #25):** Hotload docs may pin/reference CGM for install. The adopter/ACS **root README** must cover only the target product (audience, problem, features, evidence for their claims). Do **not** defend/cite CGM as methodology theater in the README body; do **not** add an image-generation section (image provenance stays in `.content-system/asset-manifest.json`). See CGM `docs/README_PLAYBOOK.md`.
 
-Cite: [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/c95d73a0ce072a6d7173ce4848621a25cdf1cc7e/docs/ACS_VERIFY.md) · [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/c95d73a0ce072a6d7173ce4848621a25cdf1cc7e/docs/writing-routing.json).
+Cite: [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/32de5cf9341b36673a05a4a17b1868b2178362f8/docs/ACS_VERIFY.md) · [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/32de5cf9341b36673a05a4a17b1868b2178362f8/docs/writing-routing.json).
 
 
 
@@ -205,7 +205,7 @@ python -m pytest \
 ## Minimal session checklist
 
 - [ ] FULL PCM pinned (`4e23854…` / CLI 0.6.0) — continuity **and** PR-only + required gates + protection/auto-merge preference
-- [ ] FULL CGM 0.5.4 pinned (`c95d73a…`) — all seven modules + human_output_contract (not HSW+WD only)
+- [ ] FULL CGM 0.5.6 pinned (`32de5cf…`) — all eight modules + human_output_contract (not HSW+WD only)
 - [ ] Join order understood; I know boss / coderN for this session
 - [ ] Re-read GitHub claim / `who_is_boss_now` / `claim_queue` on wake
 - [ ] Boss lease checked or renewed (or enqueued after vacancy) — lease is **minutes** (default 30)

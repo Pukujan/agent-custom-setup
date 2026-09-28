@@ -9,12 +9,12 @@ Owning issue: [#11](https://github.com/Pukujan/agent-custom-setup/issues/11).
 When told to load the agent hot-loader into a working repo, wire **all three** as **complete** stacks (slim subsets fail closed):
 
 1. **FULL PCM** @ `4e2385474b4af9249ca009cbdcb38c4498932475` (CLI **0.6.0**, protocol `0.1.0-draft`) — continuity/checkpoints **and** PR-only + required CI + branch-protection/auto-merge preference + fail-closed gates + receipts. Still not proposals/ACCEPT. See [adopter-enforcement](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md).
-2. **FULL CGM 0.5.4** @ `c95d73a0ce072a6d7173ce4848621a25cdf1cc7e` — all seven modules + `human_output_contract` (not HSW + writing-direction only). README → writing-direction; posts/papers → hsw.
+2. **FULL CGM 0.5.6** @ `32de5cf9341b36673a05a4a17b1868b2178362f8` — all eight modules + `human_output_contract` (not HSW + writing-direction only). README → writing-direction; posts/papers → hsw.
 3. **This runtime** — join-order roles, boss lease (minutes), GitHub-canonical claim queue, agent-less watchdog, proposals → claim → PR
 
 ACS installs them together; it does **not** replace or vendor PCM/CGM source. ACS and **all** hotloader adopters must use the full stacks.
 
-`hotload_check` must run `scripts/validate_content_system.py` against the adopter `.content-system` and require stdout starting with `VALID`. After VALID, agents **MUST load** modules per CGM `docs/writing-routing.json` / `docs/ACS_VERIFY.md` (README→writing-direction; PR/issue/docs/commits→hsw) and paste/apply `acs_prompt_inject.instruction` (see `PROMPT_INJECT.md`). Soft = no NLP CI; language is MUST/APPLY.
+`hotload_check` must run `scripts/validate_content_system.py` against the adopter `.content-system` and require stdout starting with `VALID`. After VALID, agents **MUST load** modules per CGM `docs/writing-routing.json` / `docs/ACS_VERIFY.md` (README→writing-direction; PR/issue/docs/commits/HTML reports/compare/appendable→hsw (default ON); basenames→hon) and paste/apply `acs_prompt_inject.instruction` (see `PROMPT_INJECT.md`). Soft = no NLP CI; language is MUST/APPLY.
 
 ## Role fill
 
@@ -69,7 +69,7 @@ Read these in [Pukujan/jev-classifier](https://github.com/Pukujan/jev-classifier
 | --- | --- |
 | [`docs/AUTHORITY.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/AUTHORITY.md) | Who decides; project does not stop; GitHub canonical |
 | [`docs/AGENT_PROPOSALS.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/AGENT_PROPOSALS.md) | Propose / verdict / claim / receipt mechanics |
-| [`docs/HUMAN_NAMING.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/HUMAN_NAMING.md) | Human-readable titles; align with FULL CGM 0.5.4 pins |
+| [`docs/HUMAN_NAMING.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/HUMAN_NAMING.md) | Human-readable titles; align with FULL CGM 0.5.6 pins |
 
 This pack's local projections of those ideas: [ROLES.md](ROLES.md), [PROPOSALS.md](PROPOSALS.md), [HOTLOAD.md](HOTLOAD.md).
 

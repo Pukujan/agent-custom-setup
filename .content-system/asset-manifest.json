@@ -1,6 +1,6 @@
 {
   "schema_version": "content-generation.asset-manifest.v1",
-  "system_version": "0.5.4",
+  "system_version": "0.5.6",
   "assets": [
     {
       "id": "acs-adapter-placeholder",
