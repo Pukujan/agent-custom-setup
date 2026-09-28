@@ -1,6 +1,6 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"ACS-0002","active_task_file":"tasks/TASK-ACS-0002-ci-gates.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"ACS-0004","active_task_file":"tasks/TASK-ACS-0004-blind-local-replay.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
 
@@ -16,6 +16,7 @@ Phase: registry + module + docs live on main; CI enforcement remains the open ga
 
 ## Active
 
+- ACS-0004 (#28) blind local transcript replay — current baseline receipts are partial, and no model process is running. User's task-context/relation/pin-state proposal is recorded in issue comment [#5874824862](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5874824862). Local implementation, docs, and partial content-free HTML are not yet committed or pushed. Parent: none; dependencies: none.
 - ACS-0002 (#5) CI-gate ENFORCEMENT — workflow + markers landed as definition (b094c07); hosted verification blocked by account plan: private-repo Actions runs fail zero-step/zero-billable; private-repo protected branches need Pro/Team/Enterprise (docs.github.com verified 2026-09-26T00:1Z; URLs in task file). Owner options: public / Pro+budget / self-hosted / #9-agent CI/CD converges.
 
 ## Queued
@@ -30,4 +31,4 @@ Phase: registry + module + docs live on main; CI enforcement remains the open ga
 
 ## Next atomic action
 
-Owner plan decision on #5 (Actions capacity/protection) — the only open enforcement gate; suite-5 (hardened cohort) landing under evals/results/suite5/ when done.
+Commit the ACS-0004 product/docs and run `continuity checkpoint ACS-0004`; then continue the Gravebuster baseline and the two staged adapters from the exact partial receipts in issue #28. Keep ACS-0002's hosted CI/protection limitation tracked separately.
