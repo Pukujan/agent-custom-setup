@@ -2,3 +2,7 @@
 *.local.json
 .DS_Store
 __pycache__/
+
+**/tests/_tmp_ops.sqlite
+**/.acs/
+

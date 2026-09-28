@@ -53,3 +53,6 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```
 
 After VALID: MUST load modules per CGM writing-routing.json / ACS_VERIFY.md; apply acs_prompt_inject. After VALID: MUST load modules per CGM `docs/writing-routing.json` / `docs/ACS_VERIFY.md` (README→writing-direction; PR/issue/docs/commits→hsw); paste/apply `acs_prompt_inject` (hotload_check writes `PROMPT_INJECT.md` and prints instruction). Validate does not enforce prose quality.
+
+## Optional HOTLOAD full (2026-09-28)
+See HOTLOAD.md **Base vs full**: ops-db + 3 JEV gates + session-ops. Not force-bound until gates green.

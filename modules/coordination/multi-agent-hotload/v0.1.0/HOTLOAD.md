@@ -166,6 +166,42 @@ After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-ro
 Cite: [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/c95d73a0ce072a6d7173ce4848621a25cdf1cc7e/docs/ACS_VERIFY.md) · [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/c95d73a0ce072a6d7173ce4848621a25cdf1cc7e/docs/writing-routing.json).
 
 
+
+
+## Base vs full install (ACS optional layers)
+
+Alex lock 2026-09-28 (#25 RESEARCH-ALIGNED): **base excludes the four** seatbelt modules. **full** = base + the four. Do **not** force-bind full until gates green + Alex accept.
+
+### Base (required) — excludes the four
+
+1. ACS policy + registry
+2. FULL PCM + FULL CGM (pins in this file)
+3. This coordination runtime (roles, lease, claim queue, watchdog, proposals)
+
+### Full (optional) = base + these **four**
+
+| # | Module | Role |
+| --- | --- | --- |
+| 1 | `jev-ambiguity-gate` v0.1.0 | prompt/resume clarity JEV |
+| 2 | `jev-research-gate` v0.1.0 | research-needed JEV (#14 checklist fallback) |
+| 3 | `jev-gate-pin` v0.1.0 | PreToolUse tool pin JEV |
+| 4 | `session-ops-capture` v0.1.0 | transcript + OTLP (Langfuse via OTLP only) + Pass2 embeds offline |
+
+Shared buffer SoT (pulled with full): `ops-db` v0.1.0 — per-partition FIFO; lasting proof **only** git + GitHub issues + benchmarks. Helpers: `jev-shared` (OpenRouter).
+
+Authority: You/GitHub issue → Boss ACCEPT/REJECT → JEV seatbelts → coder.
+
+**Verify full (mock CI):**
+```bash
+python -m pytest \
+  modules/coordination/ops-db/v0.1.0/tests \
+  modules/coordination/jev-ambiguity-gate/v0.1.0/tests \
+  modules/coordination/jev-research-gate/v0.1.0/tests \
+  modules/coordination/jev-gate-pin/v0.1.0/tests \
+  modules/coordination/session-ops-capture/v0.1.0/tests -q
+```
+
+
 ## Minimal session checklist
 
 - [ ] FULL PCM pinned (`4e23854…` / CLI 0.6.0) — continuity **and** PR-only + required gates + protection/auto-merge preference

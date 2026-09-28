@@ -1,0 +1,14 @@
+{
+  "id": "jev-research-gate",
+  "name": "JEV research-needed gate",
+  "purpose": "Optional always-JEV on claim/issue snapshots: yes | no | insufficient. #14 checklist is mechanical fallback if JEV abstains/errors. Separate from ambiguity and tool pin.",
+  "harness": "coordination",
+  "created": "2026-09-28",
+  "updated": "2026-09-28",
+  "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/24",
+  "owning_agent": "agent-custom-setup",
+  "version": "0.1.0",
+  "path": "modules/coordination/jev-research-gate/v0.1.0/",
+  "status": "draft",
+  "summary": "Research-needed JEV on claim snapshots. Mock CI; live typesafe/jev-1.13 when ACS_JEV_LIVE. gate_kind=research. Fallback: #14 checklist. Not HOTLOAD-bound until proven."
+}
