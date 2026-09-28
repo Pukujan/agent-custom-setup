@@ -3,28 +3,692 @@
   "rule": "EVERY user message is gold; assistant text is NEVER gold",
   "primary": true,
   "turns": [
-    {"id":"acs-u01","when":"2026-09-28T04:05Z","axis":"routing","text":"three JEV gates not two: ambiguity + research-needed + jev-gate-pin; HOTLOAD full=all three; base=none","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"issue_comment","route":"three_modules"},"pins_add":["MUST ship three separate JEV gate modules","HOTLOAD base excludes gates"]},
-    {"id":"acs-u02","when":"2026-09-28T04:08Z","axis":"routing","text":"ops is module #4 in HOTLOAD full: session-ops-capture","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"issue_comment","route":"full_includes_ops"},"pins_add":["HOTLOAD full includes session-ops-capture"]},
-    {"id":"acs-u03","when":"2026-09-28T04:12Z","axis":"research","text":"versionable ops DB module; one shared SQLite partitioned; bi-temporal","gold":{"ambiguity":"clear","research_needed":"yes","tool":null,"report_shape":"module","route":"ops-db"},"pins_add":["ONE shared SQLite partitioned streams","bi-temporal occurred_at+recorded_at"]},
-    {"id":"acs-u04","when":"2026-09-28T04:15Z","axis":"research","text":"partitioned FIFO; pins not evicted with tool spam; lasting proof only git+issues+benchmarks","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"lock","route":"fifo_policy"},"pins_add":["pins/claims NOT tool-FIFO","lasting proof = git + issues + benchmarks only"]},
-    {"id":"acs-u05","when":"2026-09-28T04:17Z","axis":"tools","text":"hot path deterministic only; no embed lookup/numpy/vector on JEV gate path","gold":{"ambiguity":"clear","research_needed":"no","tool":"deny_embed_on_hot_path","report_shape":"lock","route":"deterministic_gates"},"pins_add":["JEV hot path = deterministic only","no numpy/embed on gate path"]},
-    {"id":"acs-u06","when":"2026-09-28T04:33Z","axis":"routing","text":"ACS stays live default; compare lane optional; ADAPT_PATTERN peers; skip ultrafast; no Redis","gold":{"ambiguity":"clear","research_needed":"no","tool":"allow_compare_lane","report_shape":"append_html","route":"acs_default_compare_optional"},"pins_add":["ACS gates stay Claude+Kilo default","skip jev-ultrafast","no Redis"]},
-    {"id":"acs-u07","when":"2026-09-28T05:02Z","axis":"report_shape","text":"GitHub Pages orphan gh-pages for compare HTML; never modify main","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"gh_pages","route":"pages_orphan"},"pins_add":["NEVER commit/merge main without Alex ask","Pages from gh-pages orphan"]},
-    {"id":"acs-u08","when":"2026-09-28T05:05Z","axis":"tools","text":"live OpenRouter Decisions proof required; pytest alone is not live proof","gold":{"ambiguity":"clear","research_needed":"no","tool":"require_live_jev","report_shape":"metrics","route":"live_vs_smoke"},"pins_add":["ACS_JEV_LIVE=1 for live proof","pytest != live proof"]},
-    {"id":"acs-u09","when":"2026-09-28T05:32Z","axis":"report_shape","text":"HSW ON by default for every human-facing surface including HTML; hard dark-only dashboard","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"hsw_always_on","route":"human_facing_default"},"pins_add":["HSW always-on for human HTML","hard dark dashboard"]},
-    {"id":"acs-u10","when":"2026-09-28T05:35Z","axis":"report_shape","text":"plain English for a person; allow/deny in plain words; plainer nav","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"plain_human","route":"hsw_prose"},"pins_add":["plain human writing not jargon"]},
-    {"id":"acs-u11","when":"2026-09-28T05:42Z","axis":"tools","text":"Fish hosted-only; self-host must deny; pin then live Jev; no coding-LLM in loop","gold":{"ambiguity":"clear","research_needed":"no","tool":"deny_selfhost","report_shape":"fish_story","route":"hosted_only"},"pins_add":["MUST use Fish hosted API","MUST NOT self-host fish-speech","no coding-LLM stepper"]},
-    {"id":"acs-u12","when":"2026-09-28T05:58Z","axis":"routing","text":"GO multi-lane parallel Jev backtest L1-L5; gold=blind human truth not peer agree; dual harvest; parallel workers 16; live Jev; append compare HTML","gold":{"ambiguity":"clear","research_needed":"yes","tool":null,"report_shape":"multi_lane_append","route":"multi_lane_backtest"},"pins_add":["gold = blind human truth NOT peer agree","parallel L1-L5 lanes","live typesafe/jev-1.13"]},
-    {"id":"acs-u13","when":"2026-09-28T05:59Z","axis":"report_shape","text":"REJECT brand-new separate HTML; append multi-lane into EXISTING jev-oss-compare.html only; no new report product name","gold":{"ambiguity":"clear","research_needed":"no","tool":"deny_new_html_product","report_shape":"append_existing_only","route":"existing_dashboard"},"pins_add":["append EXISTING jev-oss-compare.html only","no brand-new HTML product"]},
-    {"id":"acs-u14","when":"2026-09-28T05:59Z","axis":"research","text":"THIS ACS Grok chat is rich gold source; extract detailed gold from conversation corrections","gold":{"ambiguity":"clear","research_needed":"yes","tool":null,"report_shape":"acs_chat_gold","route":"chat_as_gold"},"pins_add":["ACS chat user messages = gold source"]},
-    {"id":"acs-u15","when":"2026-09-28T06:00Z","axis":"routing","text":"EVERY user message in ACS chat is gold; agent/assistant text is NEVER gold","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"user_only_gold","route":"user_gold_lock"},"pins_add":["assistant text NEVER gold","every user message is gold"]},
-    {"id":"acs-u16","when":"2026-09-28T06:00Z","axis":"routing","text":"FULL walk-forward turn-by-turn both streams; parallel lanes score each step","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"walk_forward","route":"walk_forward"},"pins_add":["walk-forward turn-by-turn","rolling pin store each gold turn"]},
-    {"id":"acs-u17","when":"2026-09-28T06:00Z","axis":"tools","text":"pure machine script; ONLY network/API = live Jev Decisions; zero coding-LLM","gold":{"ambiguity":"clear","research_needed":"no","tool":"deny_coding_llm","report_shape":"machine_only","route":"jev_only_api"},"pins_add":["ONLY API = live Jev","zero coding-LLM in loop"]},
-    {"id":"acs-u18","when":"2026-09-28T06:01Z","axis":"routing","text":"rolling pin store updated each gold/user turn; tiny pack per step; parallel lanes","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"rolling_pins","route":"rolling_pins"},"pins_add":["tiny pack per step","rolling pins per user turn"]},
-    {"id":"acs-u19","when":"2026-09-28T06:02Z","axis":"report_shape","text":"full TX publishable evidence; include huge Claude agents; nothing private/redaction","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"full_tx_evidence","route":"publish_full_tx"},"pins_add":["full transcripts as publishable evidence","include huge agents"]},
-    {"id":"acs-u20","when":"2026-09-28T06:02Z","axis":"routing","text":"FULL TRANSCRIPT primary = THIS ACS Grok chat yesterday+today user msgs; Claude tools second stream","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"acs_primary","route":"acs_chat_primary"},"pins_add":["ACS Grok chat is primary full TX","Claude JSONL is second stream"]},
-    {"id":"acs-u21","when":"2026-09-28T06:03Z","axis":"routing","text":"DO NOT center Claude Fish; primary+full TX=ACS chat; many more failure modes than Fish; catch ALL vs user-message gold","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"not_fish_centric","route":"anti_fish_center"},"pins_add":["NOT Fish-centric","catch ALL ACS-chat failure modes"]},
-    {"id":"acs-u22","when":"2026-09-28T06:03Z","axis":"routing","text":"benchmark MUST catch ALL failures in THIS chat; fail run if only score narrow subset","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"coverage_gate","route":"fail_narrow"},"pins_add":["fail if narrow subset only","min coverage = all user gold turns"]},
-    {"id":"acs-u23","when":"2026-09-28T06:03Z","axis":"routing","text":"BOTH transcripts required: ACS Grok chat ALL user gold AND Claude chat transcript FULL; walk-forward both streams","gold":{"ambiguity":"clear","research_needed":"no","tool":null,"report_shape":"dual_streams","route":"both_transcripts"},"pins_add":["BOTH ACS chat + Claude full TX required","walk-forward both streams"]}
-  ]
+    {
+      "id": "acs-u01",
+      "when": "2026-09-28T04:05Z",
+      "axis": "routing",
+      "text": "three JEV gates not two: ambiguity + research-needed + jev-gate-pin; HOTLOAD full=all three; base=none",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "issue_comment",
+        "route": "three_modules"
+      },
+      "pins_add": [
+        "MUST ship three separate JEV gate modules",
+        "HOTLOAD base excludes gates"
+      ]
+    },
+    {
+      "id": "acs-u02",
+      "when": "2026-09-28T04:08Z",
+      "axis": "routing",
+      "text": "ops is module #4 in HOTLOAD full: session-ops-capture",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "issue_comment",
+        "route": "full_includes_ops"
+      },
+      "pins_add": [
+        "HOTLOAD full includes session-ops-capture"
+      ]
+    },
+    {
+      "id": "acs-u03",
+      "when": "2026-09-28T04:12Z",
+      "axis": "research",
+      "text": "versionable ops DB module; one shared SQLite partitioned; bi-temporal",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "yes",
+        "tool": null,
+        "report_shape": "module",
+        "route": "ops-db"
+      },
+      "pins_add": [
+        "ONE shared SQLite partitioned streams",
+        "bi-temporal occurred_at+recorded_at"
+      ]
+    },
+    {
+      "id": "acs-u04",
+      "when": "2026-09-28T04:15Z",
+      "axis": "research",
+      "text": "partitioned FIFO; pins not evicted with tool spam; lasting proof only git+issues+benchmarks",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "lock",
+        "route": "fifo_policy"
+      },
+      "pins_add": [
+        "pins/claims NOT tool-FIFO",
+        "lasting proof = git + issues + benchmarks only"
+      ]
+    },
+    {
+      "id": "acs-u05",
+      "when": "2026-09-28T04:17Z",
+      "axis": "tools",
+      "text": "hot path deterministic only; no embed lookup/numpy/vector on JEV gate path",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "deny_embed_on_hot_path",
+        "report_shape": "lock",
+        "route": "deterministic_gates"
+      },
+      "pins_add": [
+        "JEV hot path = deterministic only",
+        "no numpy/embed on gate path"
+      ]
+    },
+    {
+      "id": "acs-u06",
+      "when": "2026-09-28T04:33Z",
+      "axis": "routing",
+      "text": "ACS stays live default; compare lane optional; ADAPT_PATTERN peers; skip ultrafast; no Redis",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "allow_compare_lane",
+        "report_shape": "append_html",
+        "route": "acs_default_compare_optional"
+      },
+      "pins_add": [
+        "ACS gates stay Claude+Kilo default",
+        "skip jev-ultrafast",
+        "no Redis"
+      ]
+    },
+    {
+      "id": "acs-u07",
+      "when": "2026-09-28T05:02Z",
+      "axis": "report_shape",
+      "text": "GitHub Pages orphan gh-pages for compare HTML; never modify main",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "gh_pages",
+        "route": "pages_orphan"
+      },
+      "pins_add": [
+        "NEVER commit/merge main without Alex ask",
+        "Pages from gh-pages orphan"
+      ]
+    },
+    {
+      "id": "acs-u08",
+      "when": "2026-09-28T05:05Z",
+      "axis": "tools",
+      "text": "live OpenRouter Decisions proof required; pytest alone is not live proof",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "require_live_jev",
+        "report_shape": "metrics",
+        "route": "live_vs_smoke"
+      },
+      "pins_add": [
+        "ACS_JEV_LIVE=1 for live proof",
+        "pytest != live proof"
+      ]
+    },
+    {
+      "id": "acs-u09",
+      "when": "2026-09-28T05:32Z",
+      "axis": "report_shape",
+      "text": "HSW ON by default for every human-facing surface including HTML; hard dark-only dashboard",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "hsw_always_on",
+        "route": "human_facing_default"
+      },
+      "pins_add": [
+        "HSW always-on for human HTML",
+        "hard dark dashboard"
+      ]
+    },
+    {
+      "id": "acs-u10",
+      "when": "2026-09-28T05:35Z",
+      "axis": "report_shape",
+      "text": "plain English for a person; allow/deny in plain words; plainer nav",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "plain_human",
+        "route": "hsw_prose"
+      },
+      "pins_add": [
+        "plain human writing not jargon"
+      ]
+    },
+    {
+      "id": "acs-u11",
+      "when": "2026-09-28T05:42Z",
+      "axis": "tools",
+      "text": "Fish hosted-only; self-host must deny; pin then live Jev; no coding-LLM in loop",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "deny_selfhost",
+        "report_shape": "fish_story",
+        "route": "hosted_only"
+      },
+      "pins_add": [
+        "MUST use Fish hosted API",
+        "MUST NOT self-host fish-speech",
+        "no coding-LLM stepper"
+      ]
+    },
+    {
+      "id": "acs-u12",
+      "when": "2026-09-28T05:58Z",
+      "axis": "routing",
+      "text": "GO multi-lane parallel Jev backtest L1-L5; gold=blind human truth not peer agree; dual harvest; parallel workers 16; live Jev; append compare HTML",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "yes",
+        "tool": null,
+        "report_shape": "multi_lane_append",
+        "route": "multi_lane_backtest"
+      },
+      "pins_add": [
+        "gold = blind human truth NOT peer agree",
+        "parallel L1-L5 lanes",
+        "live typesafe/jev-1.13"
+      ]
+    },
+    {
+      "id": "acs-u13",
+      "when": "2026-09-28T05:59Z",
+      "axis": "report_shape",
+      "text": "REJECT brand-new separate HTML; append multi-lane into EXISTING jev-oss-compare.html only; no new report product name",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "deny_new_html_product",
+        "report_shape": "append_existing_only",
+        "route": "existing_dashboard"
+      },
+      "pins_add": [
+        "append EXISTING jev-oss-compare.html only",
+        "no brand-new HTML product"
+      ]
+    },
+    {
+      "id": "acs-u14",
+      "when": "2026-09-28T05:59Z",
+      "axis": "research",
+      "text": "THIS ACS Grok chat is rich gold source; extract detailed gold from conversation corrections",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "yes",
+        "tool": null,
+        "report_shape": "acs_chat_gold",
+        "route": "chat_as_gold"
+      },
+      "pins_add": [
+        "ACS chat user messages = gold source"
+      ]
+    },
+    {
+      "id": "acs-u15",
+      "when": "2026-09-28T06:00Z",
+      "axis": "routing",
+      "text": "EVERY user message in ACS chat is gold; agent/assistant text is NEVER gold",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "user_only_gold",
+        "route": "user_gold_lock"
+      },
+      "pins_add": [
+        "assistant text NEVER gold",
+        "every user message is gold"
+      ]
+    },
+    {
+      "id": "acs-u16",
+      "when": "2026-09-28T06:00Z",
+      "axis": "routing",
+      "text": "FULL walk-forward turn-by-turn both streams; parallel lanes score each step",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "walk_forward",
+        "route": "walk_forward"
+      },
+      "pins_add": [
+        "walk-forward turn-by-turn",
+        "rolling pin store each gold turn"
+      ]
+    },
+    {
+      "id": "acs-u17",
+      "when": "2026-09-28T06:00Z",
+      "axis": "tools",
+      "text": "pure machine script; ONLY network/API = live Jev Decisions; zero coding-LLM",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "deny_coding_llm",
+        "report_shape": "machine_only",
+        "route": "jev_only_api"
+      },
+      "pins_add": [
+        "ONLY API = live Jev",
+        "zero coding-LLM in loop"
+      ]
+    },
+    {
+      "id": "acs-u18",
+      "when": "2026-09-28T06:01Z",
+      "axis": "routing",
+      "text": "rolling pin store updated each gold/user turn; tiny pack per step; parallel lanes",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "rolling_pins",
+        "route": "rolling_pins"
+      },
+      "pins_add": [
+        "tiny pack per step",
+        "rolling pins per user turn"
+      ]
+    },
+    {
+      "id": "acs-u19",
+      "when": "2026-09-28T06:02Z",
+      "axis": "report_shape",
+      "text": "full TX publishable evidence; include huge Claude agents; nothing private/redaction",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "full_tx_evidence",
+        "route": "publish_full_tx"
+      },
+      "pins_add": [
+        "full transcripts as publishable evidence",
+        "include huge agents"
+      ]
+    },
+    {
+      "id": "acs-u20",
+      "when": "2026-09-28T06:02Z",
+      "axis": "routing",
+      "text": "FULL TRANSCRIPT primary = THIS ACS Grok chat yesterday+today user msgs; Claude tools second stream",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "acs_primary",
+        "route": "acs_chat_primary"
+      },
+      "pins_add": [
+        "ACS Grok chat is primary full TX",
+        "Claude JSONL is second stream"
+      ]
+    },
+    {
+      "id": "acs-u21",
+      "when": "2026-09-28T06:03Z",
+      "axis": "routing",
+      "text": "DO NOT center Claude Fish; primary+full TX=ACS chat; many more failure modes than Fish; catch ALL vs user-message gold",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "not_fish_centric",
+        "route": "anti_fish_center"
+      },
+      "pins_add": [
+        "NOT Fish-centric",
+        "catch ALL ACS-chat failure modes"
+      ]
+    },
+    {
+      "id": "acs-u22",
+      "when": "2026-09-28T06:03Z",
+      "axis": "routing",
+      "text": "benchmark MUST catch ALL failures in THIS chat; fail run if only score narrow subset",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "coverage_gate",
+        "route": "fail_narrow"
+      },
+      "pins_add": [
+        "fail if narrow subset only",
+        "min coverage = all user gold turns"
+      ]
+    },
+    {
+      "id": "acs-u23",
+      "when": "2026-09-28T06:03Z",
+      "axis": "routing",
+      "text": "BOTH transcripts required: ACS Grok chat ALL user gold AND Claude chat transcript FULL; walk-forward both streams",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "dual_streams",
+        "route": "both_transcripts"
+      },
+      "pins_add": [
+        "BOTH ACS chat + Claude full TX required",
+        "walk-forward both streams"
+      ]
+    },
+    {
+      "id": "acs-u24",
+      "when": "2026-09-28T05:20Z",
+      "axis": "research",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 queued_human",
+      "text": "i have question on database of production do all its data live on one canonicaal sqlite",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "yes",
+        "tool": null,
+        "report_shape": "evidence",
+        "route": "storage_layout_ask",
+        "class": "explore"
+      },
+      "pins_add": [
+        "storage layout questions need evidence before pin"
+      ]
+    },
+    {
+      "id": "acs-u25",
+      "when": "2026-09-28T06:04Z",
+      "axis": "routing",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 mid_user",
+      "text": "i want them all in one db",
+      "gold": {
+        "ambiguity": "hold",
+        "research_needed": "yes",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "ambiguity_hold",
+        "route": "serial_reconsider",
+        "class": "serial_reconsider",
+        "expected": "do_not_harden_unify_db_pin"
+      },
+      "pins_add": [
+        "SERIAL RECONSIDER burst = ambiguity hold",
+        "do NOT harden unify-all-into-one-DB pin while human is reconsidering"
+      ],
+      "pins_supersede": [
+        "ONE shared SQLite partitioned streams"
+      ]
+    },
+    {
+      "id": "acs-u26",
+      "when": "2026-09-28T06:08Z",
+      "axis": "routing",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 queued_human",
+      "text": "why numpy faiss is it for calculation?",
+      "gold": {
+        "ambiguity": "hold",
+        "research_needed": "yes",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "ambiguity_hold",
+        "route": "serial_reconsider",
+        "class": "serial_reconsider",
+        "expected": "do_not_harden_unify_db_pin"
+      },
+      "pins_add": [
+        "rapid why/arent/which after unify ask = still exploring not a pin"
+      ]
+    },
+    {
+      "id": "acs-u27",
+      "when": "2026-09-28T06:08Z",
+      "axis": "routing",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 queued_human",
+      "text": "arent those easy to lose isnt sqlite more permanent?",
+      "gold": {
+        "ambiguity": "hold",
+        "research_needed": "yes",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "ambiguity_hold",
+        "route": "serial_reconsider",
+        "class": "serial_reconsider",
+        "expected": "do_not_harden_unify_db_pin"
+      },
+      "pins_add": []
+    },
+    {
+      "id": "acs-u28",
+      "when": "2026-09-28T06:08Z",
+      "axis": "routing",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 queued_human",
+      "text": "do we even need numpy for them? can numpy just be projection tell me pls",
+      "gold": {
+        "ambiguity": "hold",
+        "research_needed": "yes",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "ambiguity_hold",
+        "route": "serial_reconsider",
+        "class": "serial_reconsider",
+        "expected": "do_not_harden_unify_db_pin"
+      },
+      "pins_add": []
+    },
+    {
+      "id": "acs-u29",
+      "when": "2026-09-28T06:08Z",
+      "axis": "routing",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 queued_human",
+      "text": "profiles/hades-v2/state.db (~2GB canonical conversation) this vs sqlite db which one is better and why",
+      "gold": {
+        "ambiguity": "hold",
+        "research_needed": "yes",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "ambiguity_hold",
+        "route": "serial_reconsider",
+        "class": "serial_reconsider",
+        "expected": "do_not_harden_unify_db_pin"
+      },
+      "pins_add": []
+    },
+    {
+      "id": "acs-u30",
+      "when": "2026-09-28T06:08Z",
+      "axis": "routing",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 queued_human",
+      "text": "wha tabout user.md and memory.md do they act like db too or just md? but they do store user data why are they not treated as db?",
+      "gold": {
+        "ambiguity": "hold",
+        "research_needed": "yes",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "ambiguity_hold",
+        "route": "serial_reconsider",
+        "class": "serial_reconsider",
+        "expected": "do_not_harden_unify_db_pin"
+      },
+      "pins_add": [
+        "user.md/memory.md questions during burst keep unify-DB unpinned"
+      ]
+    },
+    {
+      "id": "acs-u31",
+      "when": "2026-09-28T06:23Z",
+      "axis": "routing",
+      "source_tx": "synthetic_delayed_15m_from_burst_class",
+      "text": "wait why numpy — take a step back on unifying everything into one db",
+      "gold": {
+        "ambiguity": "hold",
+        "research_needed": "yes",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "ambiguity_hold",
+        "route": "delayed_reconsider",
+        "class": "delayed_reconsider",
+        "delay": "15m",
+        "expected": "reopen_supersede_unify_pin"
+      },
+      "pins_add": [
+        "DELAYED reconsider (15m/2hr later wait-why) reopens pins",
+        "do NOT keep unify-DB pin frozen after delayed reconsider"
+      ],
+      "pins_supersede": [
+        "ONE shared SQLite partitioned streams",
+        "MUST unify all stores into one SQLite"
+      ]
+    },
+    {
+      "id": "acs-u32",
+      "when": "2026-09-28T08:08Z",
+      "axis": "routing",
+      "source_tx": "synthetic_delayed_2h_from_burst_class",
+      "text": "wait why numpy faiss still — supersede any unify-all-one-db pin I said earlier",
+      "gold": {
+        "ambiguity": "hold",
+        "research_needed": "yes",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "ambiguity_hold",
+        "route": "delayed_reconsider",
+        "class": "delayed_reconsider",
+        "delay": "2h",
+        "expected": "reopen_supersede_unify_pin"
+      },
+      "pins_add": [
+        "human take-back / wait-why supersedes prior hasty unify pin"
+      ],
+      "pins_supersede": [
+        "ONE shared SQLite partitioned streams",
+        "MUST unify all stores into one SQLite"
+      ]
+    },
+    {
+      "id": "acs-u33",
+      "when": "2026-09-28T06:09Z",
+      "axis": "routing",
+      "source_tx": "acs_grok_chat",
+      "text": "add gold for SERIAL RECONSIDER bursts so Jev does NOT pin hasty claims; after agent dump storage NOT one SQLite then i want them all in one db then rapid why/arent/which — ambiguity hold do-not-harden unify-DB pin; supersede when taken back",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "acs_chat_gold",
+        "route": "serial_reconsider_meta",
+        "class": "serial_reconsider",
+        "expected": "do_not_harden_unify_db_pin"
+      },
+      "pins_add": [
+        "Jev MUST NOT pin hasty claims during SERIAL RECONSIDER bursts",
+        "supersede unify-DB pin when human takes it back"
+      ]
+    },
+    {
+      "id": "acs-u34",
+      "when": "2026-09-28T06:10Z",
+      "axis": "routing",
+      "source_tx": "acs_grok_chat",
+      "text": "also gold for DELAYED reconsider (15min / 2hr later wait why numpy) — same as immediate burst: reopen/supersede pins, do not keep frozen",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "acs_chat_gold",
+        "route": "delayed_reconsider_meta",
+        "class": "delayed_reconsider",
+        "expected": "reopen_supersede_unify_pin"
+      },
+      "pins_add": [
+        "DELAYED reconsider same class as SERIAL RECONSIDER",
+        "pins reopen on delayed wait-why; never keep frozen against take-back"
+      ]
+    },
+    {
+      "id": "acs-u35",
+      "when": "2026-09-27T18:57Z",
+      "axis": "tools",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 queued_human",
+      "text": "I BELIEVE FISH is hosted apio we dont have to self host for this i gave u an api for it please check before u use",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "yes",
+        "tool": "deny_selfhost",
+        "report_shape": "fish_story",
+        "route": "hosted_only"
+      },
+      "pins_add": [
+        "Fish hosted API before any self-host attempt"
+      ]
+    },
+    {
+      "id": "acs-u36",
+      "when": "2026-09-27T18:58Z",
+      "axis": "research",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 queued_human",
+      "text": "we really need our agents to do external research before we touch or try to use any of these kind of things why is that not being enforced? maybe this is something ACS should enforce",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "yes",
+        "tool": null,
+        "report_shape": "module",
+        "route": "research_gate"
+      },
+      "pins_add": [
+        "external research gate before touch/use unknown APIs"
+      ]
+    },
+    {
+      "id": "acs-u37",
+      "when": "2026-09-27T20:31Z",
+      "axis": "research",
+      "source_tx": "claude:e781f4ad/agent-aea1d360 queued_human",
+      "text": "write issue log about this idea proposal dont decide yet",
+      "gold": {
+        "ambiguity": "hold",
+        "research_needed": "no",
+        "tool": "deny_hasty_unify_pin",
+        "report_shape": "issue_comment",
+        "route": "dont_decide_yet",
+        "class": "serial_reconsider",
+        "expected": "do_not_harden_pin"
+      },
+      "pins_add": [
+        "dont decide yet / proposal only = do not pin"
+      ]
+    },
+    {
+      "id": "acs-u38",
+      "when": "2026-09-28T06:09Z",
+      "axis": "report_shape",
+      "source_tx": "acs_grok_chat",
+      "text": "Update fixtures, issue #28 comment, re-run multi_lane_walkforward live parallel Jev-only, append existing jev-oss-compare.html, push PR #26. Report agree% and whether dont-pin gold is caught. No secrets. CGM plain HTML.",
+      "gold": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "deny_new_html_product",
+        "report_shape": "append_existing_only",
+        "route": "mlwf_rerun"
+      },
+      "pins_add": [
+        "append EXISTING jev-oss-compare.html only",
+        "CGM plain HTML",
+        "comment issue #28 with agree% and dont-pin catch"
+      ]
+    }
+  ],
+  "classes": {
+    "serial_reconsider": "Immediate why/arent/which burst after a hasty claim — ambiguity hold; do NOT harden pin; supersede on take-back",
+    "delayed_reconsider": "15m/2hr later wait-why — same as serial: reopen/supersede; do not keep pin frozen"
+  },
+  "harvest_note": "ReadTranscript MCP unavailable; expanded from ACS Grok chat user locks + harvested Claude TX e781f4ad/agent-aea1d3605524be4e9 human queued_command mid-turn msgs (SERIAL RECONSIDER unify-DB burst 2026-09-28T06:04–06:08Z). Assistant dumps never gold."
 }

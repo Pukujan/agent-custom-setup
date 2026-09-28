@@ -1,0 +1,36 @@
+{
+  "source_session": "e781f4ad-9ab3-4ade-b4d4-4d805973ab61",
+  "source_agent": "agent-aea1d3605524be4e9",
+  "agent_dump_summary_NOT_gold": "Production storage is NOT one canonical SQLite: state.db (chat) + sqlite satellites + JSON state + JSONL/numpy/FAISS.",
+  "human_burst_USER_gold": [
+    {
+      "when": "2026-09-28T05:20:14Z",
+      "text": "i have question on database of production do all its data live on one canonicaal sqlite"
+    },
+    {
+      "when": "2026-09-28T06:04:25Z",
+      "text": "i want them all in one db"
+    },
+    {
+      "when": "2026-09-28T06:08:26Z",
+      "text": "why numpy faiss is it for calculation?"
+    },
+    {
+      "when": "2026-09-28T06:08:26Z",
+      "text": "arent those easy to lose isnt sqlite more permanent?"
+    },
+    {
+      "when": "2026-09-28T06:08:26Z",
+      "text": "do we even need numpy for them? can numpy just be projection tell me pls"
+    },
+    {
+      "when": "2026-09-28T06:08:26Z",
+      "text": "profiles/hades-v2/state.db (~2GB) this vs sqlite db which one is better and why"
+    },
+    {
+      "when": "2026-09-28T06:08:26Z",
+      "text": "wha tabout user.md and memory.md do they act like db too or just md? but they do store user data why are they not treated as db?"
+    }
+  ],
+  "expected": "ambiguity hold / do-not-harden unify-DB pin; supersede when taken back; DELAYED 15m/2hr wait-why same class"
+}
