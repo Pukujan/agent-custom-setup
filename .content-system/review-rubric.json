@@ -3,7 +3,7 @@
   "dimensions": [
     {
       "id": "full_stack_pins",
-      "question": "Are FULL PCM and FULL CGM 0.5.6 required and pinned?"
+      "question": "Are FULL PCM and FULL CGM 0.5.7 required and pinned?"
     },
     {
       "id": "hotload_order",

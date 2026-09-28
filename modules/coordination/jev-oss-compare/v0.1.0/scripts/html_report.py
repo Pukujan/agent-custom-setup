@@ -9,6 +9,7 @@ are preserved across appends.
 from __future__ import annotations
 import html, json, re
 from pathlib import Path
+import sys
 from typing import Any, Dict, List, Optional
 
 REPORT_NAME = "ACS Jev gate comparison"
@@ -788,6 +789,67 @@ def _extract_existing_blinds(text: str) -> str:
     return "".join(_BLIND_SECTION_RE.findall(text))
 
 
+
+def verify_hsw_before_publish(html_path: Path) -> None:
+    """Fail-closed: run CGM verify_hsw_applied --mode acs-html before Pages publish."""
+    import os
+    import subprocess
+
+    candidates = []
+    env = os.environ.get("CGM_ROOT")
+    if env:
+        candidates.append(Path(env))
+    here = Path(__file__).resolve()
+    acs_root = here.parents[4]
+    candidates.extend(
+        [
+            acs_root.parent / "content-generation-modules",
+            Path("/workspace/cgm-057"),
+            Path("/workspace/content-generation-modules"),
+            Path(r"D:/claude/content-generation-modules"),
+            Path.home() / "content-generation-modules",
+        ]
+    )
+    cgm = None
+    for cand in candidates:
+        try:
+            root = cand.expanduser().resolve()
+        except OSError:
+            continue
+        script = root / "scripts" / "verify_hsw_applied.py"
+        if script.is_file():
+            cgm = root
+            break
+    if cgm is None:
+        raise RuntimeError(
+            "verify_hsw_before_publish: CGM checkout with scripts/verify_hsw_applied.py not found "
+            "(set CGM_ROOT). Refusing to publish without HSW gate."
+        )
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(cgm / "scripts" / "verify_hsw_applied.py"),
+            "--root",
+            str(cgm),
+            "--mode",
+            "acs-html",
+            "--html",
+            str(html_path),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    out = (proc.stdout or "") + (proc.stderr or "")
+    if proc.returncode != 0:
+        raise RuntimeError(
+            "verify_hsw_applied FAILED before publish (fix jargon/tool-dump tells):\n" + out
+        )
+    print("hsw_verify: OK before publish")
+    if out.strip():
+        print(out.strip())
+
+
 def append_run(report_path: Path, summary: Dict[str, Any], rows: List[Dict[str, Any]]) -> None:
     """Rewrite multi-page shell with latest numbers; prepend run history (newest first)."""
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -816,6 +878,7 @@ def append_run(report_path: Path, summary: Dict[str, Any], rows: List[Dict[str, 
     elif old_blinds:
         text = text.replace("</body>", old_blinds + "\n</body>", 1)
     report_path.write_text(text, encoding="utf-8")
+    verify_hsw_before_publish(report_path)
 
 
 def rebuild_preserving_history(
@@ -845,3 +908,4 @@ def rebuild_preserving_history(
     text = shell.replace("<!--RUNS-->", "<!--RUNS-->\n" + old_runs, 1)
     text = text.replace("<!--BLIND-->", "<!--BLIND-->\n" + old_blinds, 1)
     report_path.write_text(text, encoding="utf-8")
+    verify_hsw_before_publish(report_path)

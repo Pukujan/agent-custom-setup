@@ -130,10 +130,10 @@ REQUIRED_PCM_FEATURES = (
     "leaf_parent_dependency_receipts",
 )
 
-CGM_PIN_VERSION = "0.5.6"
-CGM_PIN_REVISION_PREFIX = "32de5cf"
+CGM_PIN_VERSION = "0.5.7"
+CGM_PIN_REVISION_PREFIX = "c069613"
 PCM_PIN_REVISION_PREFIX = "4e23854"
-CGM_PIN_REVISION = "32de5cf9341b36673a05a4a17b1868b2178362f8"
+CGM_PIN_REVISION = "c069613ca8b3e02bcf5aba1960160583537f8a3a"
 CGM_HELPER_REPO = "https://github.com/Pukujan/content-generation-modules"
 
 
@@ -150,6 +150,7 @@ def discover_cgm_root(explicit: Path | None = None) -> Path | None:
     acs_root = MODULE_ROOT.parents[3]  # v0.1.0 -> multi-agent-hotload -> coordination -> modules -> repo
     candidates.extend(
         [
+            Path("/workspace/cgm-057"),
             Path("/workspace/cgm-056"),
             Path("/workspace/content-generation-modules"),
             Path("/workspace/cgm-054"),
@@ -211,7 +212,7 @@ def validate_cgm_live(
         if require:
             errors.append(
                 "CGM checkout not found: set CGM_ROOT or pass --cgm-root to a "
-                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.6)"
+                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.7)"
             )
         return errors
 
@@ -234,7 +235,7 @@ def validate_cgm_live(
             )
             return errors
 
-    # Confirm helper system-version.json reports 0.5.4 + eight modules
+    # Confirm helper system-version.json reports pinned version + eight modules
     try:
         version = load_json(cgm_root / "system-version.json")
     except Exception as exc:  # noqa: BLE001
@@ -316,13 +317,18 @@ def load_writing_routing(cgm_root: Path) -> dict | None:
 def render_prompt_inject_md(routing: dict, *, pin_sha: str, pin_version: str) -> str:
     """Render PROMPT_INJECT.md from CGM writing-routing acs_prompt_inject fields.
 
-    Injects application, human_facing_default, routes, apply_checklist (see
-    acs_prompt_inject.fields). HSW is ON by default for every human-facing
-    deliverable including HTML reports/compare/appendable; basenames -> hon.
+    Injects application, human_facing_default, routes, apply_checklist, and
+    always-on system_block (see acs_prompt_inject.fields). Paste system_block
+    into agent system prompt at session boot — not per-report. HSW is ON by
+    default for every human-facing deliverable including HTML reports/compare/
+    appendable; basenames -> hon. Opt-in forbidden.
     """
     inject = routing.get("acs_prompt_inject") if isinstance(routing.get("acs_prompt_inject"), dict) else {}
     instruction = str(inject.get("instruction") or "").strip()
+    system_block = str(inject.get("system_block") or "").strip()
     when = str(inject.get("when") or "").strip()
+    always_on = inject.get("always_on") is True
+    opt_in_forbidden = inject.get("opt_in_forbidden") is True
     application = str(routing.get("application") or "must_load").strip()
     checklist = routing.get("apply_checklist") if isinstance(routing.get("apply_checklist"), list) else []
     checklist_md = "\n".join(f"{i+1}. {c}" for i, c in enumerate(checklist))
@@ -373,6 +379,14 @@ def render_prompt_inject_md(routing: dict, *, pin_sha: str, pin_version: str) ->
         "- **rule:** HSW is ON by default for EVERY human-facing task/output including HTML "
         "reports, compare HTML/UIs, and appendable HTML. Not optional. Not per-report opt-in. "
         "Visible HTML prose → **hsw**; filesystem basenames → **hon**.\n\n"
+        "## Boot paste — acs_prompt_inject.system_block (ALWAYS-ON)\n\n"
+        f"- **always_on:** `{str(always_on).lower()}`\n"
+        f"- **opt_in_forbidden:** `{str(opt_in_forbidden).lower()}`\n"
+        "- **rule:** Paste the block below into the agent **system prompt at session boot** "
+        "(every CGM adopter). Not per-report. Not per-HTML. Not ACS-only.\n\n"
+        "```\n"
+        f"{system_block or instruction}\n"
+        "```\n\n"
         "## Instruction (MUST paste/apply into system or task prompts)\n\n"
         f"{instruction}\n\n"
         "## apply_checklist\n\n"
@@ -405,10 +419,17 @@ def apply_acs_prompt_inject(cgm_root: Path, pack_root: Path) -> tuple[str | None
             render_prompt_inject_md(routing, pin_sha=CGM_PIN_REVISION, pin_version=CGM_PIN_VERSION),
             encoding="utf-8",
         )
-        notes.append(f"acs_prompt_inject: wrote {out}")
+        notes.append(f"acs_prompt_inject: wrote {out} (system_block boot paste)")
     except OSError as exc:
         notes.append(f"acs_prompt_inject: failed to write PROMPT_INJECT.md: {exc}")
-    return instruction, notes
+    system_block = ""
+    if isinstance(inject, dict):
+        system_block = str(inject.get("system_block") or "").strip()
+        if inject.get("always_on") is not True:
+            notes.append("acs_prompt_inject: WARN always_on is not true on pinned writing-routing")
+        if inject.get("opt_in_forbidden") is not True:
+            notes.append("acs_prompt_inject: WARN opt_in_forbidden is not true on pinned writing-routing")
+    return (system_block or instruction), notes
 
 
 def validate_pins(data: object) -> list[str]:
@@ -444,7 +465,7 @@ def validate_pins(data: object) -> list[str]:
 
     cgm = pins.get("cgm")
     if not isinstance(cgm, dict):
-        errors.append("pins.cgm: required (FULL CGM 0.5.6 stack)")
+        errors.append("pins.cgm: required (FULL CGM 0.5.7 stack)")
     else:
         ver = str(cgm.get("version") or "")
         if ver != CGM_PIN_VERSION:
@@ -454,7 +475,7 @@ def validate_pins(data: object) -> list[str]:
         rev = str(cgm.get("revision") or "")
         if not rev.startswith(CGM_PIN_REVISION_PREFIX):
             errors.append(
-                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.6)"
+                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.7)"
             )
         mods = cgm.get("modules")
         if not isinstance(mods, list):
@@ -549,21 +570,27 @@ def run(
     print(f"  cgm_root={resolved_cgm}")
     print(f"  adopter_root={resolved_adopter}")
     print(f"  cgm_pin={CGM_PIN_VERSION}@{CGM_PIN_REVISION}")
-    print("  install_surface=FULL PCM + FULL CGM 0.5.6 + this runtime")
+    print("  install_surface=FULL PCM + FULL CGM 0.5.7 + this runtime")
     print("  cgm_validate=VALID (validate_content_system.py)")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
     print("  claim_queue=FIFO after vacancy; zombie re-reads GitHub claim")
     for note in inject_notes:
         print(f"  {note}")
     print(
-        "  next: MUST load CGM modules per docs/writing-routing.json / docs/ACS_VERIFY.md "
-        "(README/product -> writing-direction; PR/issue/docs/commits -> hsw). "
-        "Paste/apply acs_prompt_inject.instruction into system/task prompts before writing."
+        "  next: MUST paste acs_prompt_inject.system_block into agent system prompt at BOOT "
+        "(always_on; opt_in_forbidden). Then MUST load CGM modules per docs/writing-routing.json "
+        "/ docs/ACS_VERIFY.md (README/product -> writing-direction; human-facing prose/HTML/"
+        "compare/appendable -> hsw; basenames -> hon). Not per-report."
+    )
+    print(
+        "  hsw_verify: before publishing compare/Pages HTML run "
+        "python <cgm>/scripts/verify_hsw_applied.py --root <cgm> --mode acs-html "
+        "--html <path-to-jev-oss-compare.html>"
     )
     if inject_text:
-        print("  --- acs_prompt_inject.instruction ---")
+        print("  --- acs_prompt_inject.system_block (BOOT PASTE) ---")
         print(console_safe(inject_text))
-        print("  --- end acs_prompt_inject ---")
+        print("  --- end acs_prompt_inject.system_block ---")
     return 0
 
 

@@ -49,3 +49,17 @@ def test_shell_hard_dark_only():
     assert "#fafafa" not in shell
     assert "#0b0f14" in shell or "#121212" in shell
     assert "tabler" in shell.lower() or "theme: 'dark'" in shell or 'theme: "dark"' in shell
+
+
+def test_verify_hsw_helper_exists():
+    import html_report as hr
+    assert hasattr(hr, "verify_hsw_before_publish")
+    report = ROOT / "reports" / "jev-oss-compare.html"
+    if not report.is_file():
+        return
+    try:
+        hr.verify_hsw_before_publish(report)
+    except RuntimeError as exc:
+        if "not found" in str(exc).lower():
+            return
+        raise

@@ -12,7 +12,7 @@
   "preferred_terms": {
     "ACS": "this repository as source of truth for registered setups",
     "hotload": "load order that installs PCM + CGM + coordination runtime",
-    "FULL CGM": "all eight modules at 0.5.6 plus human_output_contract (incl. human-output-naming)"
+    "FULL CGM": "all eight modules at 0.5.7 plus human_output_contract (incl. human-output-naming)"
   },
   "avoid": [
     "HSW+writing-direction only as complete CGM",
@@ -21,7 +21,7 @@
     "direct pushes to main"
   ],
   "good_examples": [
-    "Hotload is done only when FULL PCM, FULL CGM 0.5.6 validate, and this runtime all pass."
+    "Hotload is done only when FULL PCM, FULL CGM 0.5.7 validate, and this runtime all pass."
   ],
   "bad_examples": [
     "We pinned HSW and writing-direction, so CGM is done."
