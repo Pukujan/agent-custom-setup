@@ -67,6 +67,33 @@
         "PCM @ 4e2385474b4af9249ca009cbdcb38c4498932475 (CLI 0.6.0) full stack",
         "CGM @ 9874b26dc46499137bf22e1ca163874ef2dd5e7a (0.5.1) full seven modules"
       ]
+    },
+    {
+      "id": "session-ops-capture",
+      "name": "Session ops capture (ACS-wide JSONL \u2192 SQLite + OTLP + Pass2)",
+      "purpose": "ACS-wide idempotent ops capture for any hotloaded agent: adapter\u2192canonical SQLite+OTLP (Pass1) + classify/embed (Pass2). Claude JSONL adapter #1; Kilo Code VS Code tasks adapter #2.",
+      "harness": "coordination",
+      "created": "2026-09-27",
+      "updated": "2026-09-27",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/22",
+      "owning_agent": "agent-custom-setup",
+      "deploy_mirrors": [
+        {
+          "label": "ACS module tree (SoT; optional draft)",
+          "path": "D:\\\\claude\\\\agent-custom-setup\\\\modules\\\\coordination\\\\session-ops-capture\\\\v0.1.0\\\\",
+          "notes": "ACS is SoT. Optional until proven; not binding in HOTLOAD.md. Multi-harness via adapters (Claude #1, Kilo #2)."
+        }
+      ],
+      "version": "0.1.0",
+      "path": "modules/coordination/session-ops-capture/v0.1.0/",
+      "recorded_at": "2026-09-28T03:50:00Z",
+      "valid_time": {
+        "start": "2026-09-27T00:00:00-04:00",
+        "end": null
+      },
+      "status": "draft",
+      "optional": true,
+      "summary": "Draft optional ACS-wide module: adapters (Claude #1, Kilo #2) \u2192 uuid SQLite + OTLP Pass1 + classify/embed Pass2. FN=0 held-out fixtures. Not binding hotload until proven."
     }
   ]
 }
