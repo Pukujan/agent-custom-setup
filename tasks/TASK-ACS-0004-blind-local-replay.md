@@ -94,3 +94,26 @@ The user’s task-context, message-relation, and pin-state proposal is recorded 
 - Decisions: treat all row counts as partial receipts, preserve disagreement between copies, and keep the design proposal separate from benchmark acceptance.
 - Blocked/uncertain: no terminal summaries exist for the current lanes; the model identity in old Laya/Kev receipts comes from explicit lane IDs because their `model_id` fields are generic.
 - Next: commit product/docs, run the continuity checkpoint push, then continue the baseline and adapters in the next session.
+
+### 2026-09-28 17:14:02 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["No baseline or adapter runner is active; 4B/9B terminal summaries are missing; PR #26 is behind main and current-base checks are pending."],"changed":["modules/coordination/jev-oss-compare/v0.1.0/, tasks/TASK-ACS-0004-blind-local-replay.md, checkpoints/CURRENT.md"],"completed":["Committed the replay harness, design/test/report specifications, content-free partial HTML, current task projection, and benchmark status handoff."],"decisions":["Preserve incomplete and conflicting receipts; keep task-context design proposal separate from current exhaustive ACS-0004 acceptance; do not restart Windows inference."],"evidence":["Commit d46f4e1 on task/ACS-25-dual-jev-gates; issue #28 comment https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5874824862; continuity validate reports VALID with an existing issue-log-format marker warning; receipts remain partial and conflicting as recorded in task ACS-0004."],"next_action":"Continue the Gravebuster baseline from saved cache, then run fast-jev-compaction and auto-mode sequentially and refresh the content-free HTML report.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0004","timestamp":"2026-09-28T17:14:02Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"317510008f7b16101006ba0655fb150539033845adf12742fd17b1259e466f3a","request_id":"d439c0ea83cf4701808f5a07c97f547f","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0004"} -->
+
+Completed:
+- Committed the replay harness, design/test/report specifications, content-free partial HTML, current task projection, and benchmark status handoff.
+
+Evidence:
+- Commit d46f4e1 on task/ACS-25-dual-jev-gates; issue #28 comment https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5874824862; continuity validate reports VALID with an existing issue-log-format marker warning; receipts remain partial and conflicting as recorded in task ACS-0004.
+
+Decisions:
+- Preserve incomplete and conflicting receipts; keep task-context design proposal separate from current exhaustive ACS-0004 acceptance; do not restart Windows inference.
+
+Changed:
+- modules/coordination/jev-oss-compare/v0.1.0/, tasks/TASK-ACS-0004-blind-local-replay.md, checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- No baseline or adapter runner is active; 4B/9B terminal summaries are missing; PR #26 is behind main and current-base checks are pending.
+
+Next:
+- Continue the Gravebuster baseline from saved cache, then run fast-jev-compaction and auto-mode sequentially and refresh the content-free HTML report.
