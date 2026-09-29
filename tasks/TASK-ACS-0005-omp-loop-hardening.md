@@ -39,3 +39,26 @@ Owner report 2026-09-29: sessions spend turns reacting to injected messages inst
 Owner review + merge the PR (Refs #35 #37); then fresh-live-session confirmation (court disabled at start, no post-settle advisory wakes) and the delivery receipt on #37.
 
 ## Checkpoint log
+
+### 2026-09-29 21:44:18 UTC — omp/qwen3.8-flash
+
+<!-- continuity:checkpoint {"agent":"omp/qwen3.8-flash","blocked":[],"changed":["oh-my-pi/extensions/jev-court.ts, oh-my-pi/extensions/loop-guard.ts, oh-my-pi/config/{config.yml,WATCHDOG.yml,jev-court.example.json}, oh-my-pi/README.md, tasks/TASK-ACS-0005-omp-loop-hardening.md, checkpoints/CURRENT.md, .gitignore"],"completed":["jev-court v2 rewrite (fail-quiet, budgets, nextTurn-when-idle, stop suppression, transcript reconciliation, re-raise reuse, durable rehydrated decisions); new loop-guard (replay marking, task-echo guidance); WATCHDOG silence-first + scope advisor disabled; config storm keys incl. syncBacklog enum-type fix; README/CURRENT/task projection updated; live ~/.omp/agent cutover with dated backup; rebase onto main 9999d87 with conflict reconciliation"],"decisions":["scope advisor disabled pending hardened severity rules; court opt-in default; goal auto-continue off; upstream residue documented"],"evidence":["32/32 assertions replaying real #35 fixture (v1 83 injected messages -> 0 dup-reconciled); omp -p clean load v18.4.4; omp config get syncBacklog=3 immuneTurns=6 maxNotesPerUpdate=2 goal.continuationModes=[] todo.remindersMax=1"],"next_action":"owner review + merge PR (Refs #35 #37); fresh-live-session confirmation; receipt on #37","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0005","timestamp":"2026-09-29T21:44:18Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a55fc548d7e50d25756019829f70191bf909016c1d08d7df63d1de15b550f631","request_id":"4b3771efa5ee4ef1ae2d9f15483bbffe","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0005"} -->
+
+Completed:
+- jev-court v2 rewrite (fail-quiet, budgets, nextTurn-when-idle, stop suppression, transcript reconciliation, re-raise reuse, durable rehydrated decisions); new loop-guard (replay marking, task-echo guidance); WATCHDOG silence-first + scope advisor disabled; config storm keys incl. syncBacklog enum-type fix; README/CURRENT/task projection updated; live ~/.omp/agent cutover with dated backup; rebase onto main 9999d87 with conflict reconciliation
+
+Evidence:
+- 32/32 assertions replaying real #35 fixture (v1 83 injected messages -> 0 dup-reconciled); omp -p clean load v18.4.4; omp config get syncBacklog=3 immuneTurns=6 maxNotesPerUpdate=2 goal.continuationModes=[] todo.remindersMax=1
+
+Decisions:
+- scope advisor disabled pending hardened severity rules; court opt-in default; goal auto-continue off; upstream residue documented
+
+Changed:
+- oh-my-pi/extensions/jev-court.ts, oh-my-pi/extensions/loop-guard.ts, oh-my-pi/config/{config.yml,WATCHDOG.yml,jev-court.example.json}, oh-my-pi/README.md, tasks/TASK-ACS-0005-omp-loop-hardening.md, checkpoints/CURRENT.md, .gitignore
+
+Blocked/uncertain:
+- none
+
+Next:
+- owner review + merge PR (Refs #35 #37); fresh-live-session confirmation; receipt on #37
