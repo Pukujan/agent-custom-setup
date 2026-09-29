@@ -22,7 +22,7 @@ Owner report 2026-09-29: sessions spend turns reacting to injected messages inst
 
 - `oh-my-pi/extensions/jev-court.ts` (v2 rewrite), `oh-my-pi/extensions/loop-guard.ts` (new)
 - `oh-my-pi/config/config.yml`, `oh-my-pi/config/WATCHDOG.yml`, `oh-my-pi/config/jev-court.example.json`
-- `oh-my-pi/README.md`, `checkpoints/CURRENT.md`, `tasks/TASK-ACS-0005-omp-loop-hardening.md`, `.gitignore`
+- `oh-my-pi/README.md`, `checkpoints/CURRENT.md`, `tasks/TASK-ACS-0005-omp-loop-hardening.md`, `.gitignore`, `oh-my-pi/ops/storm-report.py` (new: read-only loop-diagnostics over session artifacts)
 - (`oh-my-pi/config/models.yml` carries the owner's uncommitted plan-role drift — preserved, not ours)
 
 ## Non-goals

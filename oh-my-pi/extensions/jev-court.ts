@@ -262,7 +262,9 @@ export default function (pi: ExtensionAPI) {
   let ownerStopped = false;
   let stopAnnounced = false;
   let passthroughAnnounced = false;
-  const STOP_RE = /^\s*(stop|halt|cancel|enough|quit|pause)\b/i;
+  // Bare-interjection stops only: "stop", "Stop.", "halt!" — never "stop the timer
+  // in the code" (false positive would suppress legit advisories for real work text).
+  const STOP_RE = /^\s*(stop|halt|cancel|enough|quit|pause)\b[\s.!,…]*$/i;
 
   pi.on("input", (event: { source?: string; text?: string }) => {
     if (event?.source && event.source !== "interactive") return;
