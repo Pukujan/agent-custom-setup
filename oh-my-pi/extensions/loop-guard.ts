@@ -136,8 +136,10 @@ export default function (pi: ExtensionAPI) {
 
       let changed = false;
       let newIncidents = 0;
+      const hitByObj = new Map<object, Hit>();
+      for (const h of hits) hitByObj.set(h.m, h);
       const out = msgs.map((raw) => {
-        const hit = hits.find((h) => h.m === raw);
+        const hit = hitByObj.get(raw as object);
         if (!hit) return raw;
         // Marked only when EVERY job here already had an EARLIER delivery; a
         // batch with any fresh job stays verbatim.
