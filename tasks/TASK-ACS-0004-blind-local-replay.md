@@ -228,7 +228,7 @@ Next:
 - Decisions: mechanics-only — no catch-rate/backtest claim; `queue_wait_ms` documented as enqueue→result latency; capped harvest treated as non-evidence; old receipt fingerprints change with the runner fix (expected, versioned on-branch).
 - Changed: runner.py (2 fixes), tests/test_laya_typed_decisions_v1.py (regression test), reports/runs/laya-local-20260929T184900Z.json, docs/REPORT-local-blind-replay.md (status section), docs/PDD-local-blind-replay.md:38 (1.2.0/boundary-gate/smoke corrections), .gitignore (`.venv-laya/`, `.laya-tmp/`), task + CURRENT projections.
 - Blocked/uncertain: full 81-file replay unreachable from this device — Gravebuster SSH permission denied; Cortex tailnet node reachable but SSH/22 closed and its Ollama cannot serve a ModernBERT classifier. Base-English Laya sidecar (:8770 on Gravebuster) exposes no typed-decisions contract.
-- Next atomic action: obtain corpus-host access (Gravebuster key or Cortex SSH), run the full raw Claude DAG replay from this branch on that host, then refresh the HTML report from terminal receipts.
+- Next: obtain corpus-host access (Gravebuster key or Cortex SSH), run the full raw Claude DAG replay from this branch on that host, then refresh the HTML report from terminal receipts.
 
 ### 2026-09-29 19:15:06 UTC — omp
 
