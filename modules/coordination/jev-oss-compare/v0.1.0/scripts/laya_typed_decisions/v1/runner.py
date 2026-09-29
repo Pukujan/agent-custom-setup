@@ -2009,7 +2009,10 @@ def _parse_remote_identity(model_path: Path, profile: Mapping[str, Any]) -> None
 def _load_tokenizer(model_path: Path) -> Any:
     try:
         from transformers import AutoTokenizer
-        tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True, use_fast=True)
+        tokenizer_path = (model_path / "tokenizer"
+                          if (model_path / "tokenizer").is_dir() else model_path)
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path,
+                                                  local_files_only=True, use_fast=True)
     except BaseException as exc:
         raise AdapterError("pinned_local_tokenizer_load_failed") from exc
     if not getattr(tokenizer, "is_fast", False):
