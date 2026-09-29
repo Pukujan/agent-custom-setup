@@ -325,3 +325,26 @@ Decisions: no feasibility/duration estimate derived from the trial; corpus inven
 Changed: reports/runs/laya-resource-trial-20260929.json; task lineage line 68 + this entry; checkpoints/CURRENT.md line 19.
 Blocked/uncertain: full-replay feasibility on any host remains unmeasured; replay gated on corpus-host access.
 Next: corpus-host access, then the full 81-file DAG replay.
+
+### 2026-09-29 20:13:38 UTC — omp
+
+<!-- continuity:checkpoint {"agent":"omp","blocked":["full 81-file replay gated on corpus-host access (Gravebuster key or Cortex SSH)"],"changed":["modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-resource-trial-20260929.json; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md"],"completed":["Ran the owner-sequenced time-limited local resource attempt: cold smoke 7/7, wall 11.05s, peak RSS 1.84GB, per-batch 326-1122ms; receipt records observed values with explicit non-extrapolation boundary; completed PR #26/#30/#31/#32/#33 lineage in task and CURRENT."],"decisions":["no feasibility/duration estimate derived; synthetic states too short to transfer; corpus inventory context only"],"evidence":["/usr/bin/time -l cold smoke output -> reports/runs/laya-resource-trial-20260929.json; gh pr view #33 MERGED e6d5af96 gates pass head 1e59118 run 36623693396"],"next_action":"open PR (Refs #28) for the resource-trial increment; then corpus-host access and the full DAG replay","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0004","timestamp":"2026-09-29T20:13:38Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"2729e85f5dc26760fc4fb619192ff72fa522622586b2bd28c9656b7cecc23369","request_id":"203e5eb6c08d4ddba0e0e6e6e72d5b63","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0004"} -->
+
+Completed:
+- Ran the owner-sequenced time-limited local resource attempt: cold smoke 7/7, wall 11.05s, peak RSS 1.84GB, per-batch 326-1122ms; receipt records observed values with explicit non-extrapolation boundary; completed PR #26/#30/#31/#32/#33 lineage in task and CURRENT.
+
+Evidence:
+- /usr/bin/time -l cold smoke output -> reports/runs/laya-resource-trial-20260929.json; gh pr view #33 MERGED e6d5af96 gates pass head 1e59118 run 36623693396
+
+Decisions:
+- no feasibility/duration estimate derived; synthetic states too short to transfer; corpus inventory context only
+
+Changed:
+- modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-resource-trial-20260929.json; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- full 81-file replay gated on corpus-host access (Gravebuster key or Cortex SSH)
+
+Next:
+- open PR (Refs #28) for the resource-trial increment; then corpus-host access and the full DAG replay
