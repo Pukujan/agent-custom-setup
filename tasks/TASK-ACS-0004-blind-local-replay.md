@@ -261,3 +261,26 @@ Next:
 - Changed: tasks/TASK-ACS-0004-blind-local-replay.md (lines 32, 68, this entry); checkpoints/CURRENT.md (Active line, Next atomic action).
 - Blocked/uncertain: full 81-file replay remains gated on corpus-host access (Gravebuster key or Cortex SSH); no benchmark-evidence claim.
 - Next: on the corpus host, `python modules/coordination/jev-oss-compare/v0.1.0/scripts/laya_typed_decisions/v1/runner.py run --source <dir-of-81-jsonl> --model-dir <pinned-snapshot-1a793eb5…> --output <private-dir-outside-repo> --run-id <id> --execute-local`, then refresh the HTML report from terminal receipts.
+
+### 2026-09-29 19:28:56 UTC — omp
+
+<!-- continuity:checkpoint {"agent":"omp","blocked":["full 81-file replay gated on corpus-host access (Gravebuster key or Cortex SSH)"],"changed":["tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md"],"completed":["Synced task/CURRENT projections after PR #30 (0e8f302) and PR #31 (bc78910) merges; labeled pre-fix receipt corpus as historical; recorded gate evidence and the full corpus-host run command."],"decisions":["docs-correction increments require pre-push projection sync + checkpoint, not receipt-only transition"],"evidence":["gh pr view mergeCommit + gh pr checks: gates pass runs 36618372931 (head 079ac14) and 36619028133; #28 receipts 5896975313/5897053583/5897127716"],"next_action":"on corpus host run runner.py run with --source 81-file dir, --model-dir pinned snapshot, --output private dir, --run-id, --execute-local; refresh HTML from terminal receipts","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0004","timestamp":"2026-09-29T19:28:56Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"6854f150f54f046c9fe8084af7a93a2b6d09fc4a5a36b6dd53a6ea3828090d5e","request_id":"bd18e178eab34cdc8cc7edf0013f4096","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0004"} -->
+
+Completed:
+- Synced task/CURRENT projections after PR #30 (0e8f302) and PR #31 (bc78910) merges; labeled pre-fix receipt corpus as historical; recorded gate evidence and the full corpus-host run command.
+
+Evidence:
+- gh pr view mergeCommit + gh pr checks: gates pass runs 36618372931 (head 079ac14) and 36619028133; #28 receipts 5896975313/5897053583/5897127716
+
+Decisions:
+- docs-correction increments require pre-push projection sync + checkpoint, not receipt-only transition
+
+Changed:
+- tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- full 81-file replay gated on corpus-host access (Gravebuster key or Cortex SSH)
+
+Next:
+- on corpus host run runner.py run with --source 81-file dir, --model-dir pinned snapshot, --output private dir, --run-id, --execute-local; refresh HTML from terminal receipts
