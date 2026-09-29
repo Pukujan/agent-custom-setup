@@ -197,3 +197,26 @@ Blocked/uncertain:
 
 Next:
 - Rerun tests/test_laya_typed_decisions_v1.py, fix any remaining failures, and reconcile the live issue/evidence documents before a bounded synthetic resource trial.
+
+### 2026-09-29 18:18:07 UTC — Codex
+
+<!-- continuity:checkpoint {"agent":"Codex","blocked":["Focused synthetic suite not rerun after fixture correction; full M01-M28/property fuzz and Laya inference remain unverified; fresh PR checks after pushing are pending."],"changed":["modules/coordination/jev-oss-compare/v0.1.0/{docs,profiles/laya-typed-decisions/v1,scripts/laya_typed_decisions/v1,tests/test_laya_typed_decisions_v1.py,scripts/replay_sources.py}; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md"],"completed":["Committed and pushed the Laya 1.2.0 typed-decision profile/runner, worker, focused synthetic suite, updated PDD/SDD/TDD/protocol, and corrected task/CURRENT handoff projections; recorded the owner problem sequence and discovery-only evaluation boundary."],"decisions":["Keep issue #28 open and the adapter explicitly unverified until the focused suite passes; keep the historical corpus discovery-only, do not inspect the named incident before a frozen run, and make no accuracy/generalization or completion claim."],"evidence":["GitHub branch task/ACS-25-dual-jev-gates received product commit e084ab0; continuity validate is VALID with the existing stale issue-log-format marker warning; last focused suite run was 11 passed/1 fixture mismatch and the fixture was patched afterward but not rerun; no Laya inference or full-corpus replay was started; PR #26 was OPEN with auto-merge enabled and its old head checks are stale pending a fresh run."],"next_action":"On the other PC, pull task/ACS-25-dual-jev-gates; rerun tests/test_laya_typed_decisions_v1.py and fix any failures; then verify the local Laya runtime/checkpoint and available Gravebuster resources, run a bounded synthetic resource trial, and validate the frozen source manifest before any transcript replay.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0004","timestamp":"2026-09-29T18:18:07Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"eea324240bcd57976866737de9c9da579904626d23f5173e9bc8b0d09986ba7a","request_id":"acs0004-handoff-e084ab0-20260929","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0004"} -->
+
+Completed:
+- Committed and pushed the Laya 1.2.0 typed-decision profile/runner, worker, focused synthetic suite, updated PDD/SDD/TDD/protocol, and corrected task/CURRENT handoff projections; recorded the owner problem sequence and discovery-only evaluation boundary.
+
+Evidence:
+- GitHub branch task/ACS-25-dual-jev-gates received product commit e084ab0; continuity validate is VALID with the existing stale issue-log-format marker warning; last focused suite run was 11 passed/1 fixture mismatch and the fixture was patched afterward but not rerun; no Laya inference or full-corpus replay was started; PR #26 was OPEN with auto-merge enabled and its old head checks are stale pending a fresh run.
+
+Decisions:
+- Keep issue #28 open and the adapter explicitly unverified until the focused suite passes; keep the historical corpus discovery-only, do not inspect the named incident before a frozen run, and make no accuracy/generalization or completion claim.
+
+Changed:
+- modules/coordination/jev-oss-compare/v0.1.0/{docs,profiles/laya-typed-decisions/v1,scripts/laya_typed_decisions/v1,tests/test_laya_typed_decisions_v1.py,scripts/replay_sources.py}; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- Focused synthetic suite not rerun after fixture correction; full M01-M28/property fuzz and Laya inference remain unverified; fresh PR checks after pushing are pending.
+
+Next:
+- On the other PC, pull task/ACS-25-dual-jev-gates; rerun tests/test_laya_typed_decisions_v1.py and fix any failures; then verify the local Laya runtime/checkpoint and available Gravebuster resources, run a bounded synthetic resource trial, and validate the frozen source manifest before any transcript replay.
