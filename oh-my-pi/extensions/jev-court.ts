@@ -208,6 +208,7 @@ export default function (pi: ExtensionAPI) {
     try {
       const sm = ctx.sessionManager as unknown as { getBranch?: () => Array<Record<string, unknown>> };
       if (typeof sm.getBranch !== "function") return;
+      let rehydratedCount = 0;
       for (const e of sm.getBranch()) {
         if (e.type !== "custom" || e.customType !== "com.jev-court.decision") continue;
         const d = e.data as
@@ -223,10 +224,10 @@ export default function (pi: ExtensionAPI) {
         decided.set(d.key, v);
         seen.add(d.key);
         if (d.sig) sigIndex.set(d.sig, v);
-        ledger.push({ ts: d.ts ?? 0, key: d.key.slice(0, 80), verdict: v, outcome: d.outcome ?? "rehydrated", note: "" });
+        rehydratedCount++;
       }
-      if (ledger.length)
-        pi.logger?.info?.(`jev-court: rehydrated ${decided.size} prior decisions from session branch`);
+      if (rehydratedCount)
+        pi.logger?.info?.(`jev-court: rehydrated ${rehydratedCount} prior decisions (${decided.size} keys) from session branch`);
     } catch (e) {
       pi.logger?.warn?.(`jev-court: rehydrate failed: ${String(e)}`);
     }
@@ -264,7 +265,8 @@ export default function (pi: ExtensionAPI) {
   let passthroughAnnounced = false;
   // Bare-interjection stops only: "stop", "Stop.", "halt!" — never "stop the timer
   // in the code" (false positive would suppress legit advisories for real work text).
-  const STOP_RE = /^\s*(stop|halt|cancel|enough|quit|pause)\b[\s.!,…]*$/i;
+  const STOP_RE =
+    /^\s*(?:please\s+|just\s+)?(?:stop|halt|cancel|enough|quit|pause)(?:\s+(?:it|this|that|the\s+(?:loop|session|run)))?\s*[.!…]*\s*$/i;
 
   pi.on("input", (event: { source?: string; text?: string }) => {
     if (event?.source && event.source !== "interactive") return;
@@ -467,7 +469,9 @@ export default function (pi: ExtensionAPI) {
       decide(note, { choice: "ignore", confidence: 0, risk, model: "no-key" }, true);
       return;
     }
-
+    // Concurrency gate: storm bursts (v1 saw 94 notes fire at once) must not
+    // hammer the decisions API; excess adjudications queue FIFO.
+    await courtGate();
     let verdict: Verdict;
     try {
       const res = await fetch(`${cfg.baseUrl}${cfg.path}`, {
@@ -520,10 +524,32 @@ export default function (pi: ExtensionAPI) {
     } catch (e) {
       // Fail-QUIET: court error must not turn into an unscored act message.
       pi.logger?.warn?.(`jev-court: adjudication failed (${String(e)}); note stays native-only`);
+      courtGateRelease();
       decide(note, { choice: "ignore", confidence: 0, risk, model: "court-error" }, true);
       return;
     }
+    courtGateRelease();
     decide(note, verdict, false);
+  }
+  // ---------- adjudication concurrency gate ----------
+  const MAX_CONCURRENT_COURT_CALLS = 3;
+  let courtSlots = 0;
+  const courtQueue: Array<() => void> = [];
+  async function courtGate(): Promise<void> {
+    if (courtSlots < MAX_CONCURRENT_COURT_CALLS) {
+      courtSlots++;
+      return;
+    }
+    await new Promise<void>((resolve) =>
+      courtQueue.push(() => {
+        courtSlots++;
+        resolve();
+      }),
+    );
+  }
+  function courtGateRelease(): void {
+    courtSlots--;
+    courtQueue.shift()?.();
   }
 
   function record(key: string, sig: string, v: Verdict, outcome: string, note: string) {
