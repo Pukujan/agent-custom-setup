@@ -35,7 +35,7 @@ This is a hypothesis, not an established benefit. A useful result requires revie
 ## Current evidence and gaps
 
 - The raw Claude source has 81 JSONL files, 18,350 normalized events across 80 streams, and 198 eligible human messages. Raw ACS/Grok is not verified; gold-derived ACS fixtures remain excluded.
-- Laya adapter/profile 1.1.0 now adds an acknowledgment-expectation decision and span-paired checks against only the next assistant message. The deterministic reducer emits shadow routes for acknowledgment, recorded tool/intent, and research gates. Assistant prose-plan boundary detection is still unimplemented. These paths have synthetic tests but no Laya inference or full-transcript run yet.
+- Laya adapter/profile 1.2.0 adds an acknowledgment-expectation decision, span-paired checks against only the next assistant message, and the versioned assistant prose-plan boundary gate. The deterministic reducer emits shadow routes for acknowledgment, recorded tool/intent, and research gates. These paths have synthetic tests, and the pinned model scored the 7-job synthetic smoke on a local CPU host (2026-09-29 receipt: `reports/runs/laya-local-20260929T184900Z.json`); no full-transcript run has happened yet.
 - The existing user-message and tool/research jobs provide provenance-bearing shadow signals. They do not implement a live recovery controller.
 - The live issue body and owner correction comment now state the recovery goal and backtest tradeoff; the latter remains an untested hypothesis.
 - The report marks the M01–M14 suite unverified and whole-session hidden holdout not implemented. Previous post-inference partitions are exploratory and cannot be called hidden.

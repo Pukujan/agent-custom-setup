@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import queue
 import sys
+import threading
+import time
 import unittest
 from pathlib import Path
 
@@ -294,6 +297,96 @@ class LayaTypedDecisionsV1Tests(unittest.TestCase):
         self.assertEqual(research["recommended_route"], "dispatch_verifier")
         self.assertEqual(research["reason_code"], "no_matching_as_of_evidence")
         self.assertEqual(research["claim_event_ids"], ["claim-1"])
+
+
+class _ClampedQueue(queue.Queue):
+    """Clamp the result-wait timeout so a dispatch regression fails fast."""
+
+    def get(self, block=True, timeout=None):
+        if timeout is not None:
+            timeout = min(timeout, 0.5)
+        return super().get(block, timeout)
+
+
+class WorkerPoolInferRegressionTests(unittest.TestCase):
+    """_WorkerPool.infer must enqueue batch envelopes and carry the enqueue stamp.
+
+    Guards the 2026-09-29 production bug: dropping task_queues[wid].put(envelope)
+    or failing to copy enqueued_monotonic into the inflight record. Runs the pool
+    in-process against a fake responder thread (no mp.spawn, no model load).
+    """
+
+    GROUP = "acknowledgment_response_pair"
+    QID = "acknowledgment_response"
+
+    def setUp(self):
+        self.profile = runner.load_profile()
+        self.labels = sorted(self.profile["questions"][self.QID]["criteria"])
+
+    def _job(self, job_id):
+        return {
+            "job_id": job_id,
+            "request_hash": "req-" + job_id,
+            "state": {"text": "state-" + job_id},
+            "meta": {"gate": "acknowledgment", "question_group": self.GROUP,
+                     "stream_id": "stream-1", "event_id": "user-1"},
+        }
+
+    def test_infer_dispatches_envelopes_and_carries_enqueue_time(self):
+        pool = object.__new__(runner._WorkerPool)
+        pool.worker_count = 1
+        pool.max_queued = 2
+        pool.batch_size = 2
+        pool.result_queue = _ClampedQueue()
+        pool.task_queues = [queue.Queue()]
+        seen, errors = [], []
+
+        class _Cache:
+            def get(self, request_hash):
+                return None
+
+            def put_many(self, rows):
+                return None
+
+        def responder():
+            try:
+                envelope = pool.task_queues[0].get(timeout=5)
+                seen.append(envelope)
+                enqueue = envelope["enqueued_monotonic"]
+                if not isinstance(enqueue, float):
+                    raise AssertionError("envelope enqueue stamp missing")
+                time.sleep(0.03)
+                probs = {label: 1.0 / len(self.labels) for label in self.labels}
+                rows = [{
+                    "job_id": item["job_id"], "status": "scored",
+                    "token_preflight": {"status": "ok"},
+                    "answers": {self.QID: {"choice": self.labels[0],
+                                           "probabilities": probs}},
+                } for item in envelope["jobs"]]
+                pool.result_queue.put({"kind": "batch_result",
+                                       "batch_id": envelope["batch_id"],
+                                       "worker_id": 0, "batch_elapsed_ms": 5.0,
+                                       "rows": rows})
+            except Exception as exc:  # noqa: BLE001
+                errors.append(repr(exc))
+
+        jobs = [self._job("job-a"), self._job("job-b")]
+        thread = threading.Thread(target=responder, daemon=True)
+        thread.start()
+        try:
+            inferred = pool.infer(jobs, self.profile, _Cache(), {}, lambda row: None,
+                                  run_id="test-run", profile_hash="ph")
+        finally:
+            thread.join(timeout=10)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(seen), 1, "no batch envelope was enqueued to a worker")
+        self.assertEqual(len(inferred), 2)
+        for job_id in ("job-a", "job-b"):
+            row = inferred[job_id]
+            self.assertEqual(row["status"], "scored")
+            self.assertEqual(row["run_id"], "test-run")
+            # queue_wait_ms spans enqueue->result arrival; the responder slept 30ms.
+            self.assertGreaterEqual(row["queue_wait_ms"], 20.0)
 
 
 if __name__ == "__main__":

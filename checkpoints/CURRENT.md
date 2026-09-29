@@ -16,7 +16,7 @@ Phase: registry + module + docs live on main; CI enforcement remains the open ga
 
 ## Active
 
-- ACS-0004 (#28) blind recovery-routing replay — issue #28 centers whether low-cost local Laya can surface actionable recovery for consequential intent/research drift. Laya is primary; OpenJev/Kev are optional comparators. Local adapter/profile 1.2.0 changes add next-response acknowledgment, assistant plan/claim boundaries, plan-to-intent checks, and shadow recovery routes. They are not yet tested after the last fixture correction or pushed. No Laya inference/full-corpus run occurred. Parent: none; dependencies: none. Owner correction: [#5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).
+- ACS-0004 (#28) blind recovery-routing replay — issue #28 centers whether low-cost local Laya can surface actionable recovery for consequential intent/research drift. Laya is primary; OpenJev/Kev are optional comparators. Adapter/profile 1.2.0 (next-response acknowledgment, assistant plan/claim boundaries, plan-to-intent checks, shadow recovery routes) is committed on branch `task/ACS-0004-laya-benchmark`: 13/13 unittest suite, mutation-proven pool regression test, and a pinned-model cold synthetic smoke (7/7 on a local CPU host; receipt `modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-local-20260929T184900Z.json`). No full-corpus replay has run: the verified 81-file corpus lives on hosts unreachable from this device (Gravebuster SSH denied; Cortex SSH closed). Parent: none; dependencies: none. Owner correction: [#5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).
 - ACS-0002 (#5) CI-gate ENFORCEMENT — workflow + markers landed as definition (b094c07); hosted verification blocked by account plan: private-repo Actions runs fail zero-step/zero-billable; private-repo protected branches need Pro/Team/Enterprise (docs.github.com verified 2026-09-26T00:1Z; URLs in task file). Owner options: public / Pro+budget / self-hosted / #9-agent CI/CD converges.
 
 ## Queued
@@ -31,4 +31,4 @@ Phase: registry + module + docs live on main; CI enforcement remains the open ga
 
 ## Next atomic action
 
-On the other PC, pull `task/ACS-25-dual-jev-gates`, rerun `tests/test_laya_typed_decisions_v1.py`, fix any failures, then verify the exact Laya runtime/checkpoint and resource budget before a bounded synthetic trial. Do not start full transcript inference until the suite passes and the input manifest is validated.
+Obtain corpus-host access (Gravebuster key or Cortex SSH), run the full raw Claude DAG replay from `task/ACS-0004-laya-benchmark` on that host, and refresh the HTML report from terminal receipts.

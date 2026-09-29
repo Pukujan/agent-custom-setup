@@ -28,7 +28,7 @@ A cheap shadow backtest can be better than doing nothing if it exposes timely, p
 
 - Live owning issue #28 is OPEN and now titled “Blind replay for long-running intent and research recovery”; the owner correction is recorded in [comment #5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).
 - The local Claude source inventory is 81 raw JSONL files (14 root, 67 nested), 18,350 normalized events across 80 streams, 198 eligible human messages, and 41 captured compact-boundary records. Raw ACS/Grok is unverified.
-- The new Laya typed-decision adapter/profile 1.2.0 adds acknowledgment checks, assistant prose-boundary classification, plan-to-intent checks, and deterministic shadow routes for acknowledgment, plans, recorded tool conflicts, and research evidence. No Laya inference or full-corpus run has occurred. The expanded synthetic suite is pending rerun: the latest run had 11 passing tests and one fixture mismatch; the fixture was corrected after that run.
+- The new Laya typed-decision adapter/profile 1.2.0 adds acknowledgment checks, assistant prose-boundary classification, plan-to-intent checks, and deterministic shadow routes for acknowledgment, plans, recorded tool conflicts, and research evidence. The synthetic suite is green 13/13 (incl. a mutation-proven worker-pool regression test), and the pinned model scored a cold 7/7 synthetic smoke on a local CPU host (receipt `modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-local-20260929T184900Z.json`). No full-corpus run has occurred: `inspect`/`run` reject the capped harvest with `source_must_be_the_verified_81_file_corpus`.
 - The prior replay receipt corpus has partial/conflicting Laya/OpenJev/Kev results; none is terminal completion evidence. Windows OpenJev inference remains stopped. The previous session partition occurred after inference and is exploratory.
 - Repository production gate modules remain optional drafts. Their current mocks do not implement or prove a general live recovery controller.
 - The current M01-M14 report status is unverified and hidden whole-session holdout is not implemented. No named known incident is to be inspected until post-run audit.
@@ -38,7 +38,7 @@ A cheap shadow backtest can be better than doing nothing if it exposes timely, p
 - Outcome-aligned PDD, SDD, benchmark protocol, and TDD under modules/coordination/jev-oss-compare/v0.1.0/docs/.
 - A versioned Laya-first typed-decision profile/runner and deterministic source/replay machinery that can represent response acknowledgment, plan/action conflict, as-of evidence support, and routes.
 - Synthetic metamorphic/property-fuzz coverage for provenance, chronology, exact supersession, route sensitivity, no-lookahead, and incomplete-input abstention.
-- The focused Laya adapter suite has 12 synthetic cases; its latest complete run is not green. The full M01-M28 suite and generated fuzz remain unverified.
+- The focused Laya adapter suite has 13 synthetic cases and is green (2026-09-29, this branch). The full M01-M28 suite and generated fuzz remain unverified.
 - Private replay inputs/receipts remain outside version control. Commit only code, schemas, hashes, and content-free aggregate receipts suitable for review.
 - Report the raw source boundary and old partial/contradictory model receipts separately. Do not present a Claude-only result as dual-stream or as human-gold accuracy.
 
@@ -63,9 +63,9 @@ The user’s task-context, message-relation, and pin-state proposal is recorded 
 - Leaf owning issue: [#28](https://github.com/Pukujan/agent-custom-setup/issues/28)
 - Parent ancestry: none; dependencies: none
 - Primary writer: Codex
-- Branch: task/ACS-25-dual-jev-gates
+- Branch: task/ACS-0004-laya-benchmark (continuation; prior PR #26 branch `task/ACS-25-dual-jev-gates` merged)
 - Source issue revision: #28 body and owner correction comment #5894826843 read 2026-09-29
-- PR/CI/receipt: PR #26 is OPEN with auto-merge enabled. The latest observed `gates` success was for old head `68c2066`, while GitHub reported the PR BEHIND `main`; local merge commit `e212a69` includes `origin/main` at `c1bbbb8` and is pending push. Fresh checks are required after the update; this is not a delivery claim.
+- PR/CI/receipt: PR #26 MERGED 2026-09-29T18:19:06Z as `69a34dd` (verified live this session). Continuation branch `task/ACS-0004-laya-benchmark` cut from that main head carries commit `947e8a5` + continuity checkpoint; a new PR (Refs #28, never a closing keyword) with fresh checks is required — this is not a delivery claim.
 
 ## Checkpoint log
 
@@ -220,3 +220,35 @@ Blocked/uncertain:
 
 Next:
 - On the other PC, pull task/ACS-25-dual-jev-gates; rerun tests/test_laya_typed_decisions_v1.py and fix any failures; then verify the local Laya runtime/checkpoint and available Gravebuster resources, run a bounded synthetic resource trial, and validate the frozen source manifest before any transcript replay.
+
+### 2026-09-29 — Laya local runtime proven; full replay blocked on corpus-host access
+
+- Completed: on this device (Apple-Silicon CPU host), installed the pinned SDK (laya 0.3.20 @git 23a17522aa4942da6cce53a995a275760320b691), staged the pinned HF snapshot @1a793eb568e6718f15941d08f85432581df534e3, and ran the pinned-model cold synthetic smoke: 7/7 jobs scored, 2 workers, batch latency 342–1125 ms. Fixed two production bugs found at runtime: `_OutputCache` chmod now only touches directories it creates; `_WorkerPool.infer` carries `enqueued_monotonic` into the inflight record. Added an in-process mutation-proven regression test for the pool path (drop-enqueue → `worker_batch_timeout`; drop-stamp → `KeyError`); suite 13/13. Demonstrated the corpus guard: `inspect` and `run` reject the capped harvest with `source_must_be_the_verified_81_file_corpus`.
+- Evidence: content-free receipt `modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-local-20260929T184900Z.json`; unittest output 13/13 OK; guard rejection JSON for run-id `laya-probe-20260929`. PR #26 (old branch) MERGED at 2026-09-29T18:19:06Z into main @69a34dd; this continuation lives on new branch `task/ACS-0004-laya-benchmark` cut from that main head.
+- Decisions: mechanics-only — no catch-rate/backtest claim; `queue_wait_ms` documented as enqueue→result latency; capped harvest treated as non-evidence; old receipt fingerprints change with the runner fix (expected, versioned on-branch).
+- Changed: runner.py (2 fixes), tests/test_laya_typed_decisions_v1.py (regression test), reports/runs/laya-local-20260929T184900Z.json, docs/REPORT-local-blind-replay.md (status section), docs/PDD-local-blind-replay.md:38 (1.2.0/boundary-gate/smoke corrections), .gitignore (`.venv-laya/`, `.laya-tmp/`), task + CURRENT projections.
+- Blocked/uncertain: full 81-file replay unreachable from this device — Gravebuster SSH permission denied; Cortex tailnet node reachable but SSH/22 closed and its Ollama cannot serve a ModernBERT classifier. Base-English Laya sidecar (:8770 on Gravebuster) exposes no typed-decisions contract.
+- Next: obtain corpus-host access (Gravebuster key or Cortex SSH), run the full raw Claude DAG replay from this branch on that host, then refresh the HTML report from terminal receipts.
+
+### 2026-09-29 19:15:06 UTC — omp
+
+<!-- continuity:checkpoint {"agent":"omp","blocked":["full 81-file replay needs corpus-host access: Gravebuster SSH denied from this device; Cortex SSH closed"],"changed":["modules/coordination/jev-oss-compare/v0.1.0/{scripts/laya_typed_decisions/v1/runner.py,tests/test_laya_typed_decisions_v1.py,reports/runs/laya-local-20260929T184900Z.json,docs/REPORT-local-blind-replay.md,docs/PDD-local-blind-replay.md}; .gitignore; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md"],"completed":["Pinned Laya runtime proven locally: cold synthetic smoke 7/7 (SDK 0.3.20 @23a17522, model @1a793eb5); pool enqueue-stamp + cache chmod fixes with mutation-proven regression test; suite 13/13; corpus guard rejection demonstrated on capped harvest; content-free receipt committed."],"decisions":["mechanics-only claim boundary; queue_wait_ms documented as enqueue-to-result latency; new branch task/ACS-0004-laya-benchmark continues merged ACS-0004 scope"],"evidence":["reports/runs/laya-local-20260929T184900Z.json; unittest 13/13 OK; inspect/run reject with source_must_be_the_verified_81_file_corpus; PR #26 verified MERGED as 69a34dd (live gh api)"],"next_action":"open PR (Refs #28) for task/ACS-0004-laya-benchmark, publish #28 receipt comment, then run full DAG replay once corpus-host access is granted","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0004","timestamp":"2026-09-29T19:15:06Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"557da70392aa958e184ed22ef621aee265d26add44511c3af5ac7a72f667f3d3","request_id":"c967c27d353948fb912ed63ef33177ae","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0004"} -->
+
+Completed:
+- Pinned Laya runtime proven locally: cold synthetic smoke 7/7 (SDK 0.3.20 @23a17522, model @1a793eb5); pool enqueue-stamp + cache chmod fixes with mutation-proven regression test; suite 13/13; corpus guard rejection demonstrated on capped harvest; content-free receipt committed.
+
+Evidence:
+- reports/runs/laya-local-20260929T184900Z.json; unittest 13/13 OK; inspect/run reject with source_must_be_the_verified_81_file_corpus; PR #26 verified MERGED as 69a34dd (live gh api)
+
+Decisions:
+- mechanics-only claim boundary; queue_wait_ms documented as enqueue-to-result latency; new branch task/ACS-0004-laya-benchmark continues merged ACS-0004 scope
+
+Changed:
+- modules/coordination/jev-oss-compare/v0.1.0/{scripts/laya_typed_decisions/v1/runner.py,tests/test_laya_typed_decisions_v1.py,reports/runs/laya-local-20260929T184900Z.json,docs/REPORT-local-blind-replay.md,docs/PDD-local-blind-replay.md}; .gitignore; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- full 81-file replay needs corpus-host access: Gravebuster SSH denied from this device; Cortex SSH closed
+
+Next:
+- open PR (Refs #28) for task/ACS-0004-laya-benchmark, publish #28 receipt comment, then run full DAG replay once corpus-host access is granted
