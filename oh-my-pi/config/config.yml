@@ -7,17 +7,28 @@ modelRoles:
   task: yolo-auto/qwen3.8-flash
   smol: yolo-auto/yolo-small
   tiny: inferhub/deepseek-v4.1-flash
-  plan: ckff-astra/gpt-6-astra
+  plan: inferhub/qwen3.8-max
   vision: inferhub/qwen3.8-flash
   image: ckff-image/gpt-image-2.5
   judge: openrouter-jev/typesafe/jev-1.13
   research: inferhub/deepseek-v4.1-flash:auto
 advisor:
   enabled: true
-  # syncBacklog=1: primary waits up to 30s for advisor catch-up at turn end.
-  # Fixes observed advisor staleness: with backlog off, advisors lagged the
-  # primary by up to 812s of review latency while streaming continued.
-  syncBacklog: 1
+  # syncBacklog is a STRING enum (off|1|3|5). The bare YAML number `1` v1 shipped
+  # failed validation and silently fell back to `off` — the documented staleness
+  # fix was never in effect (issue #35). "3" pauses only on a real advisor backlog,
+  # avoiding a per-turn 30s wait against "sessions never finish".
+  syncBacklog: "3"
+  # Storm bounds (#35): repeat concerns/blockers route non-interruptingly for 6
+  # primary turns after one interrupt; max 2 non-blocker notes per advisor update.
+  immuneTurns: 6
+  maxNotesPerUpdate: 2
+goal:
+  # [] = active goals never auto-continue between turns (#35: goal re-injection
+  # pulled focus back onto merged sub-items; owner stops were not terminal).
+  continuationModes: []
+todo:
+  remindersMax: 1  # #35: three post-stop "please continue" reminders each cost a turn
 symbolPreset: unicode
 composer:
   shape: band
