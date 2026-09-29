@@ -229,3 +229,26 @@ Next:
 - Changed: runner.py (2 fixes), tests/test_laya_typed_decisions_v1.py (regression test), reports/runs/laya-local-20260929T184900Z.json, docs/REPORT-local-blind-replay.md (status section), docs/PDD-local-blind-replay.md:38 (1.2.0/boundary-gate/smoke corrections), .gitignore (`.venv-laya/`, `.laya-tmp/`), task + CURRENT projections.
 - Blocked/uncertain: full 81-file replay unreachable from this device — Gravebuster SSH permission denied; Cortex tailnet node reachable but SSH/22 closed and its Ollama cannot serve a ModernBERT classifier. Base-English Laya sidecar (:8770 on Gravebuster) exposes no typed-decisions contract.
 - Next atomic action: obtain corpus-host access (Gravebuster key or Cortex SSH), run the full raw Claude DAG replay from this branch on that host, then refresh the HTML report from terminal receipts.
+
+### 2026-09-29 19:15:06 UTC — omp
+
+<!-- continuity:checkpoint {"agent":"omp","blocked":["full 81-file replay needs corpus-host access: Gravebuster SSH denied from this device; Cortex SSH closed"],"changed":["modules/coordination/jev-oss-compare/v0.1.0/{scripts/laya_typed_decisions/v1/runner.py,tests/test_laya_typed_decisions_v1.py,reports/runs/laya-local-20260929T184900Z.json,docs/REPORT-local-blind-replay.md,docs/PDD-local-blind-replay.md}; .gitignore; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md"],"completed":["Pinned Laya runtime proven locally: cold synthetic smoke 7/7 (SDK 0.3.20 @23a17522, model @1a793eb5); pool enqueue-stamp + cache chmod fixes with mutation-proven regression test; suite 13/13; corpus guard rejection demonstrated on capped harvest; content-free receipt committed."],"decisions":["mechanics-only claim boundary; queue_wait_ms documented as enqueue-to-result latency; new branch task/ACS-0004-laya-benchmark continues merged ACS-0004 scope"],"evidence":["reports/runs/laya-local-20260929T184900Z.json; unittest 13/13 OK; inspect/run reject with source_must_be_the_verified_81_file_corpus; PR #26 verified MERGED as 69a34dd (live gh api)"],"next_action":"open PR (Refs #28) for task/ACS-0004-laya-benchmark, publish #28 receipt comment, then run full DAG replay once corpus-host access is granted","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0004","timestamp":"2026-09-29T19:15:06Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"557da70392aa958e184ed22ef621aee265d26add44511c3af5ac7a72f667f3d3","request_id":"c967c27d353948fb912ed63ef33177ae","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0004"} -->
+
+Completed:
+- Pinned Laya runtime proven locally: cold synthetic smoke 7/7 (SDK 0.3.20 @23a17522, model @1a793eb5); pool enqueue-stamp + cache chmod fixes with mutation-proven regression test; suite 13/13; corpus guard rejection demonstrated on capped harvest; content-free receipt committed.
+
+Evidence:
+- reports/runs/laya-local-20260929T184900Z.json; unittest 13/13 OK; inspect/run reject with source_must_be_the_verified_81_file_corpus; PR #26 verified MERGED as 69a34dd (live gh api)
+
+Decisions:
+- mechanics-only claim boundary; queue_wait_ms documented as enqueue-to-result latency; new branch task/ACS-0004-laya-benchmark continues merged ACS-0004 scope
+
+Changed:
+- modules/coordination/jev-oss-compare/v0.1.0/{scripts/laya_typed_decisions/v1/runner.py,tests/test_laya_typed_decisions_v1.py,reports/runs/laya-local-20260929T184900Z.json,docs/REPORT-local-blind-replay.md,docs/PDD-local-blind-replay.md}; .gitignore; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- full 81-file replay needs corpus-host access: Gravebuster SSH denied from this device; Cortex SSH closed
+
+Next:
+- open PR (Refs #28) for task/ACS-0004-laya-benchmark, publish #28 receipt comment, then run full DAG replay once corpus-host access is granted
