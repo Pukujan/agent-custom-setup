@@ -220,6 +220,52 @@ Blocked/uncertain:
 Next:
 - Switch to task/ACS-0003-readme-docs; run frozen reader-task eval harness (omp -p arms): current x2 repeatability, stub differential, M-01/M-09 invariance, M-04 degradation; iterate README; #7 receipt + checkpoint.
 
+### 2026-09-29 22:46:06 UTC — omp/qwen3.8-flash
+
+<!-- continuity:checkpoint {"agent":"omp/qwen3.8-flash","blocked":[],"changed":["AGENTS.md, HANDOFF.md, .github/pull_request_template.md, .github/ISSUE_TEMPLATE/task.md"],"completed":["issue-log-format governance markers synced 1.1.0->1.2.0 in AGENTS.md, HANDOFF.md, PR template, task template from installed continuity CLI canonical ISSUE_LOG_FORMAT_GUIDANCE (validator's own constant); local enforcement facts recorded on #5 (protection live, gates passing, auto-merge armed on #38)"],"decisions":["marker sync delivered as separate bounded branch off current main, refs #5; did not touch ACS-0004 worktree or task branch"],"evidence":["continuity validate: stale-marker WARNING gone (only residual = other-agent local pcm/worktree/ACS-0004 branch-name error, untracked in CI); 1.2.0 marker count 1 per file"],"next_action":"open PR Refs #5; enable auto-merge; owner approve #38 + #39 (author self-approval blocked)","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0002","timestamp":"2026-09-29T22:46:06Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"7f4725e4878c5e25e4239361fc1b4c152e2adc6096e05a9b8097e36e638f9630","request_id":"036bf3eb3c1f4eb6a6f611cf3a1a0494","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0002"} -->
+
+Completed:
+- issue-log-format governance markers synced 1.1.0->1.2.0 in AGENTS.md, HANDOFF.md, PR template, task template from installed continuity CLI canonical ISSUE_LOG_FORMAT_GUIDANCE (validator's own constant); local enforcement facts recorded on #5 (protection live, gates passing, auto-merge armed on #38)
+
+Evidence:
+- continuity validate: stale-marker WARNING gone (only residual = other-agent local pcm/worktree/ACS-0004 branch-name error, untracked in CI); 1.2.0 marker count 1 per file
+
+Decisions:
+- marker sync delivered as separate bounded branch off current main, refs #5; did not touch ACS-0004 worktree or task branch
+
+Changed:
+- AGENTS.md, HANDOFF.md, .github/pull_request_template.md, .github/ISSUE_TEMPLATE/task.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- open PR Refs #5; enable auto-merge; owner approve #38 + #39 (author self-approval blocked)
+
+### 2026-09-29 22:46:23 UTC — omp/qwen3.8-flash
+
+<!-- continuity:checkpoint {"agent":"omp/qwen3.8-flash","blocked":[],"changed":["AGENTS.md, HANDOFF.md, .github/pull_request_template.md, .github/ISSUE_TEMPLATE/task.md, .git/info/exclude (local)"],"completed":["issue-log-format markers 1.1.0->1.2.0 (4 files) from installed CLI canonical guidance; #5 enforcement facts recorded on issue"],"decisions":["separate bounded branch for #5 scope; device-local .git/info/exclude instead of repo .gitignore churn (repo-level ignore lands in PR #38)"],"evidence":["validate stale-marker WARNING gone; 1.2.0 present once per file; residual local-only validate error = other-agent pcm/worktree naming, untracked"],"next_action":"owner: approve #38+#39 or admin-merge; then close #5 after merged-gates verification","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0002","timestamp":"2026-09-29T22:46:23Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"a85c3a43b309cf687438808bd63d2b1d3c043e8a6b98dd6ad57aa89c0f2488a4","request_id":"036bf3ec6f0a4719bce94b3b758758d5","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0002"} -->
+
+Completed:
+- issue-log-format markers 1.1.0->1.2.0 (4 files) from installed CLI canonical guidance; #5 enforcement facts recorded on issue
+
+Evidence:
+- validate stale-marker WARNING gone; 1.2.0 present once per file; residual local-only validate error = other-agent pcm/worktree naming, untracked
+
+Decisions:
+- separate bounded branch for #5 scope; device-local .git/info/exclude instead of repo .gitignore churn (repo-level ignore lands in PR #38)
+
+Changed:
+- AGENTS.md, HANDOFF.md, .github/pull_request_template.md, .github/ISSUE_TEMPLATE/task.md, .git/info/exclude (local)
+
+Blocked/uncertain:
+- none
+
+Next:
+- owner: approve #38+#39 or admin-merge; then close #5 after merged-gates verification
+
 ## Handoff
 
 Read PROJECT → CURRENT → this task → minimum relevant spec. Checkpoint before stopping.
