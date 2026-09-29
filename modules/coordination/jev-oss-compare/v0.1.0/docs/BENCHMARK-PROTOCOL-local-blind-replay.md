@@ -52,7 +52,26 @@ Route outcomes are reconfirm_intent, rethink_plan, research_more, dispatch_verif
 
 ## Metamorphic suite
 
-These are synthetic mechanics and sensitivity checks, not examples copied from the transcript. Preserve existing M01–M14 invariants and add the following:
+These are synthetic mechanics and sensitivity checks, not examples copied from the transcript. The M01–M14 invariants (restored verbatim from the protocol revision at commit d46f4e1) are:
+
+| ID | Transformation | Required property |
+| --- | --- | --- |
+| M01 | Add an unrelated earlier user turn | Existing relation edges and pin states do not change; one additional comparison appears. |
+| M02 | Swap assistant wording that summarizes a user request | No human pin is created or superseded by assistant text. |
+| M03 | Put a tool result under role=`user` | It is recorded as `tool_result`, never as user intent. |
+| M04 | Add a later explicit correction to one earlier constraint | Only the identified constraint relation changes; history remains append-only. |
+| M05 | Remove source evidence that arrived after a coding claim | Earlier research readiness remains unchanged; later readiness may change. |
+| M06 | Add an uncaptured compaction marker | No compaction judgment is emitted; completeness remains explicit. |
+| M07 | Exceed a model's state budget | Request is chunked or rejected with coverage details; never silently truncated or marked ready/allow. |
+| M08 | Duplicate an identical source UUID | One event is replayed and all duplicate source locations are retained. |
+| M09 | Reuse a UUID with conflicting content | Source build fails closed before model calls. |
+| M10 | Trigger deterministic hard-deny rule | All lanes deny before inference and no tool execution occurs. |
+| M11 | Remove one retrieved active pin from the candidate set | Coverage becomes incomplete and aggregate tool action cannot be `allow`. |
+| M12 | Permute independent model execution order | Per-lane outputs and state hashes remain unchanged. |
+| M13 | Add a future correction/tool result | Earlier request hashes and decisions remain identical. |
+| M14 | Add ambiguous/incomplete research provenance | Research gate abstains/requests more evidence; missing evidence cannot count as ready. |
+
+and the following cases were added with the recovery-routing correction:
 
 | ID | Transformation | Required property |
 | --- | --- | --- |
@@ -107,4 +126,4 @@ Stop the affected lane if model identity cannot be confirmed, a call leaves the 
 - No raw ACS/Grok source is verified. Gold-derived ACS artifacts remain excluded.
 - The proposed whole-session partition was created after earlier inference and is exploratory, not a valid hidden holdout.
 - The new Laya typed-decision adapter has not completed full-corpus inference. Previous receipts are partial; they are not completion evidence.
-- M01–M14 and the hidden holdout remain unverified/not implemented in the report. The new M15–M28/fuzz cases are design requirements until implemented and evidenced.
+- The M01–M28 metamorphic suite and seeded fuzz are implemented as synthetic mechanics tests (`tests/test_laya_metamorphic_m01_m28.py`, 24 cases; M15/M22/M25 mapped to existing cases in `test_laya_typed_decisions_v1.py`), passing locally 2026-09-29 (receipt `reports/runs/laya-metamorphic-20260929.json`; not CI-enforced). The hidden whole-session holdout remains not implemented, and the report's M01–M14 verification status remains Unverified.
