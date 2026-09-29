@@ -62,3 +62,26 @@ Blocked/uncertain:
 
 Next:
 - owner review + merge PR (Refs #35 #37); fresh-live-session confirmation; receipt on #37
+
+### 2026-09-29 22:21:53 UTC — omp/qwen3.8-flash
+
+<!-- continuity:checkpoint {"agent":"omp/qwen3.8-flash","blocked":[],"changed":["oh-my-pi/extensions/loop-guard.ts, oh-my-pi/ops/storm-report.py, oh-my-pi/README.md"],"completed":["ops layer: storm-report.py (independent counts verified vs manual forensics: 83/7/94/13/2/1 on #35); loop-guard replay identity corrected to (timestamp, job-set) rank from fixture forensics (A@19:01, A+B@19:03, A@20:14, A@20:39); durable com.acs.loopguard.state incident records; STOP_RE bare-interjection fix; README precedence/ops notes; live extensions reinstalled; harness reload smoke exit 0; fleet scan finds 4 replays in 18:26 session too"],"decisions":["no new decisions"],"evidence":["40/40 replay assertions incl. real-transcript-order tests L11/L12; storm-report json spot-check matches manual recount; omp -p reload-ok clean"],"next_action":"owner review + merge PR #38; fresh-live-session confirmation; receipt updates on #37/#35","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0005","timestamp":"2026-09-29T22:21:53Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"02263886dca48718954116c350a45f4260a364211e24a9d79d2819f83f5b8a51","request_id":"d179616713014eac8eec58b2a6bf1857","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0005"} -->
+
+Completed:
+- ops layer: storm-report.py (independent counts verified vs manual forensics: 83/7/94/13/2/1 on #35); loop-guard replay identity corrected to (timestamp, job-set) rank from fixture forensics (A@19:01, A+B@19:03, A@20:14, A@20:39); durable com.acs.loopguard.state incident records; STOP_RE bare-interjection fix; README precedence/ops notes; live extensions reinstalled; harness reload smoke exit 0; fleet scan finds 4 replays in 18:26 session too
+
+Evidence:
+- 40/40 replay assertions incl. real-transcript-order tests L11/L12; storm-report json spot-check matches manual recount; omp -p reload-ok clean
+
+Decisions:
+- no new decisions
+
+Changed:
+- oh-my-pi/extensions/loop-guard.ts, oh-my-pi/ops/storm-report.py, oh-my-pi/README.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- owner review + merge PR #38; fresh-live-session confirmation; receipt updates on #37/#35
