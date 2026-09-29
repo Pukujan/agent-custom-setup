@@ -131,3 +131,26 @@ Blocked/uncertain:
 
 Next:
 - owner review + merge PR #38; fresh-session confirm; close #37 then #35
+
+### 2026-09-29 22:42:35 UTC — omp/qwen3.8-flash
+
+<!-- continuity:checkpoint {"agent":"omp/qwen3.8-flash","blocked":[],"changed":["oh-my-pi/extensions/loop-guard.ts, checkpoints/CURRENT.md"],"completed":["event-frequency probe run in installed harness (context=1 trivial/4 tool-turn per-request, session_stop=1 incl -p, todo/goal 0); loop-guard pass-2 Map lookup; CURRENT.md ACS-0002 superseded with live protection/auto-merge facts"],"decisions":["review receipts corrected in place with revision note after placeholder request-id found; #5 observation supersession preserved on issue not rewritten"],"evidence":["probe log /tmp/acs0005/agent/event-probe.log SUMMARY lines; 40/40 suite re-pass on Map version; gh api protection GET contexts=[gates] strict reviews=1; PR38 autoMerge SQUASH enabled, checks pass 19s run 36640336687"],"next_action":"owner approve-or-admin-merge #38; fresh-session confirm; close #37 then #5 then #35","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0005","timestamp":"2026-09-29T22:42:35Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"5021028bcebaea7547f48d81bb2aca2b4719624ce724f6d060230471d79511ce","request_id":"dccee15acf774c68969bdf9d129d9b6b","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0005"} -->
+
+Completed:
+- event-frequency probe run in installed harness (context=1 trivial/4 tool-turn per-request, session_stop=1 incl -p, todo/goal 0); loop-guard pass-2 Map lookup; CURRENT.md ACS-0002 superseded with live protection/auto-merge facts
+
+Evidence:
+- probe log /tmp/acs0005/agent/event-probe.log SUMMARY lines; 40/40 suite re-pass on Map version; gh api protection GET contexts=[gates] strict reviews=1; PR38 autoMerge SQUASH enabled, checks pass 19s run 36640336687
+
+Decisions:
+- review receipts corrected in place with revision note after placeholder request-id found; #5 observation supersession preserved on issue not rewritten
+
+Changed:
+- oh-my-pi/extensions/loop-guard.ts, checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- none
+
+Next:
+- owner approve-or-admin-merge #38; fresh-session confirm; close #37 then #5 then #35
