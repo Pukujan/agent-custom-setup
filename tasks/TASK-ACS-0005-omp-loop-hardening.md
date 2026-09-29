@@ -108,3 +108,26 @@ Blocked/uncertain:
 
 Next:
 - owner review + merge PR #38; fresh-session confirmation; receipt on #37
+
+### 2026-09-29 22:34:02 UTC — omp/qwen3.8-flash
+
+<!-- continuity:checkpoint {"agent":"omp/qwen3.8-flash","blocked":[],"changed":["oh-my-pi/extensions/jev-court.ts"],"completed":["reviewer findings applied: fetch concurrency gate, rehydrate ledger-no-push, record try-scope, anchored STOP_RE; live re-synced (diff -q both files)"],"decisions":["no new decisions"],"evidence":["40/40 replay suite re-passed against gated source; harness reload gate-ok exit 0; reviewer R1a/R1b/R7/C1 regression checks pass"],"next_action":"owner review + merge PR #38; fresh-session confirm; close #37 then #35","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0005","timestamp":"2026-09-29T22:34:02Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"877865d3f2a96d1f9ddbcc8a4e6143f1c2e786c5ffafcb5bc6d0e5ac796038ec","request_id":"b801962d61e043b8a79854883c8f2bdb","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0005"} -->
+
+Completed:
+- reviewer findings applied: fetch concurrency gate, rehydrate ledger-no-push, record try-scope, anchored STOP_RE; live re-synced (diff -q both files)
+
+Evidence:
+- 40/40 replay suite re-passed against gated source; harness reload gate-ok exit 0; reviewer R1a/R1b/R7/C1 regression checks pass
+
+Decisions:
+- no new decisions
+
+Changed:
+- oh-my-pi/extensions/jev-court.ts
+
+Blocked/uncertain:
+- none
+
+Next:
+- owner review + merge PR #38; fresh-session confirm; close #37 then #35
