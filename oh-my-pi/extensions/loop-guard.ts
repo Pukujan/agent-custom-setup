@@ -7,21 +7,21 @@
  * 1. REDELIVERED BACKGROUND RESULTS (#35 symptom 1). TRUE shape, verified
  *    against the #35 session JSONL: redelivered async jobs are persisted as
  *    `custom_message` entries with customType "async-result" whose body names
- *    job ids ("Background job <Id> has completed…" / "── Job <Id> …"). The
- *    same job id can re-appear later with a DIFFERENT body, so replay identity
- *    keys on the job-id SET, not on text. The `context` handler fires per
- *    provider request over the persisted message list, therefore marking is
- *    STATELESS and deterministic: within one request, entries whose job-id set
- *    repeats are ranked by (timestamp, request position) — the earliest
- *    occurrence is the original delivery (verbatim); every later occurrence is
- *    marked in-place as an already-consumed replay needing no acknowledgement
- *    turn. (The real #35 transcript interleaves other jobs between
- *    redeliveries — e.g. A@19:01, A+B@19:03, A@20:39 — so "first-in-list" is
- *    wrong; timestamp rank is correct.) Re-firing re-derives the identical
- *    output: nothing stacks, nothing double-counts. Entries are never removed;
- *    assistant/toolResult pairing and provider integrity stay intact. The WAKE
- *    itself is harness-owned (upstream residue, #37); this removes only the
- *    re-audit pressure from the content.
+ *    job ids ("Background job <Id> has completed…" / "── Job <Id> …"). Replay
+ *    identity is PER JOB: the #35 order is Recipe@19:01, Guardian@19:02,
+ *    Recipe+Guardian@19:03, …, Recipe+Guardian@20:14, Recipe@20:39 — a
+ *    whole-set signature masks single-job re-arrivals. The `context` handler
+ *    fires per provider request over the persisted message list, therefore
+ *    marking is STATELESS and deterministic: within one request, for each job
+ *    its occurrences rank by (timestamp, position) — the earliest is that
+ *    job's original delivery. An entry is marked in-place as an
+ *    already-consumed replay needing no acknowledgement turn ONLY when EVERY
+ *    job it carries already had an earlier delivery (fully redundant).
+ *    Partially-new batches carry fresh output and stay verbatim. Re-firing
+ *    re-derives the identical output: nothing stacks, nothing double-counts.
+ *    Entries are never removed: assistant/toolResult pairing and provider
+ *    integrity stay intact. The WAKE itself is harness-owned (upstream
+ *    residue, #37); this removes only the re-audit pressure from the content.
  *
  * 2. NO-OP SUBAGENT ECHOES (#35 symptom 2): task-role subagents that return a
  *    verbatim echo of their own tool-call JSON burned ~13 min of parent audit
@@ -33,9 +33,9 @@
  *
  * Both handlers are observation/marking only: no blocks, no sends, no wakes,
  * no steering. Ops capture: one compact `com.acs.loopguard.state` entry per
- * incident (via appendEntry — invisible to the model, durable in the session
- * JSONL, read by oh-my-pi/ops/storm-report.py for long-run forensics).
- * `/loopguard` shows live counters.
+ * marking call (via appendEntry — invisible to the model, durable in the
+ * session JSONL, read by oh-my-pi/ops/storm-report.py for long-run
+ * forensics). `/loopguard` shows live counters.
  */
 
 import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
@@ -44,7 +44,7 @@ type TextBlock = { type: string; text?: string };
 
 // One of the host's content shapes: blocks of {type,text}. Non-arrays are
 // handled by the string branch at the call site — we only patch text we
-// positively recognizes.
+// positively recognize.
 function textBlocks(content: unknown): TextBlock[] | undefined {
   if (!Array.isArray(content)) return undefined;
   return content as TextBlock[];
@@ -63,22 +63,31 @@ const JOB_ID_RE = /(?:Background job|── Job) ([A-Za-z0-9_-]+)/g;
 const MARK_PREFIX =
   "[loop-guard] REPLAY of already-consumed background job result(s) — these jobs were delivered earlier in the session; continue the primary task, no acknowledgement turn required.\n";
 
+type Hit = {
+  m: Record<string, unknown>;
+  jobs: string[];
+  key: string; // entry identity for incident counting: sorted-jobs@ts:idx
+  idx: number;
+  ts: number;
+};
+
 export default function (pi: ExtensionAPI) {
   pi.setLabel("Loop Guard — replay marking + subagent echo detection");
 
   // Counters are incident-based per session; marking itself is stateless.
-  let replayIncidents = 0; // distinct job-sets observed as redelivered
+  let replayIncidents = 0; // fully-redundant deliveries marked (once per entry)
   let echoIncidents = 0;
-  const countedIncidents = new Set<string>(); // sigs already counted here
+  const countedEntries = new Set<string>(); // entry keys already counted here
 
-  // Ops capture: one compact record per incident — exactly what
+  // Ops capture: one compact record per marking call — exactly what
   // oh-my-pi/ops/storm-report.py aggregates offline for long-run debugging.
-  function persistState(reason: string) {
+  function persistState(newReplays: number) {
     try {
       pi.appendEntry("com.acs.loopguard.state", {
         replayIncidents,
         echoIncidents,
-        reason,
+        newReplays,
+        reason: "replay_incident",
         ts: Date.now(),
       });
     } catch {
@@ -86,7 +95,7 @@ export default function (pi: ExtensionAPI) {
     }
   }
 
-  // ---------- 1) context: mark repeated async-result entries ----------
+  // ---------- 1) context: mark fully-redundant async-result entries ----------
 
   pi.on(
     "context",
@@ -95,7 +104,6 @@ export default function (pi: ExtensionAPI) {
       if (!msgs) return;
 
       // Pass 1: collect async-result entries with request position + timestamp.
-      type Hit = { m: Record<string, unknown>; sig: string; idx: number; ts: number };
       const hits: Hit[] = [];
       let idx = 0;
       for (const raw of msgs) {
@@ -108,45 +116,49 @@ export default function (pi: ExtensionAPI) {
           typeof m.content === "string"
             ? m.content
             : blocksText(textBlocks(m.content));
-        const ids = [...text.matchAll(JOB_ID_RE)].map((x) => x[1]);
-        if (!ids.length) continue;
-        hits.push({
-          m,
-          sig: [...new Set(ids)].sort().join("+"),
-          idx,
-          ts: Number(m.timestamp ?? m.ts ?? 0),
-        });
+        const jobs = [
+          ...new Set([...text.matchAll(JOB_ID_RE)].map((x) => x[1])),
+        ].sort();
+        if (!jobs.length) continue;
+        const ts = Number(m.timestamp ?? m.ts ?? 0);
+        hits.push({ m, jobs, key: `${jobs.join("+")}@${ts}:${idx}`, idx, ts });
       }
       if (!hits.length) return;
 
-      // Pass 2: rank per sig by (ts, idx); earliest stays verbatim, rest mark.
-      const rank = new Map<string, Hit[]>();
-      for (const h of hits) {
-        const arr = rank.get(h.sig) ?? [];
-        arr.push(h);
-        rank.set(h.sig, arr);
-      }
+      // Pass 2: per job, the earliest occurrence (ts, then idx) is the original.
+      const earliest = new Map<string, Hit>();
+      for (const h of hits)
+        for (const j of h.jobs) {
+          const cur = earliest.get(j);
+          if (!cur || h.ts < cur.ts || (h.ts === cur.ts && h.idx < cur.idx))
+            earliest.set(j, h);
+        }
+
       let changed = false;
-      const newIncidents: string[] = [];
+      let newIncidents = 0;
       const out = msgs.map((raw) => {
         const hit = hits.find((h) => h.m === raw);
         if (!hit) return raw;
-        const group = rank.get(hit.sig)!;
-        const first = group.reduce((a, b) =>
-          b.ts !== a.ts ? (b.ts < a.ts ? b : a) : b.idx < a.idx ? b : a,
-        );
-        if (hit === first) return raw;
+        // Marked only when EVERY job here already had an EARLIER delivery; a
+        // batch with any fresh job stays verbatim.
+        const allBefore = hit.jobs.every((j) => {
+          const e = earliest.get(j);
+          return (
+            !!e && e !== hit && (e.ts < hit.ts || (e.ts === hit.ts && e.idx < hit.idx))
+          );
+        });
+        if (!allBefore) return raw;
         changed = true;
-        if (!countedIncidents.has(hit.sig)) {
-          countedIncidents.add(hit.sig);
-          newIncidents.push(hit.sig);
+        if (!countedEntries.has(hit.key)) {
+          countedEntries.add(hit.key);
+          newIncidents++;
         }
         return markEntry(hit.m);
       });
       if (!changed) return;
-      if (newIncidents.length) {
-        replayIncidents += newIncidents.length;
-        persistState("replay_incident");
+      if (newIncidents) {
+        replayIncidents += newIncidents;
+        persistState(newIncidents);
       }
       ctx.ui?.setStatus?.("loop-guard", `replay-incidents=${replayIncidents}`);
       return { messages: out };
@@ -158,7 +170,9 @@ export default function (pi: ExtensionAPI) {
   function markEntry(m: Record<string, unknown>): Record<string, unknown> {
     const bare = MARK_PREFIX.trim();
     if (typeof m.content === "string")
-      return m.content.startsWith(bare) ? m : { ...m, content: MARK_PREFIX + m.content };
+      return m.content.startsWith(bare)
+        ? m
+        : { ...m, content: MARK_PREFIX + m.content };
     const blocks = textBlocks(m.content);
     if (blocks && blocks.length) {
       if (blocks.some((b) => b.type === "text" && (b.text ?? "").startsWith(bare)))
@@ -189,7 +203,16 @@ export default function (pi: ExtensionAPI) {
           : blocksText(textBlocks(event.content));
       if (!looksLikeToolEcho(text)) return;
       echoIncidents++;
-      persistState("task_echo_incident");
+      try {
+        pi.appendEntry("com.acs.loopguard.state", {
+          replayIncidents,
+          echoIncidents,
+          reason: "task_echo_incident",
+          ts: Date.now(),
+        });
+      } catch {
+        /* memory-only */
+      }
       // Passive guidance only: content/details/isError NOT mutated.
       return {
         additionalContext:

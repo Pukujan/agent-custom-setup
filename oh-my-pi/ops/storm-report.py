@@ -4,8 +4,8 @@
 Scans omp session artifacts and prints per-session delivery/loop metrics, so
 "is the advisory storm back?" and "which channel caused it?" are answered from
 durable data instead of re-litigating a transcript by hand. The #35 forensics
-(94 advisor notes, ~11 native cards, 83-84 court injections, async-result
-replays) reproduce with:
+(94 advisor notes, ~11 native cards, 83 court injections, async-result replays)
+reproduce with:
 
     python3 oh-my-pi/ops/storm-report.py ~/.omp/agent/sessions --limit 10
     python3 oh-my-pi/ops/storm-report.py <one-session.jsonl>
@@ -17,8 +17,10 @@ extensions to be enabled. jev-court v2 and loop-guard add structured records
 inferred; v1 sessions lack them and are still measurable from message content.
 Redelivered background results are `custom_message` entries with customType
 "async-result" naming job ids in the body ("Background job <Id> has completed"
-/ "── Job <Id>"); a replay is a job-id SET seen earlier in the session (same
-ids can arrive with different bodies).
+/ "── Job <Id>"). Replay identity is PER JOB (an entry counts as a replay when
+every job it carries was already announced by an earlier entry): #35 interleaves
+singles and batches (Recipe, Guardian, Recipe+Guardian, …), so whole-set
+signatures mask re-arrivals — same rule the extension marks with.
 
 Exit 0 always (diagnostic, not a gate); --fail-on-warn exits 1 if any WARN.
 """
@@ -35,11 +37,11 @@ JOB_ID_RE = re.compile(r"(?:Background job|── Job) ([A-Za-z0-9_-]+)")
 
 # Proposed thresholds (untested against a fleet): tuned to the #35 session, where
 # healthy native-channel behaviour was ~11 accepted notes and the loop was 83
-# injections + 4 replays + 3 post-stop reminders. See issue #37 acceptance.
+# injections + 3 fully-redundant replays + post-stop pressure. See issue #37.
 WARN_VERDICTS = 15       # injected court verdicts in one session
 WARN_NOTES = 60          # advisor advise() calls produced
 WARN_NATIVE = 30         # native <advisory> renders
-WARN_REPLAYS = 1         # duplicate async-result announcements
+WARN_REPLAYS = 1         # fully-redundant async-result announcements
 WARN_DECISION_RATIO = 0.5  # decided notes that got injected
 
 
@@ -98,7 +100,7 @@ def scan_session(path):
 
     m["size_bytes"] = os.path.getsize(path)
     note_keys = set()
-    announce_sigs = set()
+    announced_jobs = set()
     last_stop_ts = 0.0
 
     with open(path, "r", errors="ignore") as fh:
@@ -113,6 +115,7 @@ def scan_session(path):
                     m["post_stop_verdicts"] += 1
             if v.get("type") == "custom_message":
                 ct = v.get("customType")
+                content_str = blocks_text(v.get("content"))
                 if ct == "com.jev-court.decision":
                     d = v.get("data") or {}
                     o = str(d.get("outcome", "unknown"))
@@ -121,15 +124,12 @@ def scan_session(path):
                     d = v.get("data") or {}
                     m["loopguard_records"].append(str(d.get("reason", "unknown")))
                 elif ct == "async-result":
-                    ids = JOB_ID_RE.findall(blocks_text(v.get("content")))
-                    if ids:
-                        sig = "+".join(sorted(set(ids)))
+                    jobs = set(JOB_ID_RE.findall(content_str))
+                    if jobs:
                         m["async_announcements"] += 1
-                        if sig in announce_sigs:
+                        if jobs <= announced_jobs:
                             m["async_replays"] += 1
-                        else:
-                            announce_sigs.add(sig)
-                content_str = blocks_text(v.get("content"))
+                        announced_jobs |= jobs
                 if "<advisory" in content_str:
                     m["advisory_native"] += 1
             msg = v.get("message") or {}
@@ -189,7 +189,7 @@ def _warnings(m):
         w.append(f"native advisories {m['advisory_native']} > {WARN_NATIVE}")
     if m["async_replays"] > WARN_REPLAYS:
         w.append(
-            f"async-result replays {m['async_replays']} > {WARN_REPLAYS} — duplicate background delivery (issue #35 symptom 1)"
+            f"async-result replays {m['async_replays']} > {WARN_REPLAYS} — fully-redundant background deliveries (issue #35 symptom 1)"
         )
     if m["post_stop_verdicts"] > 0:
         w.append(
@@ -202,7 +202,7 @@ def _warnings(m):
         )
     if m["loopguard_records"].count("task_echo_incident") >= 2:
         w.append(">=2 subagent tool-echo incidents — delegation failing (issue #35 symptom 2)")
-    if m["loopguard_records"].count("replay_incident") >= 1:
+    if "replay_incident" in m["loopguard_records"]:
         w.append("loop-guard recorded replay incident(s) — dedup marking active (informational)")
     return w
 
