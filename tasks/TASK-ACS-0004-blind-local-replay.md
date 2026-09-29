@@ -293,3 +293,26 @@ Decisions: suite is synthetic mechanics only — protocol:129, TDD:76, task 34/4
 Changed: protocol M01–M14 restore + status line; TDD:76; task 34/41; new test file; new receipt.
 Blocked/uncertain: transcript performance and hidden holdout remain unverified/not implemented; full replay still gated on corpus-host access.
 Next: corpus-host access, then the full 81-file DAG replay.
+
+### 2026-09-29 20:03:25 UTC — omp
+
+<!-- continuity:checkpoint {"agent":"omp","blocked":["transcript performance + full replay still gated on corpus-host access (Gravebuster key or Cortex SSH)"],"changed":["modules/coordination/jev-oss-compare/v0.1.0/{docs/BENCHMARK-PROTOCOL-local-blind-replay.md,docs/TDD-local-blind-replay.md,tests/test_laya_metamorphic_m01_m28.py,reports/runs/laya-metamorphic-20260929.json}; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md"],"completed":["Implemented the protocol M01-M28 metamorphic suite + deterministic seeded fuzz as tests/test_laya_metamorphic_m01_m28.py (24 cases; M15/M22/M25 mapped to existing adapter cases); restored the M01-M14 table verbatim from protocol revision d46f4e1; product code untouched."],"decisions":["synthetic mechanics only: report M01-M14 stays Unverified, holdout stays not implemented, suite labeled not CI-enforced"],"evidence":["python3 suites 13/13 + 24/24 OK; 3 mutation proofs fail-as-expected with green control; 8-word crib scan vs claude_full_raw.jsonl = 0 hits; receipt reports/runs/laya-metamorphic-20260929.json"],"next_action":"open PR (Refs #28) for the metamorphic increment; then corpus-host access and the full 81-file DAG replay","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0004","timestamp":"2026-09-29T20:03:25Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"3adf6caf40c822e5e1a493a59907e7f219dfa319a1190810253a066650239056","request_id":"51325f4aac4d4709b76968b0b5410f19","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0004"} -->
+
+Completed:
+- Implemented the protocol M01-M28 metamorphic suite + deterministic seeded fuzz as tests/test_laya_metamorphic_m01_m28.py (24 cases; M15/M22/M25 mapped to existing adapter cases); restored the M01-M14 table verbatim from protocol revision d46f4e1; product code untouched.
+
+Evidence:
+- python3 suites 13/13 + 24/24 OK; 3 mutation proofs fail-as-expected with green control; 8-word crib scan vs claude_full_raw.jsonl = 0 hits; receipt reports/runs/laya-metamorphic-20260929.json
+
+Decisions:
+- synthetic mechanics only: report M01-M14 stays Unverified, holdout stays not implemented, suite labeled not CI-enforced
+
+Changed:
+- modules/coordination/jev-oss-compare/v0.1.0/{docs/BENCHMARK-PROTOCOL-local-blind-replay.md,docs/TDD-local-blind-replay.md,tests/test_laya_metamorphic_m01_m28.py,reports/runs/laya-metamorphic-20260929.json}; tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- transcript performance + full replay still gated on corpus-host access (Gravebuster key or Cortex SSH)
+
+Next:
+- open PR (Refs #28) for the metamorphic increment; then corpus-host access and the full 81-file DAG replay
