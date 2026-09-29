@@ -12,6 +12,11 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 
+# Versioned public input surface for downstream model-specific adapters. Bump
+# this when normalized event fields or their role/kind semantics change.
+REPLAY_EVENT_CONTRACT_VERSION = 1
+
+
 class SourceIntegrityError(ValueError):
     """The source cannot support a clean blind replay."""
 

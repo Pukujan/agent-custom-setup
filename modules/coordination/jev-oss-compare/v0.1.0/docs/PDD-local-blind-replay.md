@@ -1,81 +1,101 @@
-# PDD — Blind local decision-model replay
+# PDD — Recovery routing from long-running intent and research drift
 
-**Status:** proposed design for ACS-0004 / issue #28. It replaces the prior match-to-gold and peer-lane bakeoff objective for this replay. Jev and OpenRouter are prohibited in this experiment.
+**Status:** owner-directed outcome for ACS-0004 / issue #28. This is a blind, offline replay experiment. Jev/OpenRouter inference is prohibited. Laya is the primary low-cost candidate; other OSS lanes are optional comparators.
 
 ## Human problem
 
-Coding agents have claimed that research was sufficient, started implementation, then lost time in loops because they had not inspected the relevant primary documentation or had dropped earlier user direction. Later messages can clarify, question, or take back earlier intent; tool use and context compaction can then act on an incorrect pin set. The user wants a mechanical replay that reveals whether local decision models naturally flag these failure patterns without telling the benchmark where the known examples are.
+My usual workflow is to tell Claude or Codex what I want, the success criteria and constraints, then ask it to repeat its understanding so I can correct it. During a long-running task, after many tasks or context changes, the agent may miss or weakly acknowledge that message and later make a choice that violates it. The benchmark’s main goal is to see whether Laya can catch any of these consequential failures in the prewritten transcript, and whether the same checks could help future work.
 
-## Outcome
+The failure chain I want checked is:
 
-For each valid transcript stream, a deterministic runner advances one source event at a time and records independent decisions from Laya, OpenJev, and Kev lanes. It never executes historic tools. User-message relations and pin candidates run on every human turn; research readiness runs at eligible user/resume and coding boundaries; the hard-deny/tool gate runs on every tool call; compaction runs only where the source has a captured boundary. The result is an auditable discovery trace: what each lane surfaced and where it diverged.
+1. I send an instruction, including what I need and any success criteria or constraints. Claude may acknowledge it weakly or skip the repeat-back that would let me correct a misunderstanding.
+2. Later, Claude makes a plan or takes an action that conflicts with that instruction.
+3. Claude may decide something cannot be done or costs money after too little research, then stop exploring.
+4. Claude may decide it has researched enough and move from research to a plan or action without direct, current evidence. A useful check would identify the specific unsupported claim or missing source and recommend more research or a bounded independent verifier.
 
-## Observed symptoms and evidence
+The decision lane should show exactly what triggered its concern and recommend a useful next step: reconfirm intent, rethink the plan, research the claim, dispatch a verifier, escalate uncertainty, or proceed. A generic allow/deny label is not success, and uncertainty should not automatically stop unrelated safe work.
 
-1. The former benchmark rewarded agreement with labels deliberately copied from the same known events the user wants detected naturally. That can measure label matching but cannot establish discovery of unknown failures.
-2. The checked-in ACS 20-hour artifact is explicitly a fallback: its metadata says ReadTranscript was unavailable, users came from the old gold fixture, tool results are null. It is excluded from blind evidence.
-3. The Claude harvest merges root and sidechain records, duplicates some IDs, truncates text, and omits causal/source-role fields needed to distinguish human intent from delegated agent prompts.
-4. Raw Claude JSONL sources are available locally and include parent UUIDs, sidechain identity, tool results, and 41 `compact_boundary` records. A content-free parse found 18,350 normalized events across 80 streams: 14 root sessions and 66 child streams. It collapsed 2,210 repeated rows, found zero malformed rows, and linked 56 child streams to a unique parent; 10 child streams remain unresolved. A follow-up source-role audit found 46 `isMeta=true` user-role blocks, now kept as `meta_user` and excluded from human pin decisions. There are 198 eligible human-user events.
-5. Current local model identities are verified: Laya typed-decisions on the PC, APUS OpenJev v1 4B Q4_K_M on the PC, APUS OpenJev v1 9B Q4_K_M on the MacBook Pro through the existing SSH forward, and Kev 0.8B on the PC. Each passed a synthetic local API smoke; none has received transcript text. The runner has not yet executed transcript inference.
-6. A `jev-research-gate` prototype exists, but its live path calls OpenRouter/Jev on a claim snapshot and its mock is regex-based. It consumes a caller-supplied `known_docs` list; it does not reconstruct what official/versioned evidence the agent actually retrieved before each coding action, nor compare later failure evidence against those sources. The integrated local transcript research-evidence gate in this chart is therefore still missing.
-7. The 41 raw compaction markers capture before/after token counts and retained message UUID lists (2–8 UUIDs each). The marker contains no compacted summary prose, so exact message retention is measurable but semantic survival of an omitted pin is not.
+## Main goal and success breakdown
+
+Determine whether local Laya can surface actionable recovery opportunities from the complete verified raw Claude transcript, with exact provenance and at the point they occur.
+
+1. **Instruction acknowledgment:** compare a consequential user message with the next assistant response. Detect accurate, partial, omitted, contradicted, and unclear carry-forward. An explicit user request to repeat or confirm understanding makes this check mandatory.
+2. **Intent conflict:** compare an assistant’s proposed plan or recorded tool action with active user intent. Agent prose is an agent proposal, never user authority. Durable intent does not expire by age alone; only exact supersession or an explicit task boundary changes scope.
+3. **Research warrant:** before a factual, availability, cost, or capability claim advances from research to plan/action, compare the claim with sources available as of that point. Preserve source identity/version, retrieved span/hash, timestamp, and direct-support relation. No universal source-count minimum.
+4. **Recovery route:** emit one of reconfirm_intent, rethink_plan, research_more, dispatch_verifier, escalate, or proceed, with the triggering event, exact spans, intent/evidence IDs, coverage status, and recommendation rationale.
+
+The replay reports what the frozen lane would have recommended, not what a live agent would have done. It does not claim task recovery, accuracy, recall, or future catch rate without a later independent review or prospective evaluation.
+
+## Why the backtest can be better than doing nothing
+
+Doing nothing has no inference or review cost, but it also produces no early warning, no auditable recovery candidate, and no evidence about whether this class of safeguard can help. A local shadow replay is a bounded experiment: it can reveal whether Laya surfaces timely, source-grounded opportunities to reconfirm, reconsider, or verify before a consequential transition. It does not message an agent or execute historical actions. We will measure actual runtime/resource use and review time; false alerts still have a cost, so route volume alone is not a win.
+
+This is a hypothesis, not an established benefit. A useful result requires reviewers to find some recommendations actionable and supported by the cited transcript evidence, while also examining unalerted checkpoints for misses. If the lane only emits generic warnings, repeats already-obvious signals, or adds more review burden than useful findings, that is evidence to revise or stop it. The available corpus is discovery data: it cannot establish general catch rate because it is one historical transcript collection, prior outputs have been inspected, and no valid hidden whole-session holdout is verified. Keep the known Fish incident out of tuning and inspect it only after the frozen run; use genuinely new sessions or prospective evaluation for any generalization claim.
+
+## Current evidence and gaps
+
+- The raw Claude source has 81 JSONL files, 18,350 normalized events across 80 streams, and 198 eligible human messages. Raw ACS/Grok is not verified; gold-derived ACS fixtures remain excluded.
+- Laya adapter/profile 1.1.0 now adds an acknowledgment-expectation decision and span-paired checks against only the next assistant message. The deterministic reducer emits shadow routes for acknowledgment, recorded tool/intent, and research gates. Assistant prose-plan boundary detection is still unimplemented. These paths have synthetic tests but no Laya inference or full-transcript run yet.
+- The existing user-message and tool/research jobs provide provenance-bearing shadow signals. They do not implement a live recovery controller.
+- The live issue body and owner correction comment now state the recovery goal and backtest tradeoff; the latter remains an untested hypothesis.
+- The report marks the M01–M14 suite unverified and whole-session hidden holdout not implemented. Previous post-inference partitions are exploratory and cannot be called hidden.
+- Existing ACS gate modules are optional drafts. Their current mock checks do not establish this end-to-end recovery behavior.
 
 ## Hypotheses
 
-| Hypothesis | Status | Confirming experiment | Refuting result |
+| Hypothesis | Status | Confirming evidence | Refuting or limiting evidence |
 | --- | --- | --- | --- |
-| H1: Pairwise history comparison finds useful message relations without gold examples | untested | Exhaustive per-stream comparisons with event IDs and fixed relation schema | Model produces only generic labels, misses relations, or cannot process a material fraction of messages |
-| H2: A research gate can distinguish a coding claim from the evidence actually collected before it | untested | Rebuild an as-of evidence ledger from tool results/citations, then gate every eligible user/resume/coding boundary | Evidence extraction is too lossy to identify sources or model confidently approves absent evidence |
-| H3: Pins give tool checks useful policy context | untested | Apply hard-deny first; compare each historic tool event with all active pin candidates without executing it | Context limits or retrieval omissions hide relevant pins, or lane outcomes do not expose conflict signals |
-| H4: Native compact-boundary records can test retention behavior | partially supported | Compare source-preserved segments with active pin/evidence state immediately before and after each boundary | Boundary metadata does not reconstruct enough of the before/after context |
-| H5: Local small models can run this workload with stable, inspectable output | untested | Exact `/v1/models` + health checks, single-request smoke, then fixed full replay | Endpoint unavailable, silent truncation, or output/schema failures |
+| H1: Laya can identify when an explicit consequential user instruction is omitted or contradicted by the next assistant response | Untested | Provenance-backed response checks surface reviewable omissions or contradictions | Atomic chunks lose qualifiers, or labels are generic/unclear |
+| H2: Laya can identify a plan/tool choice that conflicts with active intent | Untested | Conflict decisions cite the exact user intent and proposed action | Intent state is incomplete, or the model misses conflicts |
+| H3: As-of evidence checks can distinguish support from unsupported agent claims | Untested | Claims link to directly supporting or contradicting prior retrieved source spans | Source capture is incomplete or evidence matching is too lossy |
+| H4: A recovery route is more useful than a binary veto | Untested | Routes identify what to reconfirm, research, or verify with provenance | False alarms create noise or route recommendations are not actionable |
+| H5: A small local lane can run the workload within available resources | Untested | A bounded resource trial completes with complete job accounting and measured latency/RSS | Context packing, memory pressure, or model errors make coverage incomplete |
+| H6: Secondary OSS lanes add distinct value beyond Laya | Optional / untested | Blinded review finds additional consequential cases with exact evidence at acceptable cost | Lanes only agree, duplicate alerts, or fail to complete equal-coverage runs |
 
-## Counter-signal and caveats
+## Counter-signals and caveats
 
-- Existing Jev tests and historical lane results may be useful smoke evidence, but they do not answer whether these local models naturally catch unknown failures.
-- A local decision model's confidence is model-specific. Laya uses entropy concentration for one confidence field; Kev and OpenJev use different normalization. Raw candidate distributions are retained, and thresholds are not shared across models.
-- Successful replay cannot prove an agent would have recovered the actual task outcome. No gold means accuracy is intentionally unknown; agreement and event counts are descriptive only.
-- Raw ACS/Grok transcript is not verified locally. The checked-in ACS artifact derives from gold-curated turns and tool stubs and is excluded. Four separate raw Claude roots are verified; a Claude-only run must be labeled accordingly.
+- A historical replay is not an intervention; it can show a recommendation that might have helped, not prove the agent would recover.
+- A single Claude corpus and already-visible history can overfit. Freeze the generic profile before inference; keep the known incident out of prompts, rules, and fixture selection; inspect it only after the blind run. The corpus run is exploratory if no genuinely unexposed whole-session holdout is available.
+- The current corpus has 14 root sessions and prior outputs have been reviewed. A newly selected subset from it is not automatically an untouched holdout. Use new, unexposed sessions for a later holdout claim.
+- Secondary model agreement is not correctness. Keep another OSS lane only if it adds independently reviewed detections beyond Laya.
+- Full exhaustive message-pair coverage is an offline benchmark requirement, not necessarily the production retrieval strategy. Atomic chunking can split qualifiers; retain span provenance and surface disagreement/incomplete coverage.
 
 ## Scope and non-goals
 
-- Input lanes: each source conversation/root is isolated; sidechains retain provenance and inherit only the parent pin/evidence snapshot available at delegation time.
-- Gates: user-message ambiguity/relation + epistemic pin; research readiness from as-of sources; deterministic hard-deny then pin-aware tool decision; captured compaction boundary retention.
-- Model roster: Laya; APUS OpenJev v1 4B on this PC; APUS OpenJev v1 9B on MacBook Pro; Kev 0.8B/4B/9B where the local host/runtime can support them. Exact checkpoint, quantization, and serving runtime are frozen per lane. The user-requested OpenJev 9B is pinned to the APUS family because its published collection has paired 4B/9B variants; an endpoint reporting another exact model is logged separately, never silently relabeled.
-- Excluded: Jev, OpenRouter, external inference, curated/gold labels, failure-specific prompt cases, comparison with unrelated OSS agents, tool execution, production hook changes, and accuracy claims.
+- **In scope:** full raw Claude replay; deterministic event order and source authority; Laya-first typed decisions; consequential response acknowledgment; plan/action versus intent; as-of source-to-claim checks; recovery-route recommendations; exact event/span/evidence receipts; synthetic metamorphic and generated robustness cases; honest holdout status; optional OSS comparator only with a distinct hypothesis.
+- **Out of scope:** production enforcement or agent messaging; executing historic tools or research requests; hosted Jev/OpenRouter; curating known failure labels into the blind run; treating model agreement or route counts as accuracy; requiring OpenJev/Kev completion when they do not add value; ACS/Grok claims without a genuine raw source.
 
 ## Proposed flow
 
-```mermaid
+~~~mermaid
 graph TD
-  S[Source events] --> N[Validate provenance]
-  N --> E[Route event kind]
-  E --> U[User pin and relation]
-  E --> R[As-of research readiness]
-  E --> T[Hard-deny and tool gate]
-  E --> C[Captured compaction check]
-  U --> L[Lane outputs and receipt]
-  R --> L
-  T --> L
-  C --> L
-```
+  U[Human instruction] --> P[Attributed intent]
+  P --> A[Next response check]
+  P --> D[Plan and action checks]
+  D --> E[As-of evidence check]
+  A --> R[Recovery recommendation]
+  D --> R
+  E --> R
+~~~
 
-| Stage | Mechanical responsibility |
+| Stage | Responsibility |
 | --- | --- |
-| Validate provenance | Deduplicate by UUID; distinguish human user text, delegated prompts, assistant claims, tool calls/results, and compact boundaries; resolve delegation only from source IDs and mark unresolved links incomplete. |
-| User pairwise pin gate | Compare each human user turn against every earlier human turn in its own stream; chunk deterministically to model limits and receipt exact pair coverage. |
-| As-of research gate | Reconstruct sources visible before the current coding boundary and decide `research_more`, `ready`, or `insufficient`; missing evidence never means `ready`. |
-| Tool gate | Apply fixed hard-deny rules first; put every active pin into deterministic, context-bounded groups for each historic tool call; aggregate `allow`, `deny`, or `escalate`; diagnose non-allow groups pin by pin; do not execute tools. |
-| Compaction gate | Evaluate only source-captured compact boundaries; compare pre-boundary active pins/evidence with preserved/post-boundary material. |
-| Isolated model lanes | Keep per-model pin/evidence state separate so one model cannot coach another. |
-| Replay receipt | Store source/config hashes, coverage, decisions, confidences, timings, and failure counts without transcript text. |
+| Normalize | Preserve source event, authority, timestamps, parent/sidechain and exact span provenance. |
+| Build intent evidence | Classify attributed user excerpts, compare every required earlier-user pair, retain exact relation/supersession targets, and distinguish incomplete coverage from no detected constraint. |
+| Check acknowledgment | Compare the next assistant response to the consequential user message and any explicit repeat-back request. Do not use later assistant prose to repair an earlier omission. |
+| Check plan/action | Treat assistant plans as proposals; compare their consequential choices and recorded tool calls with active user intent. The actual tool-call event is an action boundary. |
+| Check research warrant | Compare each relevant factual claim with only retrieved evidence available before that boundary. Source requests or agent claims are not evidence. |
+| Recommend recovery | Aggregate through a deterministic reducer and return a typed route with event IDs, spans, evidence IDs, as-of times, coverage, and rationale. Keep the route shadow-only. |
+| Measure | Report coverage, omissions, incomplete jobs, abstention, routes, latency, and resource use. Review examples separately; do not infer correctness from lane agreement. |
 
 ## Success and limits
 
-Acceptance criteria are listed in `TASK-ACS-0004-blind-local-replay.md`. A clean Claude replay is a first usable result; the full two-source objective remains blocked until an actual, unlabelled ACS/Grok transcript is recovered. No percentage of agreement is called correctness without human labels, which remain outside this task.
+A usable discovery result has complete source and job accounting, explicit response/intent/research decisions at the defined boundaries, source-grounded route recommendations, and a content-free receipt. If full coverage cannot be established, the affected stream is incomplete and the report says why.
+
+The blind replay can answer whether Laya surfaces plausible, inspectable recovery opportunities in this corpus. It cannot establish live usefulness or generalization on its own. The known incident is reviewed after inference; future unseen sessions are needed for a genuine hidden holdout. Secondary OSS results are reported only if they complete comparable coverage and add distinct reviewed signals.
 
 ## Lineage
 
-- Leaf issue: [#28](https://github.com/Pukujan/agent-custom-setup/issues/28); parent: none declared; task: ACS-0004; related context: #25 and PR #26; dependencies: none for design.
-- Primary writer: Codex; branch: `task/ACS-25-dual-jev-gates`.
-- Owner scope correction: [#5867443649](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5867443649). Data provenance correction: [#5867480911](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5867480911).
+- Leaf issue: [#28](https://github.com/Pukujan/agent-custom-setup/issues/28); parent: none; dependencies: none; task: ACS-0004.
+- Owner problem/scope clarification: [comment #5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).
+- Primary writer: Codex; branch: task/ACS-25-dual-jev-gates.

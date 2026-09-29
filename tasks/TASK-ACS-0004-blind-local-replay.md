@@ -1,61 +1,71 @@
-# TASK-ACS-0004 — Blind local decision-model transcript replay
+# TASK-ACS-0004 — Blind recovery-routing replay for long-running intent and research drift
 
-<!-- continuity:task {"acceptance":["No Jev/OpenRouter requests in code or replay receipts","Source normalization rejects curated/gold-derived or incomplete streams as blind evidence","Every eligible user event is related against all prior user events within its own conversation, with explicit coverage and truncation receipts","Every tool event is checked against active pins after deterministic hard-deny rules","Research and compaction gates use only evidence/snapshots available as of each event","Laya/OpenJev/Kev lanes run independently and record model/checkpoint/device/confidence semantics","Metamorphic and hidden-session holdout suites pass without encoding known transcript failures","A replay receipt records source hashes, model configs, input coverage, outputs, latency, failures, and lane divergence without leaking transcript text"],"depends_on":[],"goal":"Build a deterministic, no-gold, blind walk-forward replay across valid Claude and ACS/Grok transcript sources using local Laya, OpenJev, and Kev decision-model lanes for user-message pins, research readiness, tool gating, and captured compaction events","id":"ACS-0004","issue_url":"https://github.com/Pukujan/agent-custom-setup/issues/28","next_action":"Commit and checkpoint the current implementation/docs/report; then continue the Gravebuster baseline and run fast-jev-compaction and auto-mode adapters sequentially before rendering the final content-free HTML report.","owner":"Codex","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"Prior benchmark conclusions were contaminated by hand-curated gold, incomplete event coverage, and lane comparisons that did not test whether the judge naturally detects agents' research and instruction failures"}-->
+<!-- continuity:task {"acceptance":["Replay only the complete verified raw Claude source for blind claims; reject gold-derived or incomplete streams and preserve source/authority/causal provenance","Use Laya typed-decisions as the primary low-cost lane; secondary OSS lanes are optional and retained only for a distinct, reviewed detection hypothesis","Evaluate consequential user-message acknowledgment, proposed-plan and recorded-tool conflicts, and as-of claim/source support before plan or action boundaries","Emit reconfirm_intent, rethink_plan, research_more, dispatch_verifier, escalate, or proceed recommendations with exact event/span/evidence IDs, timestamps, coverage and receipt time","Missing, truncated, unscored, contradictory, or out-of-order coverage cannot silently yield proceed","Implement and evidence M01-M28 plus generated property/fuzz invariants without seeding known transcript failures","Report holdout honestly; the prior post-inference partition is exploratory, and only unexposed whole-session inputs qualify as hidden holdout","Emit content-free receipts accounting for every planned job, route, omission, failure, model identity, timing, and source/config hash"],"depends_on":[],"goal":"Determine whether a cheap local Laya decision lane, inside a deterministic provenance-preserving replay, can surface actionable recovery opportunities for consequential user-intent and research drift in the complete raw Claude history; retain other OSS only if they add distinct value","id":"ACS-0004","issue_url":"https://github.com/Pukujan/agent-custom-setup/issues/28","next_action":"On the other PC, rerun the focused Laya adapter suite; resolve failures, then verify the local checkpoint/runtime and resource budget before a bounded synthetic trial. Do not start full transcript inference until the suite passes and the input manifest is validated.","owner":"Codex","priority":"P1","protocol_version":"0.1.0-draft","schema":"project-continuity.task.v1","status":"active","why":"The earlier gold/hosted-Jev bakeoff did not test whether a small local lane catches long-running intent loss, conflicting decisions, or unsupported research transitions and recommends a useful, auditable recovery step"}-->
 
 - Status: active
 - Owner / primary writer: Codex
 - Priority: P1
-- Depends on: none for design; source history in #25/#26 is related context, not a parent dependency
+- Depends on: none for design; #25 and PR #26 are related history, not verified parents or dependencies
 
 ## Human outcome
 
-Find whether small local decision models naturally surface instruction drift, weak research, unsafe tool calls, loss of user intent during compaction, and reconsideration across Claude Code and ACS/Grok histories—without teaching the benchmark which known mistakes to find.
+My usual workflow is to tell Claude or Codex what I want, the success criteria and constraints, then ask it to repeat its understanding so I can correct it. During a long-running task, after many tasks or context changes, the agent may miss or weakly acknowledge that message and later make a choice that violates it. The benchmark’s main goal is to see whether Laya can catch any of these consequential failures in the prewritten transcript, and whether the same checks could help future work.
+
+The failure chain to evaluate is: the next response omits or weakly carries forward an instruction; a later plan or tool action conflicts with active intent; the agent assumes something is impossible or paid after shallow research; or it decides it has researched enough and moves to a plan/action without direct, current evidence. A useful route should identify the claim and missing source and recommend more research or a bounded independent verifier. Generic allow/deny output is not success.
+
+A cheap shadow backtest can be better than doing nothing if it exposes timely, provenance-backed recovery opportunities for human review without messaging an agent or executing historic actions. The tradeoff includes local runtime/resources, false-alert review time, and missed unalerted checkpoints. This one historical corpus is discovery evidence, not a future catch-rate claim; prior outputs have been reviewed and no unexposed whole-session holdout is verified. Keep the known Fish incident out of tuning and inspect it only after the frozen run. Require new unexposed sessions or prospective evaluation before claiming generalization.
 
 ## Scope and boundaries
 
-- In scope: deterministic forward-only transcript replay; independent model lanes; user-message relation/pin state; research-evidence readiness; hard-deny plus pinned-message tool checks; captured before/after compaction checks; event-level receipts; metamorphic tests; session-level hidden holdout; local model comparison up through 9B.
-- Out of scope: Jev, OpenRouter, external inference, human-gold scoring, curated error seeds, peer OSS bakeoff, replaying tools against the filesystem/network, changing production gates, or treating lane agreement as correctness.
-- Candidate roster: Laya; OpenJev 4B on this Windows PC; OpenJev 9B on the MacBook Pro if the user meant the APUS 9B family; Kev 0.8B/4B/9B where actually hosted. Preserve exact upstream IDs/revisions and quantization. Do not silently count a 26B-total/4B-active routed model as 4B.
-- Model calls are disabled until a health/model-list request confirms the exact local endpoint and checkpoint. No Jev/OpenRouter fallback is permitted.
-- State/context packing is model-specific. Compare every historical user message exhaustively in deterministic chunks/pairs where necessary; never silently drop history to fit a model. Record complete pair coverage, content hashes, and any source text that cannot be represented. Tool checks use only currently active pin candidates and preserve pin provenance. Research uses only evidence present before that event. Compaction applies only to source-captured boundaries with pre/post context evidence.
-- Each conversation/root agent and each sidechain is a separate stream unless parent-child causality is explicitly reconstructed. Never merge unrelated sessions merely by timestamp. Exclude curated ACS/Grok fallback data from blind claims.
+- In scope: complete verified raw Claude replay; event/authority/causal provenance; Laya-first typed decisions; acknowledgment, plan/action intent conflict, as-of research evidence, and recovery-route recommendations; exhaustive user-message pair coverage for the offline benchmark; deterministic chronological reducer; span-level receipts; metamorphic and generated fuzz cases; truthful holdout status; optional OSS comparators with a distinct marginal-detection hypothesis.
+- Out of scope: production hook/controller implementation, live agent messages, executing historic tools or research, hosted Jev/OpenRouter, known-incident prompts/rules/fixtures, gold-scored accuracy, requiring OpenJev/Kev completion, and claiming semantic compaction preservation when source prose is absent.
+- Routes: reconfirm_intent, rethink_plan, research_more, dispatch_verifier, escalate, proceed. During replay these remain shadow recommendations; the system does not perform them.
+- Durable intent does not expire from age alone. Preserve timestamps, task/sidechain scope, and exact supersession. If context or coverage is uncertain, do not silently proceed.
+- Candidate roster: Laya typed-decisions is primary. OpenJev/Kev are optional only when they address a distinct missed-case or performance question with comparable inputs; unavailable or non-contributing lanes do not block completion.
+- Full raw ACS/Grok is unavailable/unverified. Gold-derived ACS artifacts remain excluded from blind evidence.
 
-## Observed starting evidence
+## Observed evidence
 
-- Repository revision: `2dbcf9f65ab2e4f1dc8265dadd980c34bf59d3ae` on `task/ACS-25-dual-jev-gates`; working tree clean at start.
-- Issue #28 was still titled and scoped as a gold-scored multi-lane bakeoff. Owner correction was recorded at [comment #5867443649](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5867443649); evidence correction at [comment #5867480911](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5867480911).
-- `acs_20h_export_meta.json` records `readtranscript=false`; its 70 users derive from `fixtures/acs_chat_gold/turns.json`, and its 66 tools from a shell-only fixture with null results. It is not a raw blind ACS/Grok transcript and is excluded.
-- Claude export metadata lists 81 original local JSONL files (14 root, 67 nested), 388 merged user rows, 7,797 tools, duplicate IDs, and text caps (user 4,000 chars, args 500, results 800). Raw sources preserve UUID/parent/sidechain/agent provenance and 41 compact-boundary events; normalize raw sources instead of replaying the harvest.
-- This PC currently has an RTX 4060 with 8GB VRAM; Ollama model inventory contains only `nomic-embed-text`. The MacBook Pro appears on the tailnet, but no usable model inventory/API was reachable during initial read-only probes. These are current observed facts, not a claim that the requested models are absent from all runtimes.
-- No Jev or model inference request has been made in this task.
+- Live owning issue #28 is OPEN and now titled “Blind replay for long-running intent and research recovery”; the owner correction is recorded in [comment #5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).
+- The local Claude source inventory is 81 raw JSONL files (14 root, 67 nested), 18,350 normalized events across 80 streams, 198 eligible human messages, and 41 captured compact-boundary records. Raw ACS/Grok is unverified.
+- The new Laya typed-decision adapter/profile 1.2.0 adds acknowledgment checks, assistant prose-boundary classification, plan-to-intent checks, and deterministic shadow routes for acknowledgment, plans, recorded tool conflicts, and research evidence. No Laya inference or full-corpus run has occurred. The expanded synthetic suite is pending rerun: the latest run had 11 passing tests and one fixture mismatch; the fixture was corrected after that run.
+- The prior replay receipt corpus has partial/conflicting Laya/OpenJev/Kev results; none is terminal completion evidence. Windows OpenJev inference remains stopped. The previous session partition occurred after inference and is exploratory.
+- Repository production gate modules remain optional drafts. Their current mocks do not implement or prove a general live recovery controller.
+- The current M01-M14 report status is unverified and hidden whole-session holdout is not implemented. No named known incident is to be inspected until post-run audit.
 
 ## Deliverables
 
-- PDD, SDD, benchmark protocol (blind holdout, metamorphic tests, lane isolation), and TDD in `modules/coordination/jev-oss-compare/v0.1.0/docs/`.
-- A backend-neutral local typed-decision API adapter and deterministic source-normalization / walk-forward runner in `modules/coordination/jev-oss-compare/v0.1.0/`.
-- Private/local normalized replay inputs and output receipts must remain outside version control; commit only manifests, hashes, code, and aggregate results safe for review.
-- Report source gaps separately from model failures. Until raw ACS/Grok input is recovered, Claude-only results cannot be presented as dual-stream results.
+- Outcome-aligned PDD, SDD, benchmark protocol, and TDD under modules/coordination/jev-oss-compare/v0.1.0/docs/.
+- A versioned Laya-first typed-decision profile/runner and deterministic source/replay machinery that can represent response acknowledgment, plan/action conflict, as-of evidence support, and routes.
+- Synthetic metamorphic/property-fuzz coverage for provenance, chronology, exact supersession, route sensitivity, no-lookahead, and incomplete-input abstention.
+- The focused Laya adapter suite has 12 synthetic cases; its latest complete run is not green. The full M01-M28 suite and generated fuzz remain unverified.
+- Private replay inputs/receipts remain outside version control. Commit only code, schemas, hashes, and content-free aggregate receipts suitable for review.
+- Report the raw source boundary and old partial/contradictory model receipts separately. Do not present a Claude-only result as dual-stream or as human-gold accuracy.
 
 ## Acceptance and evaluation policy
 
-- No model-specific prompt, rule, or threshold is tuned against revealed transcript failures. Freeze code/config before opening the hidden session output.
-- Hidden holdout is selected by whole conversation/session, not random event rows; preserve temporal order inside each held-out stream.
-- Metamorphic checks cover explicit correction/supersession, tentative exploration versus durable intent, delayed reconsideration, assistant/tool text not becoming user intent, irrelevant history, event-order leakage, source-role/sidechain isolation, hard-deny invariance, and missing/truncated evidence forcing an explicit incomplete/abstain state.
-- Report per-lane counts and disagreements by gate, coverage/truncation, abstention, latency, errors, and confidence distribution. These are descriptive discovery measures; none implies human-gold accuracy.
-- Model-specific confidence fields and context behavior must be recorded with their definitions; do not transfer thresholds between Laya, OpenJev, and Kev.
+- Freeze generic prompts, decision questions, source rules, reducer, profile, and model/runtime identity before full inference. Do not seed known transcript wording or expected outcomes.
+- The complete corpus replay is discovery evidence. A hidden holdout claim requires a genuinely unexposed whole root/session and descendants selected before inference; the previous post-inference split cannot be relabeled. If none exists, mark holdout not_run and use a future fresh transcript for generalization.
+- Preserve exhaustive same-stream prior-user-message comparisons and exact coverage in this offline benchmark. Chunking and worker count may change throughput, not required coverage.
+- Test acknowledgment only against the next response; test later plan/action boundaries again even if the response was accurate. Treat agent plans as proposals and actual tool calls as separate observed actions.
+- Test source provenance as-of each claim; a search request, citation-only text, agent assertion, stale/wrong-version source, or absent excerpt is not direct support. No universal source-count minimum.
+- Implement M01-M28 and generated property/fuzz checks using synthetic data; they test mechanics and directional sensitivity, not transcript correctness.
+- Review the known incident only after the blind replay. Separately review a blinded sample of routed and unrouted consequential checkpoints to report observed usefulness and false-alarm/miss examples. A sample is not full gold.
+- Report routes, source coverage, incomplete jobs, abstention, lane identity, latency/resource cost, and reviewed examples separately. Agreement and confidence do not establish correctness.
+- Keep optional OSS lanes only if they produce distinct, independently reviewable detections at justifiable cost.
 
-## Task-context design proposal
+## Prior task-context proposal
 
-The user’s task-context, message-relation, and pin-state proposal is recorded in [issue #28 comment 5874824862](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5874824862). It keeps immutable source events separate from revisable task-context annotations and append-only relations. The proposal does not change ACS-0004 acceptance: exhaustive prior-user-message comparisons remain required; retrieval may prioritize work or run as a later shadow lane, but cannot replace exhaustive coverage without a task revision.
+The user’s task-context, message-relation, and pin-state proposal is recorded in [issue #28 comment #5874824862](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5874824862). This recovery-routing correction adds response, plan/action, evidence, and route outcomes while retaining the exhaustive same-stream message-pair coverage requirement for this offline benchmark.
 
 ## Lineage and execution identity
 
 - Leaf owning issue: [#28](https://github.com/Pukujan/agent-custom-setup/issues/28)
-- Parent ancestry: none declared in live issue; #25 and PR #26 are related history, not verified parents
+- Parent ancestry: none; dependencies: none
 - Primary writer: Codex
-- Branch: `task/ACS-25-dual-jev-gates`
-- Source issue revision: issue #28 body/comments read 2026-09-28; owner corrections appended before this projection
-- PR/CI/receipt: PR #26 is OPEN on this branch with auto-merge enabled; its last `gates` check succeeded, but the PR is BEHIND `main` and does not include these unpushed ACS-0004 files. The 2026-09-28 handoff and pending gates are recorded in issue comment [#5874824862](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5874824862).
+- Branch: task/ACS-25-dual-jev-gates
+- Source issue revision: #28 body and owner correction comment #5894826843 read 2026-09-29
+- PR/CI/receipt: PR #26 is OPEN with auto-merge enabled. The latest observed `gates` success was for old head `68c2066`, while GitHub reported the PR BEHIND `main`; local merge commit `e212a69` includes `origin/main` at `c1bbbb8` and is pending push. Fresh checks are required after the update; this is not a delivery claim.
 
 ## Checkpoint log
 
@@ -117,3 +127,73 @@ Blocked/uncertain:
 
 Next:
 - Continue the Gravebuster baseline from saved cache, then run fast-jev-compaction and auto-mode sequentially and refresh the content-free HTML report.
+
+### 2026-09-29 — recovery goal and setup audit
+
+Completed:
+- Verified the live owning issue; appended the owner’s near-verbatim problem sequence and updated issue #28 title/body to make useful recovery from consequential intent/research drift the benchmark goal.
+- Audited the Laya DAG, current optional gate modules, PDD/SDD/TDD, metamorphic protocol and holdout status with repository evidence and a read-only gpt-6-sol review.
+- Updated the local PDD, SDD, TDD, benchmark protocol, task and CURRENT projections.
+
+Evidence:
+- [Issue comment #5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).
+- The current Laya adapter/profile covers pin status, user-message relations, tool-versus-pin checks and claim/source pairs; it lacks next-response acknowledgment and recovery-route output.
+- The report marks M01-M14 unverified and hidden holdout not implemented. The earlier post-inference split is exploratory.
+- Existing production gate modules are optional drafts; their current mocks do not establish an end-to-end recovery flow.
+- No new Laya full-corpus inference or benchmark tests were run.
+
+Decisions:
+- Laya is the primary cheap candidate; OpenJev/Kev are optional comparators only if they test a distinct miss hypothesis.
+- Treat the full historical replay as exploratory unless an unexposed whole-session holdout is proven.
+- Keep live recovery-controller implementation separate from ACS-0004.
+
+Changed:
+- Issue #28 title/body/comment; local PDD, SDD, TDD, benchmark protocol, task and CURRENT projections.
+
+Blocked/uncertain:
+- The Laya adapter does not yet implement acknowledgment or recovery routes.
+- New synthetic metamorphic/fuzz cases are specified but not implemented or evidenced.
+- A valid hidden holdout is unavailable; no Gravebuster full-corpus resource run has started.
+
+Next:
+- Rerun the focused synthetic suite after the fixture correction, fix any remaining failures, and synchronize the evidence docs before a bounded local resource trial.
+
+### 2026-09-29 — owner goal and acknowledgment-route update
+
+Completed:
+- Recorded the owner’s failure sequence and the backtest-versus-no-op tradeoff in the live issue body/comment and aligned the PDD, benchmark protocol, SDD, TDD, task, and CURRENT projection. Added Laya adapter/profile 1.1.0 acknowledgment expectation, next-assistant-response span jobs, deterministic omission/route aggregates, tool/research route output, and a rule that only retrieved source content can support claims.
+
+Evidence:
+- Issue #28 comments [#5895286616](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5895286616) and [#5895676182](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5895676182); focused pytest result: 9 passed; Python compilation and profile JSON parsing passed; git diff --check passed; continuity validate reports VALID with the existing stale issue-log-format marker warning.
+
+Decisions:
+- The replay-versus-no-op value remains a hypothesis. Treat this historical corpus as discovery only; no catch-rate/generalization claim. Do not inspect the named incident before the frozen replay.
+
+Changed:
+- Issue #28 body/comments; profiles/laya-typed-decisions/v1/profile.json; scripts/laya_typed_decisions/v1/runner.py; new tests/test_laya_typed_decisions_v1.py; PDD/SDD/TDD/benchmark protocol/task/CURRENT.
+
+Blocked/uncertain:
+- No Laya model inference or full-corpus replay has run; no untouched whole-session holdout is verified; assistant prose-plan boundary detection, M01-M28 completion, and generated fuzz remain outstanding. The new tests validate mechanics, not Laya semantic quality.
+
+Next:
+- Add assistant prose-plan boundary detection and attach as-of evidence/recovery routes to that checkpoint; add synthetic miss checks before freezing the adapter for a bounded local resource trial.
+
+### 2026-09-29 — assistant boundary path added, verification pending
+
+Completed:
+- Extended adapter/profile to classify assistant spans as proposed plans, factual claims, both, other, or unclear; created plan-to-active-intent jobs; moved research checks to Laya-classified factual-claim checkpoints and rechecked classified claims at coding action boundaries. Added synthetic tests for boundary job creation, plan-conflict routing, and current-task claim selection.
+
+Evidence:
+- The last focused pytest run reported 11 passed and one failed because the no-evidence fixture omitted a claim count; the fixture was corrected afterward, but the suite has not been rerun. Python compilation passed before these latest assistant-boundary edits. No model process or transcript inference was started.
+
+Decisions:
+- Treat the expanded adapter as unverified until the focused suite passes. No hosted or historic tool calls; the known incident remains uninspected.
+
+Changed:
+- Laya profile/runner, focused Laya tests, and the task/current projection. These changes were local and uncommitted at this checkpoint; the live issue progress comment still needed reconciliation.
+
+Blocked/uncertain:
+- The expanded runner may still have integration issues; full M01-M28/fuzz validation and Laya semantic quality remain unverified.
+
+Next:
+- Rerun tests/test_laya_typed_decisions_v1.py, fix any remaining failures, and reconcile the live issue/evidence documents before a bounded synthetic resource trial.

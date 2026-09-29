@@ -1,138 +1,126 @@
-# SDD — Blind local decision-model replay
+# SDD — Recovery routing from long-running intent and research drift
 
 ## 1. Runtime boundary
 
-The runner is a deterministic event stepper plus decision-model calls to explicitly configured local endpoints. It has no Jev/OpenRouter client, no browser/research agent, and no tool executor. All historical calls are shadow decisions only.
+ACS-0004 is an offline shadow replay. The runner advances source events in order, invokes explicitly configured local decision models, and records recommendations. It has no hosted Jev/OpenRouter client, browser/research agent, or historic tool executor. It does not send a route to Claude or pause a live agent.
+
+The deterministic harness owns source authority, ordering, coverage, span IDs, job DAG, evidence ledger, chronological state, and final route reduction. Laya supplies bounded semantic judgments. Model agreement never overrides provenance or user authority.
+
+## 2. Component responsibilities
 
 | Component | Responsibility |
 | --- | --- |
-| Source adapter | Read raw Claude JSONL and an explicitly approved raw ACS/Grok export; reject known gold-derived artifacts. |
-| Provenance normalizer | Emit stable ordered events with session, conversation, role authority, source file/line, UUID, parent UUID, sidechain/agent ID, tool-use ID, and before/after links. |
-| State reducer | Maintain one user-message relation graph, active pins, research evidence ledger, and compaction snapshots per stream and model lane. |
-| Candidate packer | Deterministically chunk/pack text under the exact checkpoint budget; report original/packed hashes and coverage. No silent truncation. |
-| Local decision adapter | Query one named model at a time using `/v1/systemone` or a pinned model-specific adapter; retain the returned score vector and documented confidence meaning. |
-| Hard-deny policy | Decide fixed catastrophic tool patterns before any model call. A match records `deny_rule`; it bypasses every model. |
-| Receipt writer | Append content-free JSONL results to a private run directory, keyed by run/model/stream/event/prompt hashes. |
+| Source adapter | Read the verified raw Claude JSONL corpus; reject gold-derived, incomplete, or unauthorized sources. |
+| Provenance normalizer | Emit stable ordered user, assistant, tool-call/result, research-source, delegation, and captured-compaction events with source IDs and parent links. |
+| Intent ledger | Preserve attributed user-message spans, status, relations, timestamps, exact supersession edges, and stream/task context. Age alone never expires durable intent. |
+| Boundary builder | Derive response, plan/proposal, research-to-plan/action, tool-action, resume, and captured-compaction checkpoints using a versioned deterministic rule set. Preserve the source event that caused each checkpoint. |
+| Local decision adapter | Query one exact, local model/checkpoint at a time with a model-specific packer and typed schema. |
+| Recovery reducer | Apply deterministic coverage and route policy to scored jobs and emit one shadow recommendation per covered checkpoint. |
+| Receipt writer | Write private, content-free receipts containing hashes, IDs, spans, coverage, route, and timing. |
 
-## 2. Source event envelope
+The boundary builder must not treat every assistant sentence as a formal plan. When the transcript has no structured plan event, only a reproducibly detected proposal/commitment boundary and actual tool calls can be evaluated. Unrecognized boundaries are reported as a coverage gap, not as evidence that no plan existed.
 
-Normalized event fields:
+## 3. Source event envelope
 
-```json
-{
-  "event_id": "stable source UUID or deterministic hash",
-  "stream_id": "root session + causal agent path",
-  "event_index": 0,
-  "timestamp": "source timestamp when present",
-  "sequence": 0,
-  "kind": "human_user|delegated_prompt|assistant_text|tool_call|tool_result|compact_boundary|other",
-  "authority": "human|agent|tool|system|unknown",
-  "source": {"file_hash": "sha256", "line": 0},
-  "uuid": "source UUID",
-  "parent_uuid": "source parent UUID or null",
-  "is_sidechain": false,
-  "agent_id": null,
-  "tool_use_id": null,
-  "text_ref": "private local content reference",
-  "content_sha256": "sha256"
-}
-```
+A normalized event contains:
 
-Text lives in local private storage, never in a committed replay receipt. A role=`user` row is not automatically human intent: tool-result blocks and sidechain delegated prompts are different `kind`/`authority` values. Identical duplicate UUID rows collapse to one event with all source locations retained; conflicting rows sharing a UUID fail the source build. Parent/sidechain links are resolved before replay. A child receives a frozen parent-state snapshot at the delegation event; child user-role prompts do not create human pins.
+- stable event ID, stream ID, event index, and source timestamp when present;
+- kind and authority (human_user, assistant_text, tool_call, tool_result, research_source, delegated_prompt, compact_boundary; human, agent, tool, or unknown);
+- source file hash and line, UUID, parent UUID, sidechain/agent ID, tool-use ID, and source sequence;
+- private content reference, content hash, and exact span references when atomized;
+- task/context relation evidence when available, without inferring a new task ID from timestamps alone.
 
-## 3. Event order and no-lookahead rule
+Raw text stays in private local input storage and never enters committed receipts. Tool-result blocks and delegated agent prompts do not become human intent. Identical duplicate UUIDs collapse with all source locations retained; conflicting content fails the source build. Unresolved parent links make affected coverage incomplete.
 
-Events are ordered within each source conversation using original array/file sequence as the primary order and timestamps as supporting evidence, not a global timestamp merge. A call sees only state accumulated before that call. The tool result is added only after its corresponding tool-call decision. Future assistant explanations, source outputs, corrections, labels, and compaction results cannot enter earlier states. If causal order is ambiguous, that segment is marked `order_unknown` and excluded from a claim of clean walk-forward coverage.
+## 4. Event order and no-lookahead
 
-## 4. Gate definitions
+Replay each causal conversation/sidechain forward in source order. File/array sequence is primary; timestamps are evidence, not a global merge key. A decision sees only events preceding its checkpoint. The tool result is added after the tool-call checkpoint. Future assistant explanations, research results, corrections, compacted summaries, or labels cannot repair earlier decisions.
 
-### User-message relation and pin gate
+A child stream receives the exact parent intent/evidence snapshot that existed at delegation time. If source order or parent causality is ambiguous, mark the affected segment order_unknown and do not claim complete coverage.
 
-Each eligible human turn `u_i` is compared with every eligible earlier human turn `u_j`, `j < i`, in its stream. The output is a typed relation edge, not a gold pin label:
+## 5. Decision jobs
 
-- `unrelated`
-- `same_topic`
-- `asks_about_or_questions`
-- `adds_constraint_or_refinement`
-- `supports_or_commits`
-- `revises_or_supersedes`
-- `reopens_or_uncertain`
-- `unclear`
+### 5.1 User intent and relations
 
-The runner preserves exact message IDs for every pair. Long messages split into stable, overlapping, sentence-aligned chunks. All chunk pairs are scored; deterministic aggregation retains both pair-level evidence and contradictions. A pin is an attributed user assertion or preference, never a tool result or agent paraphrase. Questions alone do not become hard instructions. Supersession is a graph edge to specific prior message IDs; the model cannot delete or rewrite history.
+Classify attributed human excerpts as durable assertion, tentative/reconsidering, question-only, context-only, or unclear. Compare each eligible human message with every earlier eligible human message in its stream using stable overlapping spans. Preserve every parent pair ID, span pair, and result.
 
-Separately classify every new human message as `durable_assertion`, `tentative_or_reconsidering`, `question_only`, `context_only`, or `unclear`. Keep every classification as an epistemic record. Only a durable assertion can impose a hard tool constraint; tentative/reconsidering pins can cause escalation, and questions/context do not become tool restrictions. A supersession edge deactivates only the explicitly targeted prior pin after the new message is itself classified; it never erases its history.
+A relation edge may be unrelated, same topic, question/reopens, adds a constraint, supports, exact supersession, conflict, or unclear. Supersession targets exact prior intent spans; it never deletes source history. A partial correction cannot deactivate unrelated clauses. Unknown task context or mixed span judgments remain uncertain/incomplete.
 
-### Research-readiness gate
+Questions and context do not become hard tool restrictions. Durable constraints remain active until explicit exact supersession or a clear task boundary; a delay of ten hours by itself changes no status.
 
-Invoke on each eligible user turn/resume and at coding-start boundaries. The deterministic evidence ledger includes only prior observed source events: URL/repository/version, tool/source kind, retrieved excerpt hash, and whether the cited content addresses the current claim/operation. A frozen lexical-overlap retriever ranks as-of evidence against the latest user/delegated task, the agent's latest readiness claim, and the current coding boundary. It records included and omitted evidence IDs plus a query hash; if potentially matching evidence cannot fit the lane's context budget, the gate is incomplete and cannot say `ready`. The model chooses:
+### 5.2 Assistant acknowledgment
 
-- `research_more`: a required fact/source is missing or unverified;
-- `ready`: the as-of evidence is sufficient for the named coding claim;
-- `insufficient`: the evidence/task boundary is ambiguous or not representable.
+For each durable/consequential user message and each explicit repeat-back request, compare the next assistant response with the user’s exact intent spans. Choose:
 
-The benchmark does not fetch fresh web pages during replay. It measures what the agent had actually seen by that point. A missing citation, unversioned API, missing source excerpt, or packing gap cannot be silently treated as proof. `ready` is a model prediction, not a verified truth label.
+- accurate: the response carries forward the relevant request and constraints;
+- partial: it omits or weakens at least one consequential constraint;
+- omitted: it does not acknowledge or represent the instruction;
+- contradicted: it restates the instruction incorrectly;
+- unclear: the response/message is incomplete or the relation cannot be judged.
 
-### Tool gate
+Use only the next assistant response available at that point. Later paraphrases do not repair an earlier miss. Keep the acknowledged user spans and response spans separate.
 
-For every historic tool call, run a fixed deterministic hard-deny list first. On a miss, pack every active pin into deterministic context-bounded groups; each pin's full text is covered exactly, with the same active-pin IDs recorded in the group receipt. The model returns a group verdict: `allow` only when all pins in that group are consistent or irrelevant, `deny` when a durable hard constraint conflicts, and `escalate` when a result is unclear or only a tentative pin conflicts. Non-allow groups trigger individual pin diagnostics to identify likely conflicts. The final tool verdict is a deterministic aggregation of all group verdicts. Missing/capped pin or tool chunks make coverage incomplete and force `escalate`, never `allow`. No historic action executes. Confidence values remain lane-specific observations; this replay does not apply one shared threshold as if Laya, Kev, and OpenJev scores had equivalent calibration.
+The versioned adapter first classifies whether acknowledgment is required for each user span. It then pairs each required span with every token-bounded text chunk from only the next assistant message, preserving both source spans and timestamps. If there is no next assistant text before the next user turn, write a deterministic omitted receipt and recommend reconfirm_intent without asking Laya to infer a missing response. Unclear intent/expectation or missing decision jobs route to escalate. For a multi-chunk response, the reducer evaluates coverage across all chunks; any missing job prevents proceed, and contradictory chunk judgments require reconfirmation.
 
-### Compaction gate
+### 5.3 Plan, claim, and action conflict
 
-Run only at source-captured `compact_boundary` events. Evaluate active pins/research facts present immediately before the boundary against the captured preserved-message IDs/segment and post-boundary context. Output `preserved`, `partially_preserved`, `lost`, or `insufficient`, plus exact pin/fact IDs. Do not synthesize summaries or infer that a compaction happened from transcript length alone.
+An assistant plan or commitment is an agent proposal, not user intent. Compare each eligible consequential proposal and each structured tool action with the active attributed intent spans. Tool-call input is the observed action boundary; assistant prose is not misreported as an executed action.
 
-## 5. Backend contract
+The model returns consistent, conflict, or uncertain, with exact proposal/action span and user-intent span IDs. A durable conflict recommends rethink_plan; uncertainty or incomplete intent coverage recommends reconfirm_intent or escalate. A proposed plan can be flagged before execution; a later tool action is checked again because an accurate plan acknowledgment does not guarantee compliant action.
 
-Laya and Kev use the local TypeSafe-compatible `POST /v1/systemone` contract. APUS OpenJev uses its own candidate-scoring prompt served through Ollama `/api/generate` or llama.cpp. These are separate adapters: do not feed APUS OpenJev the System-One JSON shape or interpret its candidate-relative scores as calibrated correctness probabilities.
+### 5.4 Research evidence and transition
 
-```json
-{
-  "model": "exact-configured-checkpoint",
-  "state": {"current": "...", "prior": "..."},
-  "questions": {
-    "relation": {
-      "type": "choice",
-      "instructions": "Choose the relation between the two attributed messages.",
-      "criteria": {
-        "unrelated": "No relevant relation.",
-        "refines": "The newer message adds a constraint.",
-        "supersedes": "The newer message withdraws or replaces the older intent.",
-        "unclear": "The evidence does not support a stable relation."
-      }
-    }
-  }
-}
-```
+Create research claims from attributed assistant claim spans before an eligible plan/action boundary. The evidence ledger contains only earlier retrieved material, with source identity (URL or repository/path), version/as-of date when present, retrieval event/time, excerpt span/hash, source type, and claim-support relation.
 
-The adapter supports model-specific input packing and response normalization. It records raw option scores, chosen option, provider confidence field, and confidence definition. It never converts different backends' confidence values to a shared scalar. Model configuration is explicit: `backend`, API root, exact model ID, expected revision, quantization/dtype, device, context tokens, request timeout, and auth environment-variable name. A lane starts only after `GET /v1/models` or its documented equivalent confirms the expected endpoint/model. Unknown models and nonlocal hosts fail closed.
+A source request, search query, citation text without retrieved content, or agent statement is not supporting evidence. For each claim/source pair the model returns supports, contradicts, relevant_but_incomplete, irrelevant, or insufficient. No universal source-count threshold is used. Missing, stale, unversioned, indirect, contradictory, or unrepresentable evidence cannot yield proceed.
 
-Initial requested roster:
+When evidence is missing, the route identifies the specific claim and missing warrant. research_more asks for more relevant evidence; dispatch_verifier recommends a bounded independent check with a named claim and source class. In this replay neither route launches a search or agent.
 
-| Lane | Requested location | Candidate identity | Context risk |
-| --- | --- | --- | --- |
-| Laya | PC | typed-decisions checkpoint, revision pinned | 1,024-token state limit; CPU smoke passed |
-| OpenJev 4B | PC | APUS OpenJev v1 4B Q4_K_M | Installed and smoke-tested; top-20 logits may be incomplete |
-| OpenJev 9B | MacBook Pro | APUS OpenJev v1 9B Q4_K_M | Installed and smoke-tested through SSH port-forward |
-| Kev 0.8B | PC | `jaredpalmer/kev-0.8b@9a45d25eb2ab761841196625383fa1dff0e56c1e`, base `Qwen/Qwen3.5-0.8B-Base@dc7cdfe2ee4154fa7e30f5b51ca41bfa40174e68` | Installed, identity-probed, CPU synthetic smoke passed |
-| Kev 4B/9B | PC or Mac | Not installed | Not included in run roster; 9B BF16 exceeds observed memory and 4B capacity/quantized serving is unverified |
+### 5.5 Tool and compaction checks
 
-OpenJev/Kev are not Jev. Synthetic smokes confirm local adapter/API viability only; no transcript replay has run. No cloud fallback is allowed.
+For each consequential tool call, apply deterministic hard-deny rules first, then compare the proposal against every active durable and relevant tentative user-intent span. Coverage lists all active candidates. A missing/capped candidate makes the checkpoint incomplete and cannot yield proceed. Unrelated safe work may continue while the affected action is held.
 
-Raw Claude normalization yields 18,350 events across 80 streams (14 root sessions, 66 child streams), 2,210 repeated rows, zero malformed lines, and 56 of 66 child streams linked to a unique parent. Ten unresolved sidechains cannot inherit parent state. Forty-six `isMeta=true` rows are classified `meta_user`, leaving 198 human-user events. Raw compaction metadata provides retained UUID lists but no summary prose; semantic survival of an omitted pin is unknown. Three additional independent Claude worktree roots contain 1,008 events total. No raw Grok source is verified.
+Run compaction evaluation only on source-captured boundaries. Current source records expose retained IDs but not compacted summary prose; semantic preservation is therefore unknown unless both pre- and post-boundary text are actually present. Never infer semantic loss from token counts alone.
 
-## 6. Determinism, caching, and privacy
+## 6. Recovery route contract
 
-- Freeze source bytes/hashes, parser revision, prompt/schema hashes, model revisions, model settings, retrieval settings, confidence semantics, and session split before any live output is reviewed.
-- Cache key includes the complete request hash, backend/model revision, and runtime settings. A cache hit is replayed only for identical inputs.
-- Model lane states are isolated. One model's pins, outputs, cache entries, or confidence cannot feed another model.
-- Use one in-flight request per host by default; this is explicitly configurable only after stable single-request smoke. Separate host queues prevent PC and Mac workloads from competing for memory.
-- Private source text and raw model payloads remain outside Git. Committed evidence is code, schemas, prompts, source-manifest hashes, and aggregate content-free receipts.
-- Local networking uses no system proxy and permits only loopback or explicitly listed tailnet IPs. Any attempt to contact Jev, OpenRouter, public Hugging Face inference, or an unlisted host aborts.
+Route enum: reconfirm_intent, rethink_plan, research_more, dispatch_verifier, escalate, proceed.
 
-## 7. Failure handling
+Each route receipt includes:
 
-Timeout, HTTP error, schema error, model mismatch, state overflow, malformed probability vector, and missing confidence semantics are logged per lane. No fallback changes model or endpoint. The gate result for that event is `insufficient`/`escalate`; later events may continue in a separately marked degraded stream but cannot report complete coverage. The runner never executes tool calls or mutates the original transcript.
+- checkpoint ID/kind, source event IDs, event order, source timestamp, and decision receipt time;
+- user intent span IDs, response/proposal/action span IDs, claim IDs, as-of source/evidence IDs and hashes;
+- job coverage, truncation/incompleteness reasons, model/checkpoint/config identity, raw choice/confidence semantics, and deterministic aggregation;
+- route, reason code, and a bounded next-check description with no raw transcript text.
 
-## 8. Receipt shape
+Route policy is deterministic: unresolved or incomplete coverage cannot silently become proceed; a direct durable intent conflict recommends rethink_plan; omitted/partial explicit acknowledgment recommends reconfirm_intent; no matched as-of source recommends dispatch_verifier; incomplete or contradictory source coverage recommends escalate or research_more; only covered, non-conflicting, adequately supported checkpoints may recommend proceed. No single uncertain checkpoint globally blocks unrelated work.
 
-Each receipt records run ID, source hash, parser version, event ID/index/kind, stream hash, lane/model/checkpoint, request hash, packed coverage, candidate message/pin IDs, raw probability map, chosen label, confidence field/definition, latency, error, and next-state hash. No raw message, tool args, tool results, URL query secret, or prompt body is emitted by default.
+The route is a shadow recommendation. It is not user-facing, it does not change a historical action, and it does not prove that an agent would have accepted it.
+
+## 7. DAG and reducer
+
+Phase 1 fans out independent user-message status/acknowledgment-expectation and prior-user pair jobs. Phase 2 fans out next-response span checks, tool-action-to-intent, and claim-to-as-of-source jobs using the snapshots available at each checkpoint. A deterministic chronological reducer applies exact relations, computes coverage, and emits route receipts. Worker count changes throughput only; it never removes required source/pair/job coverage.
+
+All planned jobs must end with a result, explicit abstention, or recorded failure. A cap, timeout, unscored pair, mixed span result, or queue loss is visible and makes only the affected checkpoint incomplete. Cache keys include source/checkpoint/span IDs, full request hash, profile/checkpoint revision, and runtime settings.
+
+## 8. Lane policy
+
+Use the frozen Laya typed-decisions profile as the primary local lane. Keep OpenJev or Kev only for a concrete comparison that can test a distinct miss hypothesis and only if comparable source/job coverage is achievable. A secondary lane is not a completion gate. Compare distinct, independently reviewed findings and latency; agreement is not a vote for correctness. Never share raw state, outputs, confidence thresholds, or cached decisions across lanes.
+
+Do not infer common calibration from model confidence fields. Preserve each backend’s raw option scores and confidence definitions. Verify exact checkpoint and runtime identity before any call. Public/cloud endpoints and implicit fallbacks fail closed.
+
+## 9. Failure and coverage handling
+
+Timeouts, model mismatch, malformed answers, hidden truncation, source gaps, unknown boundaries, unresolved causality, and missing evidence are per-checkpoint failures. Record an incomplete/escalated or targeted research route and continue only where causally independent. No model, host, or endpoint fallback is permitted. Never convert a failed or missing job into proceed.
+
+## 10. Privacy
+
+Private transcript text and model payloads stay outside GitHub and committed output. Content-free receipts may include hashes, event/span identifiers, source categories, coverage counts, route counts, latency, and incomplete reasons. Do not log source query secrets or full URLs containing credentials.
+
+## Current implementation boundary
+
+Adapter/profile 1.1.0 implements acknowledgment checks, recorded tool-action conflicts, and deterministic route receipts for research jobs. Synthetic tests cover these mechanics, but no model inference has run. Assistant prose-plan boundary detection and source checks triggered specifically at that boundary remain planned work; the design above must not be read as evidence that those paths exist.
+
+## Lineage
+
+Owning leaf issue: [#28](https://github.com/Pukujan/agent-custom-setup/issues/28), parent: none, dependencies: none. Task ACS-0004; primary writer Codex; branch task/ACS-25-dual-jev-gates. Owner clarification: [comment #5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).

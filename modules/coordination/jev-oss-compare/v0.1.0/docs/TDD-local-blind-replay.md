@@ -1,66 +1,80 @@
-# TDD — Blind local replay runner
+# TDD — Recovery-routing replay and validation
 
 ## Test objective
 
-Prove that the replay runner preserves source provenance and temporal boundaries, queries only explicitly configured local decision models, records enough information to detect coverage gaps, and never runs historical tools or Jev. These tests do not measure model accuracy.
+Validate that the benchmark preserves source authority, chronology, as-of evidence, exact coverage and route provenance, and that the decision contract can represent consequential acknowledgment misses, intent conflicts, research gaps and useful recovery recommendations. Synthetic tests validate mechanics and decision sensitivity; they do not establish model accuracy or live recovery.
 
-## Test layers
+## A. Source and authority tests
 
-### A. Source normalization (offline fixtures)
+- Parse human text, assistant responses/proposals, tool calls, tool results, research-source results, delegation, and captured compaction into distinct events with UUIDs, parents, sidechain IDs, source lines, timestamps and sequence.
+- Ensure tool-result text, agent plans, delegated prompts and search requests never become human intent or retrieved supporting evidence.
+- Ensure duplicate identical IDs collapse while retaining all locations; conflicting IDs reject the source.
+- Ensure file sequence remains causal when timestamps are delayed, repeated, or out of order.
+- Ensure unresolved task/parent context is explicit and cannot be silently inherited.
+- Verify source and event manifests reject curated labels or incomplete streams as blind evidence.
 
-- Parse human user text, assistant text, tool-use blocks, tool-result blocks, system compact boundaries, and delegated sidechain prompts into distinct event kinds.
-- Preserve source UUID, parent UUID, session ID, agent ID, sidechain flag, source path hash, line number, and in-file order.
-- Verify role=`user` plus a `tool_result` block never enters the pin classifier.
-- Verify sidechain delegated prompts have `authority=agent` and inherit a frozen parent snapshot rather than generating human pins.
-- Verify duplicate identical UUIDs collapse once and retain all locations; conflicting UUID content rejects the source.
-- Verify timestamp disorder does not reorder causal records or combine unrelated sessions.
-- Verify missing/ambiguous causal edges are marked incomplete.
-- Verify a compact boundary carries exact preserved message IDs/segments or is rejected as not evaluable.
+## B. Intent ledger and reducer tests
 
-### B. No-label/no-lookahead reducer
+- Emit every eligible earlier-user pair in the same stream and every required span-pair job; record expected, scored, skipped and failed jobs.
+- Preserve exact user-message and span IDs through relation aggregation.
+- Apply explicit supersession only to the exact target span; a partial correction cannot deactivate unrelated clauses.
+- Preserve durable instructions through arbitrary time delays unless an exact supersession or clear task boundary exists.
+- Treat uncertain task context, mixed chunk results, state overflow, queue loss, or missing jobs as incomplete.
+- Check that a missing active pin set is distinguishable from complete source coverage with no detected constraints.
 
-- For user event `u_i`, emit exactly one relation check for every earlier eligible human user event in that stream (or every stable chunk-pair with a parent pair ID).
-- Ensure no current/future assistant text, tool result, later correction, gold metadata, or future citation enters the current gate request hash.
-- Ensure supersession links target existing prior message IDs; relation history is append-only.
-- Apply deterministic hard-deny before any inference client call.
-- Check each tool event includes every prior active pin across deterministic groups; exact coverage is recorded, and any omitted/over-budget pin forces `escalate`. A non-allow group runs individual diagnostics without changing the aggregate unless coverage fails.
-- Make research readiness consume only prior evidence; incomplete/missing evidence produces `research_more` or `insufficient`, never implicit `ready`.
-- Emit no compaction result for a transcript with no captured compact boundary.
-- Compare pre/post compaction state using same-lane pins and evidence only.
+## C. Acknowledgment, action, and research tests
 
-### C. Local backend contract
+- Compare a consequential user instruction only with its next assistant response; later messages cannot repair the acknowledgment receipt.
+- Cover accurate, partial, omitted, contradicted and unclear acknowledgment states, including explicit repeat-back requests.
+- Check a later conflicting plan/action even if the assistant previously acknowledged the user correctly.
+- Keep plan/proposal events distinct from recorded tool actions; no prose may be reported as an executed action.
+- For each claim, use only prior retrieved source evidence and record source identity/version/as-of time plus exact excerpt span/hash.
+- Distinguish direct support from citation-only text, search requests, agent claims, stale/wrong-version sources, contradictions and missing results.
+- Ensure missing evidence can recommend research_more or dispatch_verifier with the exact claim/source gap; the replay never starts a verifier.
+- Verify a durable conflict holds only the affected action while unrelated safe work remains independently eligible.
 
-- Accept only `http://127.0.0.1`, `http://localhost`, `http://[::1]`, or explicitly allowlisted Tailscale `100.64.0.0/10` endpoints. Reject public names, HTTPS OpenRouter, OpenJev cloud, Jev hostnames, proxy configuration, and redirects to a nonlocal origin.
-- Read the declared local model inventory and require exact configured model ID/revision before the first decision request.
-- Send schema-valid `/v1/systemone` bodies for `choice`/`noul` decisions and preserve raw model scores.
-- Normalize each backend's confidence metadata without pretending semantics are equivalent.
-- Reject missing answer keys, unknown choices, NaN/negative/non-normalized probabilities, malformed confidence, hidden truncation indicators, HTTP errors, and mismatched model identity.
-- Ensure an unavailable lane stays `not_run`; it never falls back to hosted Jev, OpenRouter, a coding LLM, or another lane.
+## D. Recovery schema and privacy tests
 
-### D. Metamorphic checks
+- Accept only reconfirm_intent, rethink_plan, research_more, dispatch_verifier, escalate, and proceed.
+- Require a reason, target checkpoint, evidence/intent IDs, coverage status, source time and decision receipt time.
+- Reject proceed when a required input/job is missing, truncated, malformed or contradictory.
+- Preserve raw model scores and lane-specific confidence semantics.
+- Ensure content-free receipts include hashes and identifiers but no transcript text, tool payload, source body, secret, or prompt.
 
-Implement M01–M14 in `BENCHMARK-PROTOCOL-local-blind-replay.md` using synthetic data only. Every property is checked against serialized requests/receipts and state hashes, not expected labels copied from real transcript incidents.
+## E. Metamorphic and generated fuzz validation
 
-### E. Integration and replay smoke
+- Implement M01–M28 from BENCHMARK-PROTOCOL-local-blind-replay.md using synthetic data only.
+- Run a deterministic grammar/property fuzzer over scope, negation, paraphrase, order, irrelevant history, delays, partial corrections, task/sidechain boundaries, acknowledgment omissions, source versions, future evidence and truncation.
+- Assert invariants and paired sensitivity: irrelevant changes preserve routes; removing a required constraint/source changes the affected route or yields explicit uncertainty; no future event changes an earlier decision hash.
+- Store deterministic seeds and content-free failure receipts. Do not add named transcript incidents as generated fixtures.
+- Fuzz mechanics broadly; have blinded human review evaluate a sample of semantic model recommendations. Do not claim the fuzzer supplies gold labels.
 
-1. Run the entire parser/runner against a synthetic source with fake decision responses. Assert deterministic IDs, hashes, event order, and lane isolation.
-2. Read-only probe each configured local host for model identity/health. No inference until the identity matches the frozen manifest.
-3. Run one synthetic decision per verified model backend and validate the output schema.
-4. Run one real Claude source stream using the frozen holdout, then all eligible Claude roots. Store content-free receipts privately.
-5. Run ACS/Grok only after a true unlabelled raw source passes the provenance gate. Record missing sources as `not_run`.
-6. Re-run exact inputs/config to verify cache determinism. This is repeatability, not accuracy.
+## F. Holdout policy
 
-## Required commands
+- Do not reuse or rename the earlier post-inference partition as hidden.
+- A genuine hidden holdout must select complete unexposed root sessions and descendants before the frozen prompt/schema/profile is run, keep outputs sealed during any iteration, and publish only source/split hashes.
+- The current full transcript replay is exploratory unless an actually unexposed root/session is proven. With no valid holdout, mark holdout not_run; use a fresh future transcript for generalization claims.
+- A held-out unlabeled split tests stability and leakage, not accuracy. Review routed and unrouted consequential samples after inference; keep human findings separate from model output.
 
-```powershell
-python -m pytest modules/coordination/jev-oss-compare/v0.1.0/tests/test_local_blind_replay.py -q
-python modules/coordination/jev-oss-compare/v0.1.0/scripts/local_blind_replay.py inspect --manifest <private-manifest.json>
-python modules/coordination/jev-oss-compare/v0.1.0/scripts/local_blind_replay.py smoke --manifest <private-manifest.json>
-python modules/coordination/jev-oss-compare/v0.1.0/scripts/local_blind_replay.py run --manifest <private-manifest.json> --run-id <frozen-run-id>
-```
+## G. Local lane and full replay
 
-`inspect` and `smoke` must not call a decision endpoint. `run` is the only inference path and must log its backend/model/host list before sending requests. No test uses Jev or OpenRouter.
+1. Validate the source manifest, event coverage, parser version and frozen run identity without calling a model.
+2. Verify the exact local Laya checkpoint, SDK, runtime and resource budget. Use a bounded synthetic request before transcript input.
+3. Run deterministic synthetic reducers and the metamorphic/fuzz suite with fake model outputs. No hosted Jev/OpenRouter fallback.
+4. Freeze the Laya-first profile and all hashes; then run the verified raw Claude corpus in source order and account for every planned job.
+5. Consider OpenJev or Kev only if a distinct miss hypothesis remains and they can receive comparable inputs/coverage. Record unavailable or unneeded lanes as not_run.
+6. After the blind run is frozen, inspect known incidents and a blinded sample of alerts/unalerted checkpoints. Do not tune and call the same output a hidden evaluation.
+7. Produce a content-free report with coverage, routes, incomplete reasons, performance, audit limitations and next action.
 
-## Acceptance report
+## Required implementation evidence
 
-Report exact command, run ID, parser/source hashes, tests passed/failed, endpoints/models verified, inference rows by gate and lane, omitted/incomplete counts, and blockers. Keep raw prompt/output content out of GitHub issue comments and committed files. Do not claim benchmark complete while either source coverage or requested model lanes remain unavailable.
+- A test report for source, reducer, acknowledgment, action/research route, privacy, M01–M28 and generated fuzz properties.
+- A frozen profile and run manifest with exact model/checkpoint/runtime/source hashes.
+- A content-free receipt for every planned decision job, including failures, skips, and routes.
+- A truthful holdout status; no accuracy or live-recovery claim unless backed by an independent evaluation.
+
+The prior targeted synthetic adapter suite passed 9 tests for acknowledgment and source-evidence mechanics. The suite has since expanded to 12 cases to cover assistant prose-boundary classification and plan-to-intent routing. Its latest run reported 11 passed and one fixture mismatch; the fixture was corrected afterward, but the suite has not been rerun. These tests validate mechanics only; they do not establish Laya decision quality, the full M01-M28 suite, generated fuzz coverage, or transcript performance. No Laya inference or full-transcript run has occurred.
+
+## Lineage
+
+Owning leaf issue: [#28](https://github.com/Pukujan/agent-custom-setup/issues/28); parent: none; dependencies: none. Task ACS-0004; primary writer Codex; branch task/ACS-25-dual-jev-gates. Scope correction: [comment #5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).
