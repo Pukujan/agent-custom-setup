@@ -10,3 +10,7 @@ modules/coordination/jev-oss-compare/v0.1.0/fast-jev-compaction-lab/node_modules
 .venv-laya/
 .laya-tmp/
 .laya-pilot/
+
+# local-only task worktrees (PCM: never tracked) + pre-existing local artifact
+pcm/
+JEV-COURT-EXPLAINER.html
