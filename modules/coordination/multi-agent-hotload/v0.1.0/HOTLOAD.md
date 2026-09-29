@@ -20,6 +20,11 @@ Missing any of the three, or substituting a thin PCM/CGM subset, is an **incompl
 
 See [BEHAVIOR.md](BEHAVIOR.md) — Working-repo scope.
 
+
+## External research gate
+
+Binding MUST/MUST NOT + paste-ready provenance checklist: [BEHAVIOR.md](BEHAVIOR.md) — External research gate. Not always-on research.
+
 ## Load order
 
 ### 1. ACS policy and registry (always)
@@ -217,4 +222,5 @@ python -m pytest \
 - [ ] I will not treat PCM as the proposal layer
 - [ ] Parent/child ticket notes only (no DAG engine)
 - [ ] Working-repo scope: code/claims/PRs/boss actions only on this hot-loaded repo; foreign repos = proposed issue only
+- [ ] External research gate: see BEHAVIOR.md (MUST on first use / bump / failure; MUST NOT for trivial known-pattern edits)
 - [ ] No secrets in commits, logs, or comments

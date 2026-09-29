@@ -58,3 +58,7 @@ Until those land and are verified live, treat missing/failed/skipped/unverified 
 ### Working-repo scope (hotload adopters)
 
 Adopters using ACS / the multi-agent hotloader may only write code (commits, branches, PRs, claims, boss actions) on **their own working repo** — the GitHub repo they hot-loaded into. They **must not** push, open PRs, claim, ACCEPT/REJECT, or otherwise mutate other projects' repositories. **Exception:** they may report findings to another repo's issue log **only** as a proposed ticket (open/comment a Proposal-style issue) — issue-log only; no code, claim, PR, or boss actions on the foreign repo. Normative detail: `modules/coordination/multi-agent-hotload/v0.1.0/BEHAVIOR.md`.
+
+### External research gate (hotload adopters)
+
+Binding selective research (not always-on): MUST on first use / introduce, version bump, or install/runtime/API failure of an external OSS/SDK/CLI/API/framework/cloud surface; MUST NOT for trivial in-repo edits of already-known patterns. Exact version + official docs for that version; provenance checklist on the issue/PR. Normative detail: modules/coordination/multi-agent-hotload/v0.1.0/BEHAVIOR.md.

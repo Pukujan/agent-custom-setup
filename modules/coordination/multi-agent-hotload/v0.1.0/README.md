@@ -85,6 +85,7 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 9. Ticket parent/child notes only — no DAG engine.
 10. Never commit secrets; never force-push; never commit straight to `main`.
 11. **Working-repo scope (binding):** code, claims, PRs, and boss actions only on the hot-loaded working repo; foreign repos = proposed issue/ticket only (no code/claim/PR/boss there).
+12. **External research gate:** see [BEHAVIOR.md](BEHAVIOR.md) (selective MUST/MUST NOT + provenance checklist; not always-on).
 
 ## Layout
 

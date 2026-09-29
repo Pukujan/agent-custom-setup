@@ -326,3 +326,37 @@ def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):
     assert "human-sounding-writing" in body or "hsw" in body.lower()
     assert "system_block" in body or "ALWAYS-ON" in body or "Boot paste" in body
     assert any("wrote" in n for n in notes)
+
+
+def test_external_research_gate_heading_present():
+    """Heading-only assertion; CGM pin/modules unchanged."""
+    mod = _load_mod()
+    errors = mod.check_external_research_gate(MODULE_ROOT)
+    assert errors == [], errors
+    assert mod.CGM_PIN_VERSION == "0.5.4"
+    assert mod.CGM_PIN_REVISION.startswith("c95d73a")
+    assert set(mod.REQUIRED_CGM_MODULES) == {
+        "brand-foundation",
+        "content-context",
+        "writing-direction",
+        "human-sounding-writing",
+        "visual-direction",
+        "image-generation",
+        "html-demo",
+    }
+
+
+def test_external_research_gate_fails_when_heading_removed(tmp_path: Path):
+    mod = _load_mod()
+    for name in ("BEHAVIOR.md", "HOTLOAD.md"):
+        src = (MODULE_ROOT / name).read_text(encoding="utf-8")
+        (tmp_path / name).write_text(
+            src.replace("External research gate", "X-research-placeholder"),
+            encoding="utf-8",
+        )
+    policy = tmp_path / "POLICY.md"
+    policy.write_text("# POLICY\n\nNo gate here.\n", encoding="utf-8")
+    errors = mod.check_external_research_gate(tmp_path, policy_path=policy)
+    assert errors
+    assert any("External research gate" in e or "missing heading" in e for e in errors)
+
