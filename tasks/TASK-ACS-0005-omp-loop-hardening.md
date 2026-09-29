@@ -85,3 +85,26 @@ Blocked/uncertain:
 
 Next:
 - owner review + merge PR #38; fresh-live-session confirmation; receipt updates on #37/#35
+
+### 2026-09-29 22:30:11 UTC — omp/qwen3.8-flash
+
+<!-- continuity:checkpoint {"agent":"omp/qwen3.8-flash","blocked":[],"changed":["oh-my-pi/extensions/loop-guard.ts, oh-my-pi/ops/storm-report.py"],"completed":["ops capture: per-job replay identity aligned between extension and report; durable loop-guard incident records; README precedence note; verified 40/40 + fixture counts 94/83/7/13/3/1 + live reload"],"decisions":["no new decisions"],"evidence":["40/40 assertions; storm-report per-job=3 == handler marks; OpsToolVerify independent recount confirmed all headline metrics (94/83/7/1/13); omp -p perjob-ok exit 0"],"next_action":"owner review + merge PR #38; fresh-session confirmation; receipt on #37","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0005","timestamp":"2026-09-29T22:30:11Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"4bfb29533c002dcf8d2cf3c822c5012bc07df08a93af9b4bb9aa1932ce6d9c47","request_id":"550c2f64a58046048d77ffd3d66c1bb6","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0005"} -->
+
+Completed:
+- ops capture: per-job replay identity aligned between extension and report; durable loop-guard incident records; README precedence note; verified 40/40 + fixture counts 94/83/7/13/3/1 + live reload
+
+Evidence:
+- 40/40 assertions; storm-report per-job=3 == handler marks; OpsToolVerify independent recount confirmed all headline metrics (94/83/7/1/13); omp -p perjob-ok exit 0
+
+Decisions:
+- no new decisions
+
+Changed:
+- oh-my-pi/extensions/loop-guard.ts, oh-my-pi/ops/storm-report.py
+
+Blocked/uncertain:
+- none
+
+Next:
+- owner review + merge PR #38; fresh-session confirmation; receipt on #37
