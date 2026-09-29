@@ -1,26 +1,44 @@
 /**
- * jev-court — mechanical advisor adjudication pipeline.
+ * jev-court — advisor adjudication pipeline (v2, hardened against #35).
  *
- * Flow (all in-process, no chat polling):
- *   1. Tail the advisor transcript JSONL (`__advisor*.jsonl`) under the session
- *      artifacts directory, seeded at EOF so historical notes are never re-run.
- *   2. Chunk each `advise` note with mechanical provenance (the advisor's own tool
- *      calls/results during that review) plus a tail digest of the primary's output.
- *   3. POST to TypeSafe Jev via the OpenRouter decisions API
- *      (`{model,state,questions}` → typed choice + probability + confidence).
- *   4. Route by risk-tiered confidence threshold:
- *        act  + conf >= tier threshold → deliver (blocker=steer, else aside)
- *        ignore                        → suppress (ledger only) unless suppressIgnored=false
- *        insufficient_evidence         → deliver a demand-for-runnable-check instead
- *      Fail-open: court error → note passes through with the original severity.
- *   Decisions are remembered by normalized-note key, so advisor context resets
- *   (which clear the advisor's own dedupe guard) cannot resurrect a decided claim.
+ * v1 defect set (issue #35, measured on the 2026-09-29 vastai-gpu-broker session):
+ *   94 advisor notes -> harness native channel delivered ~11 (emission guard did its
+ *   job); jev-court injected 83 messages, bypassing maxNotesPerUpdate/immuneTurns/
+ *   stop-suppression, waking idle sessions (`aside` starts a turn when idle), and
+ *   steering mid-run. `insufficient_evidence` was delivered UNCONDITIONALLY (never
+ *   gated by the risk threshold) — the judge's least-confident verdict was the one
+ *   guaranteed to demand a verification turn. `decided` lived in memory only; the
+ *   persisted ledger was written but never read back, so every restart re-armed
+ *   re-adjudication; guard-suppressed notes were resurrected from the advisor JSONL;
+ *   and full-ledger appendEntry copies made persistence O(n^2) (~1MB for 94 notes).
+ *
+ * v2 contract:
+ *   - OFF by default (`enabled`): when armed, it may only DELAY/DOWNGRADE/SUPPRESS
+ *     advice routed via the native advisor channel — never add wake-ups.
+ *   - Fail-QUIET: court unavailable/no key -> nothing is injected (v1 fail-opened
+ *     every note through as act); one session notification replaces the storm.
+ *   - Delivery: `aside` while a run is active, `nextTurn` when idle (no triggerTurn,
+ *     so a late verdict never starts a session turn); NEVER `steer`.
+ *   - Budgets: per-minute sliding window + per-session cap + per-minute visible
+ *     status. Over budget -> ledger only.
+ *   - Stop-aware: an explicit owner stop message suppresses all non-high-risk
+ *     deliveries until the next real instruction; suppression is announced once
+ *     in-transcript.
+ *   - Reconciliation: notes already visible in the primary transcript (native
+ *     `<advisory>` or earlier verdict) are not re-sent; near-duplicate re-raises of
+ *     a decided note reuse the verdict (advisor guard resets can't resurrect).
+ *   - Durable decisions: one compact `com.jev-court.decision` record per
+ *     adjudication; rebuilt from the session branch on start, so ignores/dups
+ *     survive restarts.
+ *   - Verdict wording is non-mandatory: "act if useful / skip without audit; no
+ *     acknowledgement turn required" — the verification obligation itself is the
+ *     loop fuel (#35 symptom 4 + owner direction 2026-09-29).
  *
  * Config: ~/.omp/agent/jev-court.json (all optional):
- *   enabled, dryRun, baseUrl, model, apiKey, tickMs, suppressIgnored,
- *   thresholds {high, medium, low}, riskKeywords {high: string[], low: string[]}
- *   (keyword strings are compiled as case-insensitive regex sources).
- * Key resolution: config apiKey → OPENROUTER_API_KEY → read-only agent.db lookup.
+ *   enabled (default false), dryRun, baseUrl, path, model, apiKey, tickMs,
+ *   suppressIgnored, thresholds {high, medium, low}, riskKeywords {high, low},
+ *   sessionDeliveryBudget (15), deliveriesPerMinute (2), stopSuppression (true).
+ * Key resolution: config apiKey -> OPENROUTER_API_KEY -> read-only agent.db lookup.
  */
 
 import { Database } from "bun:sqlite"; // platform: bundled Bun runtime only; failure is handled
@@ -37,6 +55,9 @@ interface CourtConfig {
   suppressIgnored: boolean;
   thresholds: { high: number; medium: number; low: number };
   riskKeywords: { high: RegExp[]; low: RegExp[] };
+  sessionDeliveryBudget: number;
+  deliveriesPerMinute: number;
+  stopSuppression: boolean;
 }
 
 type RiskTier = "high" | "medium" | "low";
@@ -55,6 +76,7 @@ interface AdviseNote {
   text: string;
   provenance: string[];
   key: string;
+  sig: string;
 }
 
 interface RawEntry {
@@ -67,7 +89,7 @@ interface RawEntry {
 }
 
 const BASE_CONFIG: CourtConfig = {
-  enabled: true,
+  enabled: false, // #35: opt-in only; native advisor channel is the default
   dryRun: false,
   baseUrl: "https://openrouter.ai/api/alpha",
   path: "/decisions",
@@ -86,6 +108,9 @@ const BASE_CONFIG: CourtConfig = {
       "lint", "style", "readme", "cosmetic",
     ].map((s) => new RegExp(s, "i")),
   },
+  sessionDeliveryBudget: 15,
+  deliveriesPerMinute: 2,
+  stopSuppression: true,
 };
 
 async function readJson(v: string): Promise<Record<string, unknown>> {
@@ -124,6 +149,11 @@ function normalizeText(s: string): string {
     .trim();
 }
 
+// First 8 normalized words: catches re-raised notes whose tail wording changed.
+function noteSig(text: string): string {
+  return normalizeText(text).split(" ").slice(0, 8).join(" ");
+}
+
 function riskTierOf(text: string, cfg: CourtConfig): RiskTier {
   if (cfg.riskKeywords.high.some((re) => re.test(text))) return "high";
   if (cfg.riskKeywords.low.some((re) => re.test(text))) return "low";
@@ -156,19 +186,51 @@ function resultText(msg: NonNullable<RawEntry["message"]>): string {
 }
 
 export default function (pi: ExtensionAPI) {
-  pi.setLabel("JEV Court — advisor adjudication");
+  pi.setLabel("JEV Court v2 — advisor adjudication (opt-in)");
 
   let cfg: CourtConfig = BASE_CONFIG;
   let apiKey: string | undefined;
   let sessionFile: string | undefined;
   let advisorDir: string | undefined;
+  let extCtx: ExtensionContext | undefined;
   const offsets = new Map<string, number>();
+  const carryBytes = new Map<string, Uint8Array>();
+  const decoder = new TextDecoder("utf-8");
   const provenance = new Map<string, string[]>();
   const seen = new Set<string>();
   const decided = new Map<string, Verdict>();
+  const sigIndex = new Map<string, Verdict>(); // advisor+sig -> prior verdict (re-raise reuse)
   const inFlight = new Set<string>();
-  const ledger: Array<{ ts: number; key: string; verdict: Verdict; note: string }> = [];
+  const ledger: Array<{ ts: number; key: string; verdict: Verdict; outcome: string; note: string }> = [];
 
+  // #35 durable decisions: rebuild from compact per-decision records on the branch.
+  function rehydrate(ctx: ExtensionContext) {
+    try {
+      const sm = ctx.sessionManager as unknown as { getBranch?: () => Array<Record<string, unknown>> };
+      if (typeof sm.getBranch !== "function") return;
+      for (const e of sm.getBranch()) {
+        if (e.type !== "custom" || e.customType !== "com.jev-court.decision") continue;
+        const d = e.data as
+          | { key?: string; sig?: string; choice?: VerdictChoice; confidence?: number; risk?: RiskTier; model?: string; outcome?: string; ts?: number }
+          | undefined;
+        if (!d?.key || !d.choice) continue;
+        const v: Verdict = {
+          choice: d.choice,
+          confidence: typeof d.confidence === "number" ? d.confidence : 0,
+          risk: (d.risk ?? "medium") as RiskTier,
+          model: d.model ?? "rehydrated",
+        };
+        decided.set(d.key, v);
+        seen.add(d.key);
+        if (d.sig) sigIndex.set(d.sig, v);
+        ledger.push({ ts: d.ts ?? 0, key: d.key.slice(0, 80), verdict: v, outcome: d.outcome ?? "rehydrated", note: "" });
+      }
+      if (ledger.length)
+        pi.logger?.info?.(`jev-court: rehydrated ${decided.size} prior decisions from session branch`);
+    } catch (e) {
+      pi.logger?.warn?.(`jev-court: rehydrate failed: ${String(e)}`);
+    }
+  }
   async function resolveKey(): Promise<string | undefined> {
     if (typeof cfg.apiKey === "string" && cfg.apiKey) return cfg.apiKey;
     if (process.env.OPENROUTER_API_KEY) return process.env.OPENROUTER_API_KEY;
@@ -194,6 +256,48 @@ export default function (pi: ExtensionAPI) {
       pi.logger?.warn?.(`jev-court: key lookup failed: ${String(e)}`);
     }
     return undefined;
+  }
+
+  // ---------- owner stop flag (input hook is OBSERVATION-ONLY: return nothing) ----------
+  let ownerStopped = false;
+  let stopAnnounced = false;
+  let passthroughAnnounced = false;
+  const STOP_RE = /^\s*(stop|halt|cancel|enough|quit|pause)\b/i;
+
+  pi.on("input", (event: { source?: string; text?: string }) => {
+    if (event?.source && event.source !== "interactive") return;
+    const text = String(event?.text ?? "");
+    if (STOP_RE.test(text)) ownerStopped = true;
+    else if (text.trim().length > 12) ownerStopped = false; // next real instruction clears it
+    return undefined;
+  });
+
+  // ---------- transcript reconciliation ----------
+  let transcriptCache: { size: number; text: string } | undefined;
+  async function noteInTranscript(text: string): Promise<boolean> {
+    if (!sessionFile) return false;
+    try {
+      const file = Bun.file(sessionFile);
+      const size = file.size;
+      if (!transcriptCache || transcriptCache.size !== size) {
+        const tail = await file.slice(Math.max(0, size - 2_000_000)).text();
+        transcriptCache = { size, text: normalizeText(tail) };
+      }
+      const sig = normalizeText(text).slice(0, 60);
+      return sig.length >= 30 && transcriptCache.text.includes(sig);
+    } catch {
+      return false;
+    }
+  }
+
+  // ---------- delivery budgets ----------
+  let deliveredThisSession = 0;
+  const minuteWindow: number[] = [];
+  function budgetAllows(): boolean {
+    if (deliveredThisSession >= cfg.sessionDeliveryBudget) return false;
+    const now = Date.now();
+    while (minuteWindow.length && now - minuteWindow[0] > 60_000) minuteWindow.shift();
+    return minuteWindow.length < cfg.deliveriesPerMinute;
   }
 
   // ---------- advisor transcript tailing ----------
@@ -247,6 +351,16 @@ export default function (pi: ExtensionAPI) {
       const advisor = advisorLabel(file);
       const key = `${advisor}::${normalizeText(text).slice(0, 240)}`;
       if (seen.has(key) || decided.has(key) || inFlight.has(key)) continue;
+      const sigKey = `${advisor}::${noteSig(text)}`;
+      const prior = sigIndex.get(sigKey);
+      if (prior) {
+        // Re-raised finding (possibly reworded after an advisor guard reset):
+        // reuse the prior verdict; never re-adjudicate, never re-deliver.
+        seen.add(key);
+        decided.set(key, prior);
+        record(key, sigKey, prior, "revive_suppressed", text);
+        continue;
+      }
       seen.add(key);
       inFlight.add(key);
       const note: AdviseNote = {
@@ -255,6 +369,7 @@ export default function (pi: ExtensionAPI) {
         text: text.slice(0, 4000),
         provenance: (provenance.get(file) ?? []).slice(-6),
         key,
+        sig: sigKey,
       };
       adjudicate(note).finally(() => inFlight.delete(key));
     }
@@ -270,13 +385,34 @@ export default function (pi: ExtensionAPI) {
         offsets.set(f, size); // seed at EOF
         continue;
       }
-      if (size < prev) offsets.set(f, 0); // rewritten/truncated
+      if (size < prev) {
+        offsets.set(f, 0); // rewritten/truncated
+        carryBytes.set(f, new Uint8Array(0));
+      }
       const start = offsets.get(f) ?? size;
-      if (size === start) continue;
-      offsets.set(f, size);
-      const chunk = (await file.text()).slice(start);
-      const lines = chunk.split("\n");
-      for (const line of lines.slice(0, -1)) {
+      if (size === start && (carryBytes.get(f)?.length ?? 0) === 0) continue;
+      // Byte-exact tailing: offsets track BYTES; decode only up to the last
+      // complete line (multibyte notes must not be sliced mid-character).
+      const fresh = new Uint8Array(await file.slice(start).arrayBuffer());
+      offsets.set(f, start + fresh.length);
+      const prevCarry = carryBytes.get(f);
+      let all: Uint8Array = fresh;
+      if (prevCarry && prevCarry.length) {
+        all = new Uint8Array(prevCarry.length + fresh.length);
+        all.set(prevCarry);
+        all.set(fresh, prevCarry.length);
+      }
+      let cut = 0;
+      for (let i = all.length - 1; i >= 0; i--) {
+        if (all[i] === 0x0a) {
+          cut = i + 1;
+          break;
+        }
+      }
+      carryBytes.set(f, all.subarray(cut));
+      if (cut === 0) continue;
+      const lines = decoder.decode(all.subarray(0, cut)).split("\n");
+      for (const line of lines) {
         if (!line.trim()) continue;
         const entry = parseEntry(line);
         if (!entry) continue;
@@ -325,7 +461,8 @@ export default function (pi: ExtensionAPI) {
     ].join("\n");
 
     if (!apiKey) {
-      decide(note, { choice: "act", confidence: 0, risk, model: "no-key" }, true);
+      // Fail-QUIET (#35): with no court, notes stay on the native guarded channel.
+      decide(note, { choice: "ignore", confidence: 0, risk, model: "no-key" }, true);
       return;
     }
 
@@ -350,7 +487,7 @@ export default function (pi: ExtensionAPI) {
                 ignore:
                   "criticism is wrong, already handled, cosmetic, or acting would waste effort",
                 insufficient_evidence:
-                  "neither side shows a runnable check; demand verification instead of deciding",
+                  "neither side shows a runnable check; suggest verification without demanding it",
               },
             },
           },
@@ -379,45 +516,107 @@ export default function (pi: ExtensionAPI) {
             : cfg.model,
       };
     } catch (e) {
-      // Fail-open: court unavailable → original advisor routing stands.
-      pi.logger?.warn?.(`jev-court: adjudication failed (${String(e)}); passing note through`);
-      decide(note, { choice: "act", confidence: 0, risk, model: "court-error" }, true);
+      // Fail-QUIET: court error must not turn into an unscored act message.
+      pi.logger?.warn?.(`jev-court: adjudication failed (${String(e)}); note stays native-only`);
+      decide(note, { choice: "ignore", confidence: 0, risk, model: "court-error" }, true);
       return;
     }
     decide(note, verdict, false);
   }
 
-  function decide(note: AdviseNote, v: Verdict, passthrough: boolean) {
-    decided.set(note.key, v);
-    ledger.push({ ts: Date.now(), key: note.key.slice(0, 80), verdict: v, note: note.text.slice(0, 140) });
+  function record(key: string, sig: string, v: Verdict, outcome: string, note: string) {
     try {
-      pi.appendEntry("com.jev-court.ledger", ledger.slice(-200));
+      pi.appendEntry("com.jev-court.decision", {
+        key: key.slice(0, 260),
+        sig: sig.slice(0, 160),
+        choice: v.choice,
+        confidence: v.confidence,
+        risk: v.risk,
+        model: v.model,
+        outcome,
+        ts: Date.now(),
+      });
     } catch {
       /* before runtime init: memory-only */
     }
-
-    const thr = cfg.thresholds[v.risk];
-    if (cfg.dryRun) return;
-    if (passthrough || v.choice === "insufficient_evidence") {
-      deliver(note, v, v.choice === "insufficient_evidence");
-    } else if (v.choice === "act" && v.confidence >= thr) {
-      deliver(note, v, false);
-    } else if (v.choice === "ignore" && !cfg.suppressIgnored) {
-      deliver(note, v, false); // override: ignored notes still posted as dimmed asides
-    } // else: ignore → suppressed, ledger only
+    ledger.push({ ts: Date.now(), key: key.slice(0, 80), verdict: v, outcome, note: note.slice(0, 140) });
+    if (ledger.length > 400) ledger.splice(0, ledger.length - 400);
   }
 
-  function deliver(note: AdviseNote, v: Verdict, demandCheck: boolean) {
+  function decide(note: AdviseNote, v: Verdict, passthrough: boolean) {
+    decided.set(note.key, v);
+    sigIndex.set(note.sig, v);
+
+    if (passthrough) {
+      record(note.key, note.sig, v, "quiet_passthrough", note.text);
+      if (!passthroughAnnounced) {
+        passthroughAnnounced = true;
+        extCtx?.ui.notify?.(
+          "jev-court: court unavailable — advisor notes are left to the native guarded channel (nothing injected)",
+          "warning",
+        );
+      }
+      return; // v2 fail-QUIET: no unscored injections
+    }
+
+    if (cfg.dryRun) {
+      record(note.key, note.sig, v, "dry_run", note.text);
+      return;
+    }
+    const thr = cfg.thresholds[v.risk];
+    if (v.choice === "ignore") {
+      if (cfg.suppressIgnored) {
+        record(note.key, note.sig, v, "suppressed_ignore", note.text);
+        return;
+      }
+      deliver(note, v, "ignore_note"); // deliver() records the outcome
+      return;
+    }
+    if (v.choice === "act" && v.confidence < thr) {
+      record(note.key, note.sig, v, "below_threshold", note.text); // v1 silently dropped; now auditable
+      return;
+    }
+    void route(note, v);
+  }
+
+
+  async function route(note: AdviseNote, v: Verdict) {
+    if (await noteInTranscript(note.text)) {
+      record(note.key, note.sig, v, "dup_in_transcript", note.text);
+      return; // native <advisory>/earlier verdict already visible: silent
+    }
+    deliver(note, v, v.choice === "insufficient_evidence" ? "demand" : "act");
+  }
+
+  function deliver(note: AdviseNote, v: Verdict, mode: "act" | "demand" | "ignore_note") {
+    if (cfg.stopSuppression && ownerStopped && v.risk !== "high") {
+      record(note.key, note.sig, v, "stop_suppressed", note.text);
+      if (!stopAnnounced && extCtx) {
+        stopAnnounced = true;
+        extCtx.ui.notify?.("jev-court: owner stop in effect — non-critical advisories suppressed (ledger only)", "info");
+      }
+      return;
+    }
+    if (!budgetAllows()) {
+      record(note.key, note.sig, v, "budget_suppressed", note.text);
+      return;
+    }
+    deliveredThisSession++;
+    minuteWindow.push(Date.now());
     const head =
-      v.model === "court-error" || v.model === "no-key"
-        ? `[jev-court] court unavailable — advisor note passes through unscored:`
-        : demandCheck
-          ? `[jev-court ${v.risk} risk, confidence ${v.confidence.toFixed(2)}] VERDICT=insufficient_evidence — run a check before acting on this advisor note:`
-          : `[jev-court ${v.risk} risk, confidence ${v.confidence.toFixed(2)}] VERDICT=act — follow this advisor note:`;
+      mode === "demand"
+        ? `[jev-court ${v.risk}, conf ${v.confidence.toFixed(2)}] VERDICT=insufficient_evidence — OPTIONAL check before acting on this note; proceeding without it is allowed; no acknowledgement turn required:`
+        : mode === "ignore_note"
+          ? `[jev-court ${v.risk}] court VERDICT=ignore — you may skip this advisor note without auditing it; no acknowledgement required:`
+          : `[jev-court ${v.risk}, conf ${v.confidence.toFixed(2)}] VERDICT=act — advisory only: act if useful, skip without audit; no acknowledgement turn required:`;
+    const idle = extCtx?.isIdle?.() ?? true;
     pi.sendMessage(
       { customType: "com.jev-court.verdict", content: `${head}\n\n${note.text}` },
-      { deliverAs: note.severity === "blocker" && !demandCheck ? "steer" : "aside" },
+      // #35: never steer; when idle use nextTurn (surfaced on the owner's next
+      // prompt) so a late verdict cannot wake the session.
+      { deliverAs: idle ? "nextTurn" : "aside" },
     );
+    record(note.key, note.sig, v, `delivered_${mode}`, note.text);
   }
 
   // ---------- wiring ----------
@@ -439,13 +638,15 @@ export default function (pi: ExtensionAPI) {
   }
 
   pi.on("session_start", async (_e, ctx: ExtensionContext) => {
+    extCtx = ctx;
     cfg = toConfig(await readJson(`${process.env.PI_CODING_AGENT_DIR ?? `${process.env.HOME}/.omp/agent`}/jev-court.json`));
     if (!cfg.enabled) return;
     deriveDirs(ctx);
+    rehydrate(ctx);
     apiKey = await resolveKey();
     if (!apiKey)
       ctx.ui.notify(
-        "jev-court: no OpenRouter key; advisor notes pass through unadjudicated",
+        "jev-court: no OpenRouter key; court is quiet — advisor notes stay on the native channel",
         "warning",
       );
     if (!advisorDir) {
@@ -455,32 +656,41 @@ export default function (pi: ExtensionAPI) {
     ctx.setInterval(() => {
       tick().catch(() => {});
     }, cfg.tickMs);
-    ctx.ui.notify(`jev-court armed → ${cfg.model} @ ${cfg.baseUrl}`, "info");
+    ctx.ui.notify(
+      `jev-court v2 armed → ${cfg.model} · budget ${cfg.deliveriesPerMinute}/min · ${decided.size} decisions rehydrated · ${ownerStopped ? "stop-suppressed" : "live"}`,
+      "info",
+    );
   });
 
   pi.on("session_switch", (_e, ctx: ExtensionContext) => {
+    extCtx = ctx;
     deriveDirs(ctx);
     offsets.clear();
+    carryBytes.clear();
     provenance.clear();
     inFlight.clear();
+    transcriptCache = undefined;
+    // decided/seen/sigIndex intentionally SURVIVE the switch (v1 lost the map only
+    // across processes; same fix applies here) — budget counters do not reset.
   });
 
   pi.registerCommand("jev", {
-    description: "JEV court status: config, tallies, recent verdicts",
+    description: "JEV court v2 status: config, budget use, recent decisions",
     handler: async (_args, ctx: ExtensionContext) => {
       const tally: Record<string, number> = {};
-      for (const l of ledger) tally[l.verdict.choice] = (tally[l.verdict.choice] ?? 0) + 1;
+      for (const l of ledger) tally[l.outcome] = (tally[l.outcome] ?? 0) + 1;
       const recent = ledger
         .slice(-8)
         .reverse()
         .map(
           (l) =>
-            `${new Date(l.ts).toLocaleTimeString()} [${l.verdict.risk}] ${l.verdict.choice}@${l.verdict.confidence.toFixed(2)} :: ${l.note.slice(0, 90)}`,
+            `${new Date(l.ts).toLocaleTimeString()} ${l.outcome} [${l.verdict.risk}] ${l.verdict.choice}@${l.verdict.confidence.toFixed(2)} :: ${l.note.slice(0, 80)}`,
         );
       ctx.ui.notify(
-        `jev-court ${cfg.dryRun ? "(dry-run) " : ""}${apiKey ? "armed" : "NO KEY"} · ${cfg.model} · decided=${ledger.length} ${JSON.stringify(tally)}\n${recent.join("\n")}`,
+        `jev-court ${cfg.enabled ? (cfg.dryRun ? "(dry-run)" : "armed") : "DISABLED (default)"} · delivered ${deliveredThisSession}/${cfg.sessionDeliveryBudget} · stop=${ownerStopped ? "ACTIVE" : "off"} · ${JSON.stringify(tally)}\n${recent.join("\n")}`,
         "info",
       );
     },
   });
 }
+

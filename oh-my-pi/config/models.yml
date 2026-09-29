@@ -18,6 +18,12 @@ providers:
         input: [text, image]
         contextWindow: 1048576
         maxTokens: 393216
+      - id: qwen3.8-max
+        name: Qwen3.8 Max via InferHub
+        reasoning: true
+        input: [text, image]
+        contextWindow: 1000000
+        maxTokens: 131072
 
   # JEV as the native judge: OpenRouter's decisions API speaks the
   # `openrouter-decisions` api (POST {baseUrl}/decisions, body
@@ -67,7 +73,7 @@ modelRoles:
   default: inferhub/qwen3.8-flash
   advisor: inferhub/deepseek-v4.1-flash
   task: inferhub/deepseek-v4.1-flash
-  plan: ckff-astra/gpt-6-astra
+  plan: inferhub/qwen3.8-max
   vision: inferhub/qwen3.8-flash
   image: ckff-image/gpt-image-2.5
   judge: openrouter-jev/typesafe/jev-1.13
