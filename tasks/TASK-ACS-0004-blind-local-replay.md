@@ -29,7 +29,7 @@ A cheap shadow backtest can be better than doing nothing if it exposes timely, p
 - Live owning issue #28 is OPEN and now titled “Blind replay for long-running intent and research recovery”; the owner correction is recorded in [comment #5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).
 - The local Claude source inventory is 81 raw JSONL files (14 root, 67 nested), 18,350 normalized events across 80 streams, 198 eligible human messages, and 41 captured compact-boundary records. Raw ACS/Grok is unverified.
 - The new Laya typed-decision adapter/profile 1.2.0 adds acknowledgment checks, assistant prose-boundary classification, plan-to-intent checks, and deterministic shadow routes for acknowledgment, plans, recorded tool conflicts, and research evidence. The synthetic suite is green 13/13 (incl. a mutation-proven worker-pool regression test), and the pinned model scored a cold 7/7 synthetic smoke on a local CPU host (receipt `modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-local-20260929T184900Z.json`). No full-corpus run has occurred: `inspect`/`run` reject the capped harvest with `source_must_be_the_verified_81_file_corpus`.
-- The prior replay receipt corpus has partial/conflicting Laya/OpenJev/Kev results; none is terminal completion evidence. Windows OpenJev inference remains stopped. The previous session partition occurred after inference and is exploratory.
+- The prior replay receipt corpus is pre-fix: those Laya/OpenJev/Kev receipts were produced by the runner before the 2026-09-29 pool/chmod fixes, so their fingerprints/rows are historical only, not current-branch evidence. Results remain partial/conflicting and none is terminal completion evidence. Windows OpenJev inference remains stopped. The previous session partition occurred after inference and is exploratory.
 - Repository production gate modules remain optional drafts. Their current mocks do not implement or prove a general live recovery controller.
 - The current M01-M14 report status is unverified and hidden whole-session holdout is not implemented. No named known incident is to be inspected until post-run audit.
 
@@ -65,7 +65,7 @@ The user’s task-context, message-relation, and pin-state proposal is recorded 
 - Primary writer: Codex
 - Branch: task/ACS-0004-laya-benchmark (continuation; prior PR #26 branch `task/ACS-25-dual-jev-gates` merged)
 - Source issue revision: #28 body and owner correction comment #5894826843 read 2026-09-29
-- PR/CI/receipt: PR #26 MERGED 2026-09-29T18:19:06Z as `69a34dd` (verified live this session). Continuation branch `task/ACS-0004-laya-benchmark` cut from that main head carries commit `947e8a5` + continuity checkpoint; a new PR (Refs #28, never a closing keyword) with fresh checks is required — this is not a delivery claim.
+- PR/CI/receipt: PR #26 MERGED as `69a34dd`; PR #30 MERGED as `0e8f302` (required `gates` pass on exact head `079ac14`, run 36618372931); PR #31 TDD doc-sync MERGED as `bc78910` (`gates` pass, run 36619028133). Receipts published on #28 (comments 5896975313, 5897053583, 5897127716). Issue #28 stays OPEN — acceptance (full 81-file replay) unmet; this is not a delivery claim for the benchmark itself.
 
 ## Checkpoint log
 
@@ -252,3 +252,35 @@ Blocked/uncertain:
 
 Next:
 - open PR (Refs #28) for task/ACS-0004-laya-benchmark, publish #28 receipt comment, then run full DAG replay once corpus-host access is granted
+
+### 2026-09-29 — projection sync after PR #30/#31 merges
+
+- Completed: recorded live merge facts for PR #30 (`0e8f302`) and PR #31 (`bc78910`) with gate evidence; labeled the pre-fix receipt corpus in Observed evidence; refreshed CURRENT with merge facts and the full corpus-host run command.
+- Evidence: `gh pr view` mergeCommit + `gh pr checks` (gates pass runs 36618372931, 36619028133); #28 receipt comments 5896975313 / 5897053583 / 5897127716.
+- Decisions: docs-correction increments go through their own PR with a pre-push projection sync (AGENTS.md), not receipt-only transitions.
+- Changed: tasks/TASK-ACS-0004-blind-local-replay.md (lines 32, 68, this entry); checkpoints/CURRENT.md (Active line, Next atomic action).
+- Blocked/uncertain: full 81-file replay remains gated on corpus-host access (Gravebuster key or Cortex SSH); no benchmark-evidence claim.
+- Next: on the corpus host, `python modules/coordination/jev-oss-compare/v0.1.0/scripts/laya_typed_decisions/v1/runner.py run --source <dir-of-81-jsonl> --model-dir <pinned-snapshot-1a793eb5…> --output <private-dir-outside-repo> --run-id <id> --execute-local`, then refresh the HTML report from terminal receipts.
+
+### 2026-09-29 19:28:56 UTC — omp
+
+<!-- continuity:checkpoint {"agent":"omp","blocked":["full 81-file replay gated on corpus-host access (Gravebuster key or Cortex SSH)"],"changed":["tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md"],"completed":["Synced task/CURRENT projections after PR #30 (0e8f302) and PR #31 (bc78910) merges; labeled pre-fix receipt corpus as historical; recorded gate evidence and the full corpus-host run command."],"decisions":["docs-correction increments require pre-push projection sync + checkpoint, not receipt-only transition"],"evidence":["gh pr view mergeCommit + gh pr checks: gates pass runs 36618372931 (head 079ac14) and 36619028133; #28 receipts 5896975313/5897053583/5897127716"],"next_action":"on corpus host run runner.py run with --source 81-file dir, --model-dir pinned snapshot, --output private dir, --run-id, --execute-local; refresh HTML from terminal receipts","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0004","timestamp":"2026-09-29T19:28:56Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"6854f150f54f046c9fe8084af7a93a2b6d09fc4a5a36b6dd53a6ea3828090d5e","request_id":"bd18e178eab34cdc8cc7edf0013f4096","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0004"} -->
+
+Completed:
+- Synced task/CURRENT projections after PR #30 (0e8f302) and PR #31 (bc78910) merges; labeled pre-fix receipt corpus as historical; recorded gate evidence and the full corpus-host run command.
+
+Evidence:
+- gh pr view mergeCommit + gh pr checks: gates pass runs 36618372931 (head 079ac14) and 36619028133; #28 receipts 5896975313/5897053583/5897127716
+
+Decisions:
+- docs-correction increments require pre-push projection sync + checkpoint, not receipt-only transition
+
+Changed:
+- tasks/TASK-ACS-0004-blind-local-replay.md; checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- full 81-file replay gated on corpus-host access (Gravebuster key or Cortex SSH)
+
+Next:
+- on corpus host run runner.py run with --source 81-file dir, --model-dir pinned snapshot, --output private dir, --run-id, --execute-local; refresh HTML from terminal receipts
