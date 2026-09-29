@@ -1,6 +1,6 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"ACS-0002","active_task_file":"tasks/TASK-ACS-0002-ci-gates.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"ACS-0004","active_task_file":"tasks/TASK-ACS-0004-blind-local-replay.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
 
@@ -16,6 +16,7 @@ Phase: registry + module + docs live on main; CI enforcement remains the open ga
 
 ## Active
 
+- ACS-0004 (#28) blind recovery-routing replay — issue #28 centers whether low-cost local Laya can surface actionable recovery for consequential intent/research drift. Laya is primary; OpenJev/Kev are optional comparators. Local adapter/profile 1.2.0 changes add next-response acknowledgment, assistant plan/claim boundaries, plan-to-intent checks, and shadow recovery routes. They are not yet tested after the last fixture correction or pushed. No Laya inference/full-corpus run occurred. Parent: none; dependencies: none. Owner correction: [#5894826843](https://github.com/Pukujan/agent-custom-setup/issues/28#issuecomment-5894826843).
 - ACS-0002 (#5) CI-gate ENFORCEMENT — workflow + markers landed as definition (b094c07); hosted verification blocked by account plan: private-repo Actions runs fail zero-step/zero-billable; private-repo protected branches need Pro/Team/Enterprise (docs.github.com verified 2026-09-26T00:1Z; URLs in task file). Owner options: public / Pro+budget / self-hosted / #9-agent CI/CD converges.
 
 ## Queued
@@ -30,4 +31,4 @@ Phase: registry + module + docs live on main; CI enforcement remains the open ga
 
 ## Next atomic action
 
-Owner plan decision on #5 (Actions capacity/protection) — the only open enforcement gate; suite-5 (hardened cohort) landing under evals/results/suite5/ when done.
+On the other PC, pull `task/ACS-25-dual-jev-gates`, rerun `tests/test_laya_typed_decisions_v1.py`, fix any failures, then verify the exact Laya runtime/checkpoint and resource budget before a bounded synthetic trial. Do not start full transcript inference until the suite passes and the input manifest is validated.

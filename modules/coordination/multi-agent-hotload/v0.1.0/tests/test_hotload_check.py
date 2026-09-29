@@ -118,7 +118,11 @@ def test_watchdog_runner_must_be_agentless(tmp_path: Path):
 
 
 def _find_cgm_for_tests() -> Path | None:
+    import subprocess
     candidates = [
+        Path("/workspace/cgm-057"),
+        Path("/workspace/cgm-056"),
+        Path("/workspace/content-generation-modules"),
         Path("/workspace/cgm-054"),
         Path("/workspace/cgm-053"),
         Path("/workspace/cgm-051"),
@@ -128,10 +132,22 @@ def _find_cgm_for_tests() -> Path | None:
     env = __import__("os").environ.get("CGM_ROOT")
     if env:
         candidates.insert(0, Path(env))
+    pin_prefix = "c069613"
+    matched = None
     for cand in candidates:
-        if (cand / "scripts" / "validate_content_system.py").is_file():
+        if not (cand / "scripts" / "validate_content_system.py").is_file():
+            continue
+        try:
+            sha = subprocess.check_output(
+                ["git", "-C", str(cand), "rev-parse", "HEAD"], text=True
+            ).strip()
+        except Exception:
+            sha = ""
+        if sha.lower().startswith(pin_prefix):
             return cand
-    return None
+        if matched is None:
+            matched = cand
+    return matched
 
 
 def test_cli_ok():
@@ -233,8 +249,8 @@ def test_example_pins_are_full_stacks():
     data = json.loads(
         (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
     )
-    assert data["pins"]["cgm"]["version"] == "0.5.4"
-    assert data["pins"]["cgm"]["revision"].startswith("c95d73a")
+    assert data["pins"]["cgm"]["version"] == "0.5.7"
+    assert data["pins"]["cgm"]["revision"].startswith("c069613")
     assert data["pins"]["pcm"]["revision"].startswith("4e23854")
     assert set(mod.REQUIRED_CGM_MODULES).issubset(
         {
@@ -276,14 +292,16 @@ def test_cli_ok_with_cgm_validate():
     assert (MODULE_ROOT / "PROMPT_INJECT.md").is_file()
     inject = (MODULE_ROOT / "PROMPT_INJECT.md").read_text(encoding="utf-8")
     assert "MUST load" in inject or "required_load" in inject or "writing-direction" in inject
+    assert "system_block" in inject or "ALWAYS-ON" in inject or "Boot paste" in inject
+    assert "acs_prompt_inject.system_block" in proc.stdout or "BOOT PASTE" in proc.stdout or "system_block" in proc.stdout
 
 
-def test_cgm_pin_constants_054():
+def test_cgm_pin_constants_057():
     mod = _load_mod()
-    assert mod.CGM_PIN_VERSION == "0.5.4"
-    assert mod.CGM_PIN_REVISION.startswith("c95d73a")
-    assert mod.CGM_PIN_REVISION == "c95d73a0ce072a6d7173ce4848621a25cdf1cc7e"
-    assert mod.CGM_PIN_REVISION_PREFIX == "c95d73a"
+    assert mod.CGM_PIN_VERSION == "0.5.7"
+    assert mod.CGM_PIN_REVISION.startswith("c069613")
+    assert mod.CGM_PIN_REVISION == "c069613ca8b3e02bcf5aba1960160583537f8a3a"
+    assert mod.CGM_PIN_REVISION_PREFIX == "c069613"
 
 
 def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):
@@ -301,11 +319,12 @@ def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):
         pytest.skip(f"CGM checkout HEAD={sha} not at pin {mod.CGM_PIN_REVISION}")
     out_root = tmp_path
     text, notes = mod.apply_acs_prompt_inject(cgm, out_root)
-    assert text and "MUST load" in text
+    assert text and ("ALWAYS-ON" in text or "MUST load" in text or "human-sounding-writing" in text)
     assert (out_root / "PROMPT_INJECT.md").is_file()
     body = (out_root / "PROMPT_INJECT.md").read_text(encoding="utf-8")
     assert "writing-direction" in body
     assert "human-sounding-writing" in body or "hsw" in body.lower()
+    assert "system_block" in body or "ALWAYS-ON" in body or "Boot paste" in body
     assert any("wrote" in n for n in notes)
 
 

@@ -1,0 +1,14 @@
+{
+  "id": "jev-ambiguity-gate",
+  "name": "JEV ambiguity gate (prompt/resume)",
+  "purpose": "Optional always-JEV gate on user prompt / session resume: clear | ambiguous | insufficient. Separate from research-needed and tool pin.",
+  "harness": "coordination",
+  "created": "2026-09-28",
+  "updated": "2026-09-28",
+  "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
+  "owning_agent": "agent-custom-setup",
+  "version": "0.1.0",
+  "path": "modules/coordination/jev-ambiguity-gate/v0.1.0/",
+  "status": "draft",
+  "summary": "Prompt/resume ambiguity JEV. Mock CI; live OpenRouter typesafe/jev-1.13 when ACS_JEV_LIVE set. gate_kind=ambiguity into shared ops.sqlite. Not HOTLOAD-bound until proven."
+}

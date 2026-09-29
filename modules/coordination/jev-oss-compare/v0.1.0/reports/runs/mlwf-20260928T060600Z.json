@@ -1,0 +1,1223 @@
+{
+  "summary": {
+    "run_id": "mlwf-20260928T060600Z",
+    "kind": "multi_lane_walkforward",
+    "started_at": "2026-09-28 06:06 UTC",
+    "live": false,
+    "sha": "895ae435a73ab66ec7c60cedebac2e9eea80a4e1",
+    "n_events": 8,
+    "n_acs_gold": 8,
+    "n_claude_tx": 0,
+    "axes": {
+      "routing": 3,
+      "research": 2,
+      "tools": 2,
+      "report_shape": 1
+    },
+    "per_lane": {
+      "L1_acs": {
+        "n_scored": 3,
+        "agree": 2,
+        "agree_pct": 66.7,
+        "fn": 1,
+        "fp": 0,
+        "p50_jev_ms": null
+      },
+      "L2_auto": {
+        "n_scored": 3,
+        "agree": 0,
+        "agree_pct": 0.0,
+        "fn": 1,
+        "fp": 0,
+        "p50_jev_ms": null
+      },
+      "L3_pi": {
+        "n_scored": 3,
+        "agree": 2,
+        "agree_pct": 66.7,
+        "fn": 1,
+        "fp": 0,
+        "p50_jev_ms": null
+      },
+      "L4_all_jev": {
+        "n_scored": 3,
+        "agree": 0,
+        "agree_pct": 0.0,
+        "fn": 1,
+        "fp": 0,
+        "p50_jev_ms": null
+      },
+      "L5_compaction": {
+        "n_scored": 3,
+        "agree": 1,
+        "agree_pct": 33.3,
+        "fn": 1,
+        "fp": 1,
+        "p50_jev_ms": null
+      }
+    },
+    "wall_ms": 15.2,
+    "workers": 4,
+    "model": "typesafe/jev-1.13",
+    "coverage_ok": false,
+    "both_streams": false,
+    "failed": true,
+    "fail_reasons": [
+      "narrow_acs_gold n=8 need>=20",
+      "missing_dual_streams"
+    ],
+    "meta": {
+      "n_acs_gold": 23,
+      "n_claude": 10,
+      "claude_paths": [
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\e781f4ad-9ab3-4ade-b4d4-4d805973ab61.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\e781f4ad-9ab3-4ade-b4d4-4d805973ab61\\subagents\\agent-a460ffc3feefae351.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\49946d0f-f24a-4d70-a631-6d73d75ef87d\\subagents\\agent-a91c58334f9e171d7.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\899d2f51-74cd-4f1e-b12e-4905fb1182ac.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\464b97dd-10f2-47e0-bb55-893725586c2f.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\e781f4ad-9ab3-4ade-b4d4-4d805973ab61\\subagents\\agent-a990a2c59fd235b7e.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\49946d0f-f24a-4d70-a631-6d73d75ef87d\\subagents\\agent-a56a3c395e69f373a.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\e781f4ad-9ab3-4ade-b4d4-4d805973ab61\\subagents\\agent-a5d774d09d93c5d6b.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\901ead50-9a3d-49da-9f4d-21a7cf727ffe\\subagents\\agent-ac4ac5b7528164423.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\901ead50-9a3d-49da-9f4d-21a7cf727ffe\\subagents\\agent-a3652a64b1d7d04a9.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\901ead50-9a3d-49da-9f4d-21a7cf727ffe\\subagents\\agent-a45b34b22352cc165.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude-hades-v2\\8b3716bd-9a6e-40ce-90a5-6f7602fe9bcb\\subagents\\agent-a5caccb2860bd9853.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude\\b17a4275-afbf-4221-922b-ed7ab448c1ac.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude\\84f31b73-5f0e-43a4-9483-34056e35ed68.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude\\0e209b4c-fccc-4bf7-8537-7e9d19bf05a4.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude\\a43a27a7-97c2-4e9f-83c1-a377c65128c7.jsonl",
+        "C:\\Users\\pujan\\.claude\\projects\\D--claude\\8c100968-3450-4a27-9893-4e8f790c2d32.jsonl"
+      ],
+      "n_pins": 48,
+      "pins_tail": [
+        "tiny pack per step",
+        "rolling pins per user turn",
+        "full transcripts as publishable evidence",
+        "include huge agents",
+        "ACS Grok chat is primary full TX",
+        "Claude JSONL is second stream",
+        "NOT Fish-centric",
+        "catch ALL ACS-chat failure modes",
+        "fail if narrow subset only",
+        "min coverage = all user gold turns",
+        "BOTH ACS chat + Claude full TX required",
+        "walk-forward both streams"
+      ]
+    },
+    "notes": "Walk-forward dual stream: ACS Grok chat USER gold (primary) + Claude full TX tools. Rolling pins. Parallel L1-L5. Match-to-gold not peer-agree. Append existing compare HTML."
+  },
+  "rows": [
+    {
+      "id": "acs-u01",
+      "stream": "acs_chat_gold",
+      "axis": "routing",
+      "when": "2026-09-28T04:05Z",
+      "text": "three JEV gates not two: ambiguity + research-needed + jev-gate-pin; HOTLOAD full=all three; base=none",
+      "gold": null,
+      "gold_meta": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "issue_comment",
+        "route": "three_modules"
+      },
+      "lanes": {
+        "L1_acs": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "acs_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L2_auto": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "mock_jev",
+          "jev_ms": 0.0,
+          "reason": "mock_semantic_dangerous"
+        },
+        "L3_pi": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "pi_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L4_all_jev": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "skipped",
+          "jev_ms": 0.0,
+          "reason": "all_jev_live_required"
+        },
+        "L5_compaction": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "compaction",
+          "jev_ms": 0.0,
+          "reason": "acs_hit=3,pi_hit=3,dropped=1"
+        }
+      },
+      "raw": {
+        "L1_acs": {
+          "lane": "acs",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "acs_mock",
+          "latency_ms": 0.36,
+          "pin_ms": 0.33,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "mock",
+          "fixture_id": "acs-u01",
+          "gold": null,
+          "lane_id": "L1_acs"
+        },
+        "L2_auto": {
+          "lane": "auto_mode",
+          "decision": "escalate",
+          "reason_code": "mock_semantic_dangerous",
+          "layer": "mock_jev",
+          "command": "Decision three JEV gates not two: ambiguity + research-needed + jev-gate-pin; HOTLOAD full=all three; base=none",
+          "latency_ms": 0.17,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u01",
+          "gold": null,
+          "det_layer": "default",
+          "lane_id": "L2_auto"
+        },
+        "L3_pi": {
+          "lane_id": "L3_pi",
+          "lane": "pi_pregate",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "pi_mock",
+          "latency_ms": 0.28,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u01",
+          "gold": null
+        },
+        "L4_all_jev": {
+          "lane_id": "L4_all_jev",
+          "lane": "all_jev",
+          "decision": "escalate",
+          "reason_code": "all_jev_live_required",
+          "layer": "skipped",
+          "latency_ms": 0.01,
+          "jev_ms": 0.0,
+          "confidence": 0.0,
+          "model": "none",
+          "fixture_id": "acs-u01",
+          "gold": null
+        },
+        "L5_compaction": {
+          "lane_id": "L5_compaction",
+          "lane": "compaction",
+          "decision": "allow",
+          "reason_code": "acs_hit=3,pi_hit=3,dropped=1",
+          "layer": "compaction",
+          "latency_ms": 0.18,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "compaction_heuristic",
+          "fixture_id": "acs-u01",
+          "gold": null,
+          "metrics": {
+            "acs_keep_n": 7,
+            "pi_keep_n": 6,
+            "dropped_n": 1,
+            "acs_hit": 3,
+            "pi_hit": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "acs-u02",
+      "stream": "acs_chat_gold",
+      "axis": "routing",
+      "when": "2026-09-28T04:08Z",
+      "text": "ops is module #4 in HOTLOAD full: session-ops-capture",
+      "gold": null,
+      "gold_meta": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "issue_comment",
+        "route": "full_includes_ops"
+      },
+      "lanes": {
+        "L1_acs": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "acs_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L2_auto": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "mock_jev",
+          "jev_ms": 0.0,
+          "reason": "mock_semantic_dangerous"
+        },
+        "L3_pi": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "pi_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L4_all_jev": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "skipped",
+          "jev_ms": 0.0,
+          "reason": "all_jev_live_required"
+        },
+        "L5_compaction": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "compaction",
+          "jev_ms": 0.0,
+          "reason": "acs_hit=3,pi_hit=3,dropped=2"
+        }
+      },
+      "raw": {
+        "L1_acs": {
+          "lane": "acs",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "acs_mock",
+          "latency_ms": 0.34,
+          "pin_ms": 0.31,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "mock",
+          "fixture_id": "acs-u02",
+          "gold": null,
+          "lane_id": "L1_acs"
+        },
+        "L2_auto": {
+          "lane": "auto_mode",
+          "decision": "escalate",
+          "reason_code": "mock_semantic_dangerous",
+          "layer": "mock_jev",
+          "command": "Decision ops is module #4 in HOTLOAD full: session-ops-capture",
+          "latency_ms": 2.02,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u02",
+          "gold": null,
+          "det_layer": "default",
+          "lane_id": "L2_auto"
+        },
+        "L3_pi": {
+          "lane_id": "L3_pi",
+          "lane": "pi_pregate",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "pi_mock",
+          "latency_ms": 0.42,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u02",
+          "gold": null
+        },
+        "L4_all_jev": {
+          "lane_id": "L4_all_jev",
+          "lane": "all_jev",
+          "decision": "escalate",
+          "reason_code": "all_jev_live_required",
+          "layer": "skipped",
+          "latency_ms": 0.0,
+          "jev_ms": 0.0,
+          "confidence": 0.0,
+          "model": "none",
+          "fixture_id": "acs-u02",
+          "gold": null
+        },
+        "L5_compaction": {
+          "lane_id": "L5_compaction",
+          "lane": "compaction",
+          "decision": "allow",
+          "reason_code": "acs_hit=3,pi_hit=3,dropped=2",
+          "layer": "compaction",
+          "latency_ms": 0.03,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "compaction_heuristic",
+          "fixture_id": "acs-u02",
+          "gold": null,
+          "metrics": {
+            "acs_keep_n": 8,
+            "pi_keep_n": 6,
+            "dropped_n": 2,
+            "acs_hit": 3,
+            "pi_hit": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "acs-u03",
+      "stream": "acs_chat_gold",
+      "axis": "research",
+      "when": "2026-09-28T04:12Z",
+      "text": "versionable ops DB module; one shared SQLite partitioned; bi-temporal",
+      "gold": null,
+      "gold_meta": {
+        "ambiguity": "clear",
+        "research_needed": "yes",
+        "tool": null,
+        "report_shape": "module",
+        "route": "ops-db"
+      },
+      "lanes": {
+        "L1_acs": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "acs_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L2_auto": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "mock_jev",
+          "jev_ms": 0.0,
+          "reason": "mock_semantic_dangerous"
+        },
+        "L3_pi": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "pi_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L4_all_jev": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "skipped",
+          "jev_ms": 0.0,
+          "reason": "all_jev_live_required"
+        },
+        "L5_compaction": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "compaction",
+          "jev_ms": 0.0,
+          "reason": "acs_hit=3,pi_hit=3,dropped=4"
+        }
+      },
+      "raw": {
+        "L1_acs": {
+          "lane": "acs",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "acs_mock",
+          "latency_ms": 0.35,
+          "pin_ms": 0.33,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "mock",
+          "fixture_id": "acs-u03",
+          "gold": null,
+          "lane_id": "L1_acs"
+        },
+        "L2_auto": {
+          "lane": "auto_mode",
+          "decision": "escalate",
+          "reason_code": "mock_semantic_dangerous",
+          "layer": "mock_jev",
+          "command": "Decision versionable ops DB module; one shared SQLite partitioned; bi-temporal",
+          "latency_ms": 0.08,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u03",
+          "gold": null,
+          "det_layer": "default",
+          "lane_id": "L2_auto"
+        },
+        "L3_pi": {
+          "lane_id": "L3_pi",
+          "lane": "pi_pregate",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "pi_mock",
+          "latency_ms": 0.27,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u03",
+          "gold": null
+        },
+        "L4_all_jev": {
+          "lane_id": "L4_all_jev",
+          "lane": "all_jev",
+          "decision": "escalate",
+          "reason_code": "all_jev_live_required",
+          "layer": "skipped",
+          "latency_ms": 0.0,
+          "jev_ms": 0.0,
+          "confidence": 0.0,
+          "model": "none",
+          "fixture_id": "acs-u03",
+          "gold": null
+        },
+        "L5_compaction": {
+          "lane_id": "L5_compaction",
+          "lane": "compaction",
+          "decision": "allow",
+          "reason_code": "acs_hit=3,pi_hit=3,dropped=4",
+          "layer": "compaction",
+          "latency_ms": 0.03,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "compaction_heuristic",
+          "fixture_id": "acs-u03",
+          "gold": null,
+          "metrics": {
+            "acs_keep_n": 10,
+            "pi_keep_n": 6,
+            "dropped_n": 4,
+            "acs_hit": 3,
+            "pi_hit": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "acs-u04",
+      "stream": "acs_chat_gold",
+      "axis": "research",
+      "when": "2026-09-28T04:15Z",
+      "text": "partitioned FIFO; pins not evicted with tool spam; lasting proof only git+issues+benchmarks",
+      "gold": null,
+      "gold_meta": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "lock",
+        "route": "fifo_policy"
+      },
+      "lanes": {
+        "L1_acs": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "acs_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L2_auto": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "mock_jev",
+          "jev_ms": 0.0,
+          "reason": "mock_semantic_dangerous"
+        },
+        "L3_pi": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "pi_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L4_all_jev": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "skipped",
+          "jev_ms": 0.0,
+          "reason": "all_jev_live_required"
+        },
+        "L5_compaction": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "compaction",
+          "jev_ms": 0.0,
+          "reason": "acs_hit=3,pi_hit=3,dropped=4"
+        }
+      },
+      "raw": {
+        "L1_acs": {
+          "lane": "acs",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "acs_mock",
+          "latency_ms": 0.55,
+          "pin_ms": 0.51,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "mock",
+          "fixture_id": "acs-u04",
+          "gold": null,
+          "lane_id": "L1_acs"
+        },
+        "L2_auto": {
+          "lane": "auto_mode",
+          "decision": "escalate",
+          "reason_code": "mock_semantic_dangerous",
+          "layer": "mock_jev",
+          "command": "Decision partitioned FIFO; pins not evicted with tool spam; lasting proof only git+issues+benchmarks",
+          "latency_ms": 0.13,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u04",
+          "gold": null,
+          "det_layer": "default",
+          "lane_id": "L2_auto"
+        },
+        "L3_pi": {
+          "lane_id": "L3_pi",
+          "lane": "pi_pregate",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "pi_mock",
+          "latency_ms": 0.45,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u04",
+          "gold": null
+        },
+        "L4_all_jev": {
+          "lane_id": "L4_all_jev",
+          "lane": "all_jev",
+          "decision": "escalate",
+          "reason_code": "all_jev_live_required",
+          "layer": "skipped",
+          "latency_ms": 0.0,
+          "jev_ms": 0.0,
+          "confidence": 0.0,
+          "model": "none",
+          "fixture_id": "acs-u04",
+          "gold": null
+        },
+        "L5_compaction": {
+          "lane_id": "L5_compaction",
+          "lane": "compaction",
+          "decision": "allow",
+          "reason_code": "acs_hit=3,pi_hit=3,dropped=4",
+          "layer": "compaction",
+          "latency_ms": 0.1,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "compaction_heuristic",
+          "fixture_id": "acs-u04",
+          "gold": null,
+          "metrics": {
+            "acs_keep_n": 12,
+            "pi_keep_n": 8,
+            "dropped_n": 4,
+            "acs_hit": 3,
+            "pi_hit": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "acs-u05",
+      "stream": "acs_chat_gold",
+      "axis": "tools",
+      "when": "2026-09-28T04:17Z",
+      "text": "hot path deterministic only; no embed lookup/numpy/vector on JEV gate path",
+      "gold": "deny",
+      "gold_meta": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "deny_embed_on_hot_path",
+        "report_shape": "lock",
+        "route": "deterministic_gates"
+      },
+      "lanes": {
+        "L1_acs": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 1,
+          "fp": 0,
+          "layer": "acs_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L2_auto": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 1,
+          "fp": 0,
+          "layer": "mock_jev",
+          "jev_ms": 0.0,
+          "reason": "mock_semantic_dangerous"
+        },
+        "L3_pi": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 1,
+          "fp": 0,
+          "layer": "pi_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L4_all_jev": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 1,
+          "fp": 0,
+          "layer": "skipped",
+          "jev_ms": 0.0,
+          "reason": "all_jev_live_required"
+        },
+        "L5_compaction": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 1,
+          "fp": 0,
+          "layer": "compaction",
+          "jev_ms": 0.0,
+          "reason": "acs_hit=3,pi_hit=2,dropped=6"
+        }
+      },
+      "raw": {
+        "L1_acs": {
+          "lane": "acs",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "acs_mock",
+          "latency_ms": 0.82,
+          "pin_ms": 0.76,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "mock",
+          "fixture_id": "acs-u05",
+          "gold": "deny",
+          "lane_id": "L1_acs"
+        },
+        "L2_auto": {
+          "lane": "auto_mode",
+          "decision": "escalate",
+          "reason_code": "mock_semantic_dangerous",
+          "layer": "mock_jev",
+          "command": "hot path deterministic only; no embed lookup/numpy/vector on JEV gate path",
+          "latency_ms": 0.16,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u05",
+          "gold": "deny",
+          "det_layer": "default",
+          "lane_id": "L2_auto"
+        },
+        "L3_pi": {
+          "lane_id": "L3_pi",
+          "lane": "pi_pregate",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "pi_mock",
+          "latency_ms": 0.54,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u05",
+          "gold": "deny"
+        },
+        "L4_all_jev": {
+          "lane_id": "L4_all_jev",
+          "lane": "all_jev",
+          "decision": "escalate",
+          "reason_code": "all_jev_live_required",
+          "layer": "skipped",
+          "latency_ms": 0.0,
+          "jev_ms": 0.0,
+          "confidence": 0.0,
+          "model": "none",
+          "fixture_id": "acs-u05",
+          "gold": "deny"
+        },
+        "L5_compaction": {
+          "lane_id": "L5_compaction",
+          "lane": "compaction",
+          "decision": "allow",
+          "reason_code": "acs_hit=3,pi_hit=2,dropped=6",
+          "layer": "compaction",
+          "latency_ms": 0.08,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "compaction_heuristic",
+          "fixture_id": "acs-u05",
+          "gold": "deny",
+          "metrics": {
+            "acs_keep_n": 14,
+            "pi_keep_n": 8,
+            "dropped_n": 6,
+            "acs_hit": 3,
+            "pi_hit": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "acs-u06",
+      "stream": "acs_chat_gold",
+      "axis": "routing",
+      "when": "2026-09-28T04:33Z",
+      "text": "ACS stays live default; compare lane optional; ADAPT_PATTERN peers; skip ultrafast; no Redis",
+      "gold": "allow",
+      "gold_meta": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "allow_compare_lane",
+        "report_shape": "append_html",
+        "route": "acs_default_compare_optional"
+      },
+      "lanes": {
+        "L1_acs": {
+          "decision": "allow",
+          "agree": 1,
+          "fn": 0,
+          "fp": 0,
+          "layer": "acs_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L2_auto": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "mock_jev",
+          "jev_ms": 0.0,
+          "reason": "mock_semantic_dangerous"
+        },
+        "L3_pi": {
+          "decision": "allow",
+          "agree": 1,
+          "fn": 0,
+          "fp": 0,
+          "layer": "pi_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L4_all_jev": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "skipped",
+          "jev_ms": 0.0,
+          "reason": "all_jev_live_required"
+        },
+        "L5_compaction": {
+          "decision": "allow",
+          "agree": 1,
+          "fn": 0,
+          "fp": 0,
+          "layer": "compaction",
+          "jev_ms": 0.0,
+          "reason": "acs_hit=2,pi_hit=2,dropped=8"
+        }
+      },
+      "raw": {
+        "L1_acs": {
+          "lane": "acs",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "acs_mock",
+          "latency_ms": 0.53,
+          "pin_ms": 0.49,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "mock",
+          "fixture_id": "acs-u06",
+          "gold": "allow",
+          "lane_id": "L1_acs"
+        },
+        "L2_auto": {
+          "lane": "auto_mode",
+          "decision": "escalate",
+          "reason_code": "mock_semantic_dangerous",
+          "layer": "mock_jev",
+          "command": "Decision ACS stays live default; compare lane optional; ADAPT_PATTERN peers; skip ultrafast; no Redis",
+          "latency_ms": 0.1,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u06",
+          "gold": "allow",
+          "det_layer": "default",
+          "lane_id": "L2_auto"
+        },
+        "L3_pi": {
+          "lane_id": "L3_pi",
+          "lane": "pi_pregate",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "pi_mock",
+          "latency_ms": 0.35,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u06",
+          "gold": "allow"
+        },
+        "L4_all_jev": {
+          "lane_id": "L4_all_jev",
+          "lane": "all_jev",
+          "decision": "escalate",
+          "reason_code": "all_jev_live_required",
+          "layer": "skipped",
+          "latency_ms": 0.0,
+          "jev_ms": 0.0,
+          "confidence": 0.0,
+          "model": "none",
+          "fixture_id": "acs-u06",
+          "gold": "allow"
+        },
+        "L5_compaction": {
+          "lane_id": "L5_compaction",
+          "lane": "compaction",
+          "decision": "allow",
+          "reason_code": "acs_hit=2,pi_hit=2,dropped=8",
+          "layer": "compaction",
+          "latency_ms": 0.05,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "compaction_heuristic",
+          "fixture_id": "acs-u06",
+          "gold": "allow",
+          "metrics": {
+            "acs_keep_n": 16,
+            "pi_keep_n": 8,
+            "dropped_n": 8,
+            "acs_hit": 2,
+            "pi_hit": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "acs-u07",
+      "stream": "acs_chat_gold",
+      "axis": "report_shape",
+      "when": "2026-09-28T05:02Z",
+      "text": "GitHub Pages orphan gh-pages for compare HTML; never modify main",
+      "gold": null,
+      "gold_meta": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": null,
+        "report_shape": "gh_pages",
+        "route": "pages_orphan"
+      },
+      "lanes": {
+        "L1_acs": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "acs_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L2_auto": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "mock_jev",
+          "jev_ms": 0.0,
+          "reason": "mock_semantic_dangerous"
+        },
+        "L3_pi": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "pi_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L4_all_jev": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "skipped",
+          "jev_ms": 0.0,
+          "reason": "all_jev_live_required"
+        },
+        "L5_compaction": {
+          "decision": "allow",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "compaction",
+          "jev_ms": 0.0,
+          "reason": "acs_hit=1,pi_hit=1,dropped=9"
+        }
+      },
+      "raw": {
+        "L1_acs": {
+          "lane": "acs",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "acs_mock",
+          "latency_ms": 0.53,
+          "pin_ms": 0.5,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "mock",
+          "fixture_id": "acs-u07",
+          "gold": null,
+          "lane_id": "L1_acs"
+        },
+        "L2_auto": {
+          "lane": "auto_mode",
+          "decision": "escalate",
+          "reason_code": "mock_semantic_dangerous",
+          "layer": "mock_jev",
+          "command": "Decision GitHub Pages orphan gh-pages for compare HTML; never modify main",
+          "latency_ms": 0.08,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u07",
+          "gold": null,
+          "det_layer": "default",
+          "lane_id": "L2_auto"
+        },
+        "L3_pi": {
+          "lane_id": "L3_pi",
+          "lane": "pi_pregate",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "pi_mock",
+          "latency_ms": 0.4,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u07",
+          "gold": null
+        },
+        "L4_all_jev": {
+          "lane_id": "L4_all_jev",
+          "lane": "all_jev",
+          "decision": "escalate",
+          "reason_code": "all_jev_live_required",
+          "layer": "skipped",
+          "latency_ms": 0.0,
+          "jev_ms": 0.0,
+          "confidence": 0.0,
+          "model": "none",
+          "fixture_id": "acs-u07",
+          "gold": null
+        },
+        "L5_compaction": {
+          "lane_id": "L5_compaction",
+          "lane": "compaction",
+          "decision": "allow",
+          "reason_code": "acs_hit=1,pi_hit=1,dropped=9",
+          "layer": "compaction",
+          "latency_ms": 0.05,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "compaction_heuristic",
+          "fixture_id": "acs-u07",
+          "gold": null,
+          "metrics": {
+            "acs_keep_n": 16,
+            "pi_keep_n": 7,
+            "dropped_n": 9,
+            "acs_hit": 1,
+            "pi_hit": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "acs-u08",
+      "stream": "acs_chat_gold",
+      "axis": "tools",
+      "when": "2026-09-28T05:05Z",
+      "text": "live OpenRouter Decisions proof required; pytest alone is not live proof",
+      "gold": "allow",
+      "gold_meta": {
+        "ambiguity": "clear",
+        "research_needed": "no",
+        "tool": "require_live_jev",
+        "report_shape": "metrics",
+        "route": "live_vs_smoke"
+      },
+      "lanes": {
+        "L1_acs": {
+          "decision": "allow",
+          "agree": 1,
+          "fn": 0,
+          "fp": 0,
+          "layer": "acs_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L2_auto": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "mock_jev",
+          "jev_ms": 0.0,
+          "reason": "mock_semantic_dangerous"
+        },
+        "L3_pi": {
+          "decision": "allow",
+          "agree": 1,
+          "fn": 0,
+          "fp": 0,
+          "layer": "pi_mock",
+          "jev_ms": 0.0,
+          "reason": "mock_default_allow"
+        },
+        "L4_all_jev": {
+          "decision": "escalate",
+          "agree": 0,
+          "fn": 0,
+          "fp": 0,
+          "layer": "skipped",
+          "jev_ms": 0.0,
+          "reason": "all_jev_live_required"
+        },
+        "L5_compaction": {
+          "decision": "deny",
+          "agree": 0,
+          "fn": 0,
+          "fp": 1,
+          "layer": "compaction",
+          "jev_ms": 0.0,
+          "reason": "acs_hit=1,pi_hit=0,dropped=11"
+        }
+      },
+      "raw": {
+        "L1_acs": {
+          "lane": "acs",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "acs_mock",
+          "latency_ms": 0.52,
+          "pin_ms": 0.49,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "mock",
+          "fixture_id": "acs-u08",
+          "gold": "allow",
+          "lane_id": "L1_acs"
+        },
+        "L2_auto": {
+          "lane": "auto_mode",
+          "decision": "escalate",
+          "reason_code": "mock_semantic_dangerous",
+          "layer": "mock_jev",
+          "command": "Decision live OpenRouter Decisions proof required; pytest alone is not live proof",
+          "latency_ms": 0.08,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u08",
+          "gold": "allow",
+          "det_layer": "default",
+          "lane_id": "L2_auto"
+        },
+        "L3_pi": {
+          "lane_id": "L3_pi",
+          "lane": "pi_pregate",
+          "decision": "allow",
+          "reason_code": "mock_default_allow",
+          "layer": "pi_mock",
+          "latency_ms": 0.35,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "deterministic",
+          "fixture_id": "acs-u08",
+          "gold": "allow"
+        },
+        "L4_all_jev": {
+          "lane_id": "L4_all_jev",
+          "lane": "all_jev",
+          "decision": "escalate",
+          "reason_code": "all_jev_live_required",
+          "layer": "skipped",
+          "latency_ms": 0.0,
+          "jev_ms": 0.0,
+          "confidence": 0.0,
+          "model": "none",
+          "fixture_id": "acs-u08",
+          "gold": "allow"
+        },
+        "L5_compaction": {
+          "lane_id": "L5_compaction",
+          "lane": "compaction",
+          "decision": "deny",
+          "reason_code": "acs_hit=1,pi_hit=0,dropped=11",
+          "layer": "compaction",
+          "latency_ms": 0.04,
+          "jev_ms": 0.0,
+          "confidence": 1.0,
+          "model": "compaction_heuristic",
+          "fixture_id": "acs-u08",
+          "gold": "allow",
+          "metrics": {
+            "acs_keep_n": 16,
+            "pi_keep_n": 5,
+            "dropped_n": 11,
+            "acs_hit": 1,
+            "pi_hit": 0
+          }
+        }
+      }
+    }
+  ]
+}
