@@ -7,3 +7,5 @@ modules/coordination/jev-oss-compare/v0.1.0/fast-jev-compaction-lab/node_modules
 **/tests/_tmp_ops.sqlite
 **/.acs/
 
+.venv-laya/
+.laya-tmp/

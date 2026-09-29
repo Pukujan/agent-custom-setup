@@ -329,8 +329,9 @@ def _sanitize_answers(answers: Any, question_group: str,
 class _OutputCache:
     """Private cache stores model labels/scores only; request content is hashed."""
     def __init__(self, path: Path) -> None:
+        created_parent = not path.parent.exists()
         path.parent.mkdir(parents=True, exist_ok=True)
-        if os.name == "posix":
+        if os.name == "posix" and created_parent:
             path.parent.chmod(0o700)
         self.connection = sqlite3.connect(path, timeout=60)
         if os.name == "posix" and path.exists():
@@ -468,7 +469,8 @@ class _WorkerPool:
                                      for job in batch["jobs"]],
                             "enqueued_monotonic": time.monotonic()}
                 self.task_queues[wid].put(envelope)
-                inflight[batch["batch_id"]] = {**batch, "worker_id": wid}
+                inflight[batch["batch_id"]] = {**batch, "worker_id": wid,
+                                               "enqueued_monotonic": envelope["enqueued_monotonic"]}
                 next_batch += 1
             try:
                 message = self.result_queue.get(timeout=900)

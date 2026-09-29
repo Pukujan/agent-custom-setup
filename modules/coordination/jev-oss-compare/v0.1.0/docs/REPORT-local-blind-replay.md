@@ -101,3 +101,11 @@ The suite uses synthetic receipts only. It checks privacy, stable retry identiti
 Before publishing, apply the module's CGM HSW check to this HTML path. A local artifact alone does not establish publication or a benchmark result.
 
 Leaf: [issue #28](https://github.com/Pukujan/agent-custom-setup/issues/28); parent: none declared; related #25 and PR #26; dependencies: none for the renderer; task: ACS-0004. Primary writer: Codex; branch: `task/ACS-25-dual-jev-gates`.
+
+## Laya typed-decisions local runtime - 2026-09-29 (mechanics only; not benchmark evidence)
+
+- Pinned model + SDK verified on a local Apple-Silicon CPU host: `laya-typed-decisions` @`1a793eb5…`, SDK 0.3.20 @`23a17522…`. Cold-cache synthetic smoke scored 7/7 jobs with 2 workers (batch latency 342–1125 ms). Receipt: `reports/runs/laya-local-20260929T184900Z.json`.
+- Two production fixes landed on this branch: `_OutputCache` chmod now applies only to directories it creates (it previously failed on `/tmp`), and `_WorkerPool.infer` carries `enqueued_monotonic` into the inflight record (previously `KeyError` at result arrival). A new in-process regression test is mutation-proven for both failure modes; the unittest suite is 13/13. `queue_wait_ms` in receipts spans enqueue→result arrival (end-to-end enqueue latency), not pure queue wait.
+- Corpus guard demonstrated honestly: `inspect` and `run` both reject the checked-in capped harvest with `source_must_be_the_verified_81_file_corpus`. The full DAG replay therefore requires the verified 81-file raw corpus, which lives on corpus hosts unreachable from this device (Gravebuster SSH denied; Cortex reachable over the tailnet but SSH closed, and its Ollama cannot serve a ModernBERT classifier).
+- This section adds no catch-rate or backtest claim; the replay remains discovery-only until it runs against the verified corpus.
+- Next action: obtain corpus-host access (Gravebuster key or Cortex SSH), then run the full raw Claude DAG replay there.
