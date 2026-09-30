@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme:dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="color-scheme" content="dark only"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#111B4D"/>
+<meta name="description" content="Jev routing puts a cheap decision gate in front of your coding agent's next move, so it catches its own mistakes earlier and gets a recovery route instead of a dead end."/>
+<title>Jev routing · Catch mistakes earlier</title>
+<style>
+  :root{
+    --ink:#111B4D; --ink-deep:#0b1130; --violet:#8F7CFF; --cyan:#63D9FF;
+    --coral:#FF8A70; --cream:#F4F1FF; --mint:#94E3CB; --gold:#FFD28A;
+    --panel:rgba(244,241,255,.055); --line:rgba(143,124,255,.28);
+    --muted:#B9B5E0;
+    --display:"Avenir Next","Segoe UI Variable Display","Trebuchet MS",system-ui,sans-serif;
+    --body:system-ui,"Segoe UI",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; color:var(--cream); font-family:var(--body); line-height:1.6;
+    background:
+      radial-gradient(1100px 520px at 82% -8%, rgba(143,124,255,.28), transparent 60%),
+      radial-gradient(900px 480px at 8% 4%, rgba(99,217,255,.14), transparent 55%),
+      linear-gradient(180deg,var(--ink-deep) 0%,var(--ink) 38%,#0e1642 100%);
+  }
+  a{color:var(--cyan)}
+  a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:4px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem}
+  header.site{position:sticky;top:0;z-index:9;backdrop-filter:blur(8px);
+    background:rgba(11,17,48,.78);border-bottom:1px solid var(--line)}
+  nav{display:flex;align-items:center;gap:1.1rem;padding:.65rem 0;font-family:var(--display)}
+  .brand{display:flex;align-items:center;gap:.55rem;font-weight:700;letter-spacing:.02em;color:var(--cream);text-decoration:none;white-space:nowrap}
+  .brand svg{flex:0 0 auto}
+  nav .links{margin-left:auto;display:flex;gap:1rem;flex-wrap:wrap}
+  nav a.pg{color:var(--muted);text-decoration:none;font-weight:600;font-size:.95rem;padding:.3rem .15rem;border-bottom:2px solid transparent}
+  nav a.pg:hover{color:var(--cream)}
+  nav a.pg[aria-current="page"]{color:var(--cyan);border-bottom-color:var(--cyan)}
+  nav a.gh{color:var(--ink);background:var(--mint);border-radius:999px;padding:.34rem .85rem;font-weight:700;font-size:.9rem;text-decoration:none}
+  nav a.gh:hover{filter:brightness(1.06)}
+
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:2.2rem;align-items:center;padding:3.4rem 0 2.6rem}
+  .kicker{font-family:var(--display);text-transform:uppercase;letter-spacing:.16em;font-size:.78rem;color:var(--gold);font-weight:700}
+  h1{font-family:var(--display);font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.14;margin:.55rem 0 1rem;letter-spacing:-.01em}
+  h1 em{font-style:normal;color:var(--cyan)}
+  .lead{font-size:1.08rem;color:var(--muted);max-width:34rem}
+  .lead strong{color:var(--cream)}
+  .cta{display:flex;gap:.8rem;margin-top:1.6rem;flex-wrap:wrap}
+  .cta a{font-family:var(--display);font-weight:700;border-radius:.7rem;padding:.68rem 1.15rem;text-decoration:none;font-size:.98rem}
+  .cta .go{background:var(--coral);color:#231310}
+  .cta .go:hover{filter:brightness(1.07)}
+  .cta .alt{border:1px solid var(--line);color:var(--cream)}
+  .cta .alt:hover{border-color:var(--cyan);color:var(--cyan)}
+  .hero-art{position:relative}
+  .hero-art img{width:100%;height:auto;border-radius:1.1rem;border:1px solid var(--line);
+    box-shadow:0 18px 60px rgba(11,17,48,.65),0 0 0 6px rgba(143,124,255,.08);display:block}
+
+  section{padding:2.6rem 0}
+  h2{font-family:var(--display);font-size:clamp(1.45rem,3vw,2rem);margin:0 0 .4rem;letter-spacing:-.01em}
+  .sub{color:var(--muted);max-width:44rem;margin:0 0 1.6rem}
+  .story{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--coral);
+    border-radius:1rem;padding:1.4rem 1.5rem;margin:0 0 1.4rem}
+  .story p{margin:.4rem 0}
+  .story .said{color:var(--mint);font-weight:600}
+  .story .did{color:var(--coral);font-weight:600}
+  .grid{display:grid;gap:1.1rem;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:1rem;padding:1.3rem 1.35rem}
+  .card h3{font-family:var(--display);font-size:1.06rem;margin:.75rem 0 .35rem}
+  .card p{margin:0;color:var(--muted);font-size:.97rem}
+  .ic{width:34px;height:34px;display:grid;place-items:center;border-radius:.6rem;background:rgba(99,217,255,.12)}
+  .steps{counter-reset:s;display:grid;gap:1.1rem;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .step{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:1rem;padding:1.3rem 1.35rem}
+  .step::before{counter-increment:s;content:counter(s);font-family:var(--display);font-weight:800;
+    width:2rem;height:2rem;display:grid;place-items:center;border-radius:999px;
+    background:linear-gradient(135deg,var(--violet),var(--cyan));color:var(--ink-deep);margin-bottom:.7rem}
+  .step h3{font-family:var(--display);font-size:1.05rem;margin:0 0 .35rem}
+  .step p{margin:0;color:var(--muted);font-size:.97rem}
+
+  .routes{display:grid;gap:1.1rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .route{background:var(--panel);border:1px solid var(--line);border-radius:1rem;padding:1.25rem 1.3rem;position:relative;overflow:hidden}
+  .route::after{content:"";position:absolute;inset:auto 0 0 0;height:3px;background:var(--rc,var(--cyan))}
+  .route code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.86rem;color:var(--rc,var(--cyan));
+    background:rgba(11,17,48,.55);border:1px solid var(--line);border-radius:.45rem;padding:.14rem .5rem}
+  .route h3{font-family:var(--display);font-size:1.05rem;margin:.7rem 0 .3rem}
+  .route p{margin:0;color:var(--muted);font-size:.96rem}
+  .r-reconfirm{--rc:var(--violet)} .r-rethink{--rc:var(--cyan)} .r-research{--rc:var(--gold)}
+  .r-verifier{--rc:var(--mint)} .r-escalate{--rc:var(--coral)} .r-proceed{--rc:var(--cream)}
+
+  .honest{border:1px solid var(--line);border-radius:1.1rem;padding:1.4rem 1.5rem;background:rgba(11,17,48,.42)}
+  .honest ul{margin:.6rem 0 0;padding-left:1.2rem;color:var(--muted)}
+  .honest li{margin:.3rem 0}
+  .honest .not{color:var(--coral);font-weight:600}
+  footer{border-top:1px solid var(--line);margin-top:2rem;padding:1.6rem 0 2.4rem;color:var(--muted);font-size:.92rem}
+  footer a{color:var(--cyan)}
+  @media (max-width:820px){
+    .hero{grid-template-columns:1fr;padding-top:2.2rem}
+    .hero-art{order:-1}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <nav aria-label="Pages">
+      <a class="brand" href="jev-routing-product.html">
+        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+          <circle cx="13" cy="13" r="12" fill="none" stroke="#8F7CFF" stroke-width="1.6"/>
+          <path d="M6 17 L11 11 L15 14 L20 7" fill="none" stroke="#63D9FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="11" cy="11" r="2" fill="#FFD28A"/><circle cx="20" cy="7" r="2" fill="#FF8A70"/>
+        </svg>
+        Jev routing
+      </a>
+      <span class="links">
+        <a class="pg" aria-current="page" href="jev-routing-product.html">Product</a>
+        <a class="pg" href="jev-routing-technical.html">Technical</a>
+        <a class="gh" href="https://github.com/Pukujan/agent-custom-setup" rel="noopener">GitHub</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero" aria-labelledby="h-hero">
+    <div>
+      <div class="kicker">For people who tell agents what not to do</div>
+      <h1 id="h-hero">Your agent heard you. Then it did <em>something else.</em></h1>
+      <p class="lead">You wrote the constraint in plain words: hosted API only, never self-host. Two hours later there is a cloned repo in your working tree. <strong>Jev routing puts a cheap decision gate in front of the agent&rsquo;s next move</strong>, so it catches its own mistakes earlier &mdash; and gets a recovery route instead of a shrug.</p>
+      <div class="cta">
+        <a class="go" href="#routes">See the six routes</a>
+        <a class="alt" href="jev-routing-technical.html">See the Jev numbers</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <img src="assets/jev-routing-hero.png" width="1822" height="1024"
+        alt="Illustration: a designer holding a checklist of constraints sits at a warm evening desk beside a small robot companion who highlights one branch of a glowing route diagram; a quiet panel reads &lsquo;Catch mistakes earlier &ndash; Jev routing turns your constraints into checkpoints.&rsquo;"/>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-problem">
+    <h2 id="h-problem">The expensive part is not the typo</h2>
+    <p class="sub">Agents fail in three ways that cost you an afternoon, and every one of them was visible before the tool ran.</p>
+    <div class="story">
+      <p class="said">You said: &ldquo;Use the hosted voice API. Keep the key in the env file. Do not self-host.&rdquo;</p>
+      <p class="did">The plan said: clone the upstream repo, pip install -e, start a local server.</p>
+      <p>Nothing crashed. Nothing looked wrong in the diff. The agent simply reinterpreted your constraint and charged ahead &mdash; and you found out at the end of the session, not at the moment of the turn.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <span class="ic"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10h14M10 3v14" stroke="#63D9FF" stroke-width="2" stroke-linecap="round" transform="rotate(45 10 10)"/></svg></span>
+        <h3>Constraints, skimmed</h3>
+        <p>A long instruction list becomes a suggestion list. The one line that mattered gets acknowledged, then quietly ignored.</p>
+      </div>
+      <div class="card">
+        <span class="ic"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="#FFD28A" stroke-width="2"/><path d="M10 6v5" stroke="#FFD28A" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1.2" fill="#FFD28A"/></svg></span>
+        <h3>&ldquo;Impossible&rdquo;, unverified</h3>
+        <p>&ldquo;That needs a paid plan&rdquo; or &ldquo;there is no way to do this locally&rdquo; ends the session &mdash; sometimes correctly, sometimes without anyone checking.</p>
+      </div>
+      <div class="card">
+        <span class="ic"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16 L10 4 L16 16 Z" fill="none" stroke="#FF8A70" stroke-width="2" stroke-linejoin="round"/><path d="M10 9v3" stroke="#FF8A70" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1" fill="#FF8A70"/></svg></span>
+        <h3>Unsafe moves, allowed</h3>
+        <p>A destructive command or a key written to the wrong file is the same kind of miss: the request contradicted something you already decided.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-what">
+    <h2 id="h-what">What Jev routing is</h2>
+    <p class="sub">A set of small decision gates that sit between &ldquo;the agent wants to act&rdquo; and &ldquo;the agent acts.&rdquo; Each gate reads your pinned constraints and the request about to happen, then answers one question: <strong>is this still the thing you asked for?</strong></p>
+    <div class="steps">
+      <div class="step">
+        <h3>Pin what you decided</h3>
+        <p>Hosted-only. No secrets in the repo. Ship behind a flag. Each constraint is recorded once, in plain words, and stays on file.</p>
+      </div>
+      <div class="step">
+        <h3>Gate the next move</h3>
+        <p>Before a risky tool call, a plan boundary, or a strong claim, a cheap Jev check compares the moment against your pins. A few hundred milliseconds, not another full model pass.</p>
+      </div>
+      <div class="step">
+        <h3>Route the recovery</h3>
+        <p>A &ldquo;no&rdquo; is never bare. The gate recommends a route: ask you again, redraw the plan, look something up, verify with a second agent, or stop and escalate.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-routes" id="routes">
+    <h2 id="h-routes">Six routes, one plain idea</h2>
+    <p class="sub">Every gate decision lands on one of these. The agent keeps moving; you keep the wheel.</p>
+    <div class="routes">
+      <div class="route r-reconfirm">
+        <code>reconfirm_intent</code>
+        <h3>Ask before acting</h3>
+        <p>The request brushes against a constraint the agent may have skimmed. It repeats your words back and checks the reading before it moves.</p>
+      </div>
+      <div class="route r-rethink">
+        <code>rethink_plan</code>
+        <h3>Redraw the plan</h3>
+        <p>The next step no longer matches why you started. The gate sends the plan back for a revision instead of letting the drift ship.</p>
+      </div>
+      <div class="route r-research">
+        <code>research_more</code>
+        <h3>Look it up first</h3>
+        <p>A confident claim arrived with no evidence behind it. The route asks for a quick search pass before the claim steers any work.</p>
+      </div>
+      <div class="route r-verifier">
+        <code>dispatch_verifier</code>
+        <h3>Prove it separately</h3>
+        <p>The work looks done, so a second, independent checker verifies the result against your criteria before anyone celebrates.</p>
+      </div>
+      <div class="route r-escalate">
+        <code>escalate</code>
+        <h3>Bring the human</h3>
+        <p>Sometimes the call is genuinely yours. The gate stops routing guesses, shows you the conflict, and asks.</p>
+      </div>
+      <div class="route r-proceed">
+        <code>proceed</code>
+        <h3>Carry on</h3>
+        <p>Constraints match, claims are grounded, the move is safe. The most common route is the boring one: nothing to see, keep working.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-honest">
+    <h2 id="h-honest">Where this stands</h2>
+    <p class="sub">Honesty is part of the product. Here is what is real today, and what is not claimed.</p>
+    <div class="honest">
+      <ul>
+        <li>The routing architecture runs as coordination modules in <a href="https://github.com/Pukujan/agent-custom-setup">Agent Custom Setup</a>, with adapters for Claude, Codex, and Kilo workflows.</li>
+        <li>The Jev decision lane is live: the current run scored <strong>69 of 69</strong> gate decisions on one session stream, median <strong>238&nbsp;ms</strong>, for about <strong>$0.002</strong> total. <a href="jev-routing-technical.html">The numbers are on the technical page.</a></li>
+        <li class="not">Not measured yet: accuracy, catch-rate, or recovered task outcomes. The runs so far are plumbing checks, not a benchmark verdict.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    Jev routing is part of <a href="https://github.com/Pukujan/agent-custom-setup">Agent Custom Setup</a> · active work tracked in <a href="https://github.com/Pukujan/agent-custom-setup/issues/28">issue&nbsp;#28</a> · <a href="jev-routing-technical.html">technical breakdown</a>
+  </div>
+</footer>
+</body>
+</html>
