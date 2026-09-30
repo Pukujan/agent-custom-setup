@@ -1,12 +1,14 @@
 """Report privacy and counting boundaries, with entirely synthetic receipts."""
 import json
 from pathlib import Path
+import re
 import sys
 import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from blind_replay_report import aggregate_compaction, aggregate_experiments, aggregate_receipts, main, render_report
+from blind_replay_report import (aggregate_compaction, aggregate_experiments, aggregate_receipts,
+                                main, render_markdown, render_report, write_markdown_report)
 
 
 class AggregateReportTests(unittest.TestCase):
@@ -255,6 +257,176 @@ class AggregateReportTests(unittest.TestCase):
             self.assertNotIn("synthetic-01", rendered)
             self.assertNotIn("synthetic-02", rendered)
 
+    def test_markdown_writer_emits_no_html_tags_and_renders_required_sections(self):
+        with tempfile.TemporaryDirectory() as root:
+            sensitive = "PRIVATE_TRANSCRIPT_PROSE_AND_EVENT_TEXT"
+            path = self._write(root, [
+                self._row(gate="user_pin", choice="durable_assertion", elapsed_ms=8.5, prompt=sensitive, text=sensitive),
+                self._row(gate="research_route", route="go", elapsed_ms=12.0, event_text=sensitive, tool_args={"cmd": sensitive}),
+                self._row(gate="tool", choice="allow", elapsed_ms=16.5, tool_args={"path": sensitive}),
+            ])
+            aggregate = aggregate_receipts([path])
+            rendered_md = render_markdown(aggregate)
 
+            # Must not emit any HTML tags
+            self.assertNotRegex(rendered_md, r"<[^>]+>", "Markdown writer must not emit HTML tags")
+
+            # Must emit required sections and data
+            self.assertIn("# Blind local replay", rendered_md)
+            self.assertIn("## Overview", rendered_md)
+            self.assertIn("### Route totals", rendered_md)
+            self.assertIn("Go", rendered_md)
+            self.assertIn("### Coverage and omissions", rendered_md)
+            self.assertIn("### Latency and timing", rendered_md)
+            self.assertIn("Baseline walk-forward · Laya", rendered_md)
+            self.assertIn("Aggregate counts only", rendered_md)
+
+            # Explicit limits must be present
+            self.assertIn("Research excerpt outputs are separate from tool permission", rendered_md)
+            self.assertIn("Baseline context uses conversation/root/sidechain stream IDs", rendered_md)
+
+            # No transcript prose, event text, tool args, or prompts
+            self.assertNotIn(sensitive, rendered_md)
+            self.assertNotIn("<html", rendered_md)
+            self.assertNotIn("<table", rendered_md)
+            self.assertNotIn("<div", rendered_md)
+
+    def test_markdown_path_is_not_html_only(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = self._write(root, [self._row(gate="research_route", route="hold")])
+            md_output = Path(root) / "reports" / "laya-benchmark.md"
+            html_output = Path(root) / "reports" / "custom.html"
+
+            # 1. Writing to path ending in .md writes markdown, not HTML
+            rc = main(["--receipt-dir", str(Path(root)), "--out", str(md_output)])
+            self.assertEqual(rc, 0)
+            self.assertTrue(md_output.exists())
+            md_text = md_output.read_text(encoding="utf-8")
+            self.assertNotRegex(md_text, r"<[^>]+>", "Markdown file must contain no HTML tags")
+            self.assertIn("# Blind local replay", md_text)
+            self.assertIn("### Route totals", md_text)
+            self.assertIn("Hold", md_text)
+            self.assertNotIn("<!doctype html>", md_text)
+
+            # 2. Writing to path ending in .html still writes HTML
+            rc = main(["--receipt-dir", str(Path(root)), "--out", str(html_output)])
+            self.assertEqual(rc, 0)
+            self.assertTrue(html_output.exists())
+            html_text = html_output.read_text(encoding="utf-8")
+            self.assertIn("<!doctype html>", html_text)
+
+            # 3. Explicit --format markdown writes markdown
+            explicit_md = Path(root) / "explicit.txt"
+            rc = main(["--receipt-dir", str(Path(root)), "--format", "markdown", "--out", str(explicit_md)])
+            self.assertEqual(rc, 0)
+            self.assertNotRegex(explicit_md.read_text(encoding="utf-8"), r"<[^>]+>")
+
+            # 4. Sibling command 'markdown' writes markdown
+            sibling_md = Path(root) / "sibling.md"
+            rc = main(["markdown", "--receipt-dir", str(Path(root)), "--out", str(sibling_md)])
+            self.assertEqual(rc, 0)
+            self.assertNotRegex(sibling_md.read_text(encoding="utf-8"), r"<[^>]+>")
+
+    def test_regenerate_markdown_from_summary_json(self):
+        with tempfile.TemporaryDirectory() as root:
+            summary_data = {
+                "content_included": False,
+                "status": "complete",
+                "run_id": "laya-benchmark-run-01",
+                "adapter_id": "baseline_walkforward_laya_local",
+                "model": "laya",
+                "planned_jobs": 45,
+                "scored_jobs": 45,
+                "incomplete_jobs": 0,
+                "latency_p50_ms": 11.4,
+                "latency_p95_ms": 22.8,
+                "phase2": {
+                    "routes": {
+                        "go": 35,
+                        "loop": 8,
+                        "hold": 2
+                    }
+                }
+            }
+            summary_path = Path(root) / "summary.json"
+            summary_path.write_text(json.dumps(summary_data), encoding="utf-8")
+
+            md_output = Path(root) / "reports" / "laya-benchmark.md"
+            rc = main(["--summary", str(summary_path), "--out", str(md_output)])
+            self.assertEqual(rc, 0)
+            self.assertTrue(md_output.exists())
+            md_text = md_output.read_text(encoding="utf-8")
+            self.assertNotRegex(md_text, r"<[^>]+>", "Regenerated markdown must contain no HTML tags")
+            self.assertIn("Baseline walk-forward · Laya", md_text)
+            self.assertIn("Go", md_text)
+            self.assertIn("Loop", md_text)
+            self.assertIn("Hold", md_text)
+            self.assertIn("11.4 ms", md_text)
+            self.assertIn("22.8 ms", md_text)
+            self.assertIn("Aggregate counts only", md_text)
+
+    def test_write_markdown_report_from_fixture(self):
+        with tempfile.TemporaryDirectory() as root:
+            fixture = {
+                "schema_version": 2,
+                "status": "complete",
+                "run_id": "fixture-run",
+                "content_included": False,
+                "receipt_rows": 10,
+                "attempt_rows": 10,
+                "unsupported_rows": 0,
+                "lanes": [
+                    {
+                        "adapter": "baseline",
+                        "label": "Laya",
+                        "model_key": "laya",
+                        "lane_id": "laya-pc",
+                        "status": "complete",
+                        "experiment_fingerprint": "123456789abc",
+                        "fingerprint_kind": "profile",
+                        "fingerprint": "a" * 64,
+                        "gates": {"user_pin": 5, "tool": 5},
+                        "choices": {
+                            "user_pin": {"durable_assertion": 5},
+                            "research_route": {"go": 4, "hold": 1}
+                        },
+                        "incomplete_checks": 0,
+                        "pin_coverage_complete": 5,
+                        "pin_coverage_incomplete": 0,
+                        "pin_coverage_bypassed": 0,
+                        "policy_bypasses": 0,
+                        "omitted_evidence_refs": 0,
+                        "compaction_semantics_unknown": 0,
+                        "unsupported_rows": 0,
+                        "unknown_status_rows": 0,
+                        "unknown_choice_rows": 0,
+                        "identity_unavailable_rows": 0,
+                        "invalid_probability_rows": 0,
+                        "attempt_rows": 10,
+                        "rows": 10,
+                        "retry_rows": 0,
+                        "exact_duplicate_rows": 0,
+                        "model_attempts": 10,
+                        "cache_attempts": 0,
+                        "attempt_metadata_rows": 10,
+                        "timed_checks": 10,
+                        "cached_timed_checks": 0,
+                        "latency_p50_ms": 9.1,
+                        "latency_p95_ms": 18.2,
+                        "execution": {"decision_calls": 10},
+                        "answer_probability_bins": {},
+                    }
+                ]
+            }
+            md_path = Path(root) / "fixture.md"
+            out = write_markdown_report(fixture, md_path)
+            self.assertEqual(out, md_path)
+            self.assertTrue(md_path.exists())
+            text = md_path.read_text(encoding="utf-8")
+            self.assertNotRegex(text, r"<[^>]+>")
+            self.assertIn("Baseline walk-forward · Laya", text)
+            self.assertIn("Go", text)
+            self.assertIn("Hold", text)
+            self.assertIn("9.1 ms", text)
 if __name__ == "__main__":
     unittest.main()

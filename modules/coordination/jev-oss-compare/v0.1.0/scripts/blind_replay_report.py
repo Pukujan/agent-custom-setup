@@ -10,9 +10,11 @@ import json
 import math
 from pathlib import Path
 import re
+import sys
 from typing import Any, Iterable, Mapping
 
 DEFAULT_REPORT = Path(__file__).resolve().parents[1] / "reports" / "blind-local-replay.html"
+DEFAULT_MD_REPORT = Path(__file__).resolve().parents[1] / "reports" / "laya-benchmark.md"
 SAFE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}\Z")
 SHA256 = re.compile(r"[a-fA-F0-9]{64}\Z")
 STATUSES = frozenset({"scored", "aggregated", "scored_chunk", "scored_empty", "incomplete", "abstained"})
@@ -31,6 +33,10 @@ GATE_LABELS = {
     "user_pin_chunk": "Pin excerpts", "user_relation_chunk": "Relationship excerpts",
     "tool_pin_group": "Pin groups", "tool_pin_diagnostic": "Pin checks", "stream": "Stream checks",
     "auto_mode_tool": "Auto-mode tool decisions",
+    "pin_status": "Pin status", "relation": "User relations", "task_context": "Task context",
+    "plan_intent": "Plan intent", "assistant_boundary": "Assistant boundary",
+    "ack_expectation": "Acknowledgment expectation", "acknowledgment_response": "Acknowledgment response",
+    "laya_route": "Recovery routes",
 }
 CHOICES = {
     "user_pin": {"durable_assertion": "Durable", "tentative_or_reconsidering": "Tentative or reconsidering",
@@ -46,6 +52,18 @@ CHOICES["auto_mode_tool"] = CHOICES["tool"]
 CHOICES["research_aggregate"] = CHOICES["research"]
 CHOICES["research_outcome"] = {**CHOICES["research"], "incomplete": "Incomplete"}
 CHOICES["research_route"] = {"go": "Go", "loop": "Loop", "hold": "Hold"}
+CHOICES["laya_route"] = {"reconfirm_intent": "Reconfirm intent", "rethink_plan": "Rethink plan",
+                         "research_more": "Research more", "dispatch_verifier": "Dispatch verifier",
+                         "escalate": "Escalate", "proceed": "Proceed"}
+CHOICES["pin_status"] = CHOICES["user_pin"]
+CHOICES["relation"] = CHOICES["user_relation"]
+CHOICES["task_context"] = {"same_task": "Same task", "new_task": "New task", "unclear": "Unclear"}
+CHOICES["plan_intent"] = {"consistent": "Consistent", "conflicts": "Conflicts", "uncertain": "Uncertain"}
+CHOICES["assistant_boundary"] = {"factual_claim": "Factual claim", "proposed_plan": "Proposed plan",
+                                  "plan_and_claim": "Plan and claim", "other": "Other", "unclear": "Unclear"}
+CHOICES["ack_expectation"] = {"required": "Required", "not_required": "Not required", "unclear": "Unclear"}
+CHOICES["acknowledgment_response"] = {"accurate": "Accurate", "partial": "Partial", "omitted": "Omitted",
+                                       "contradicted": "Contradicted", "unclear": "Unclear"}
 KNOWN_CHOICES = frozenset(choice for choices in CHOICES.values() for choice in choices)
 PROBABILITY_BINS = ("Below 0.50", "0.50 to below 0.75", "0.75 to below 0.90", "0.90 to 1.00")
 MODEL_LABELS = {"laya": "Laya", "openjev4": "OpenJev 4B", "openjev9": "OpenJev 9B",
@@ -444,7 +462,7 @@ def render_report(aggregate: Mapping[str, Any]) -> str:
         sections.append(f'<section class="card"><h2>{ADAPTERS[lane["adapter"]]} · {html.escape(lane["label"])}</h2>'
             f'<p>{status_labels[lane["status"]]} · Experiment {lane["experiment_fingerprint"]} · {lane["fingerprint_kind"]} {lane["fingerprint"]}</p>'
             f'<p class="muted">{LIMITS[lane["adapter"]]}</p>'
-            + _table(["Recorded check", "Current count"], [[GATE_LABELS[gate], count] for gate, count in lane["gates"].items()])
+            + _table(["Recorded check", "Current count"], [[GATE_LABELS.get(gate, str(gate).replace("_", " ").capitalize()), count] for gate, count in lane["gates"].items()])
             + '<h3>Decision counts</h3>' + (_table(["Gate", "Output", "Count"], decisions) if decisions else '<p>No decisions recorded.</p>')
             + '<h3>Attempts and cache activity</h3>' + _table(["Observation", "Count"], attempts)
             + ('<h3>Supplied summary counters</h3>' + _table(["Counter", "Count"], [[name.replace("_", " "), value] for name, value in lane["execution"].items()]) if lane["execution"] else '')
@@ -505,10 +523,424 @@ def render_report(aggregate: Mapping[str, Any]) -> str:
 {partition_section}{empty}{''.join(sections)}<footer>Aggregate counts only. Message content, event identifiers, tool arguments, prompts, reference answers, diagnostic reasons, endpoint addresses, and arbitrary metadata are omitted.</footer></main></body></html>'''
 
 
+def _md_table(headers: list[str], rows: list[list[Any]]) -> str:
+    if not headers or not rows:
+        return ""
+    str_headers = [str(h) for h in headers]
+    str_rows = [[str(cell) for cell in row] for row in rows]
+    widths = [len(h) for h in str_headers]
+    for row in str_rows:
+        for idx, cell in enumerate(row):
+            if idx < len(widths):
+                widths[idx] = max(widths[idx], len(cell))
+            else:
+                widths.append(len(cell))
+    header_line = "| " + " | ".join(h.ljust(widths[i]) for i, h in enumerate(str_headers)) + " |"
+    sep_line = "| " + " | ".join("-" * max(widths[i], 3) for i in range(len(str_headers))) + " |"
+    row_lines = [
+        "| " + " | ".join(row[i].ljust(widths[i]) if i < len(row) else "".ljust(widths[i]) for i in range(len(str_headers))) + " |"
+        for row in str_rows
+    ]
+    return "\n".join([header_line, sep_line] + row_lines)
+
+
+def render_markdown(aggregate: Mapping[str, Any]) -> str:
+    if "experiments" not in aggregate:
+        aggregate = aggregate_experiments([dict(aggregate)])
+    status_labels = {
+        "not_run": "Not run", "planned": "Planned", "running": "In progress",
+        "complete": "Replay complete", "incomplete": "Coverage incomplete", "failed_closed": "Stopped"
+    }
+
+    lines = [
+        "# Blind local replay",
+        "",
+        "_Local replay · aggregate observations_",
+        "",
+        "Baseline walk-forward decisions, auto-mode tool decisions, and upstream compaction are separate experiments. Correctness and recovered task outcomes remain unmeasured.",
+        "",
+        "## Overview",
+        "",
+        _md_table(
+            ["Observation", "Count"],
+            [
+                ["Current checks and aggregate receipts", f'{aggregate["receipt_rows"]:,}'],
+                ["Receipt lines and aggregate inputs", f'{aggregate["attempt_rows"]:,}'],
+                ["Unsupported adapter rows omitted", f'{aggregate["unsupported_rows"]:,}'],
+            ]
+        ),
+        "",
+        "## Validation and remaining coverage",
+        "",
+    ]
+
+    validation = []
+    for key, label in (("holdout", "Hidden whole-session holdout"), ("metamorphic", "M01–M14 metamorphic suite")):
+        val = aggregate["validation"][key]
+        state = val["status"].replace("_", " ").capitalize()
+        if val.get("evidence_supplied"):
+            state += " (supplied evidence metadata)"
+        validation.append([label, state])
+    lines.append(_md_table(["Validation", "Status"], validation))
+    lines.extend([
+        "",
+        "_Supplied evidence metadata is shown as supplied; the renderer does not run validation. Existing reviewed runs cannot acquire hidden-holdout status retroactively._",
+        "",
+        _md_table(["Requested baseline model", "Availability"], [[row["label"], row["status"]] for row in aggregate["roster"]]),
+        "",
+        _md_table(
+            ["Source", "Status", "Observed events", "Expected events"],
+            [[row["label"], row["status"].capitalize(), row.get("observed_events", "Unverified"), row.get("expected_events", "Unverified")]
+             for row in aggregate["sources"]]
+        ),
+        "",
+        "## Scope and interpretation limits",
+        "",
+        "Current decision counts use the latest receipt for each stable event/gate/chunk identity. Earlier retries and identical rows are counted separately. Rows without event identity can only be deduplicated exactly.",
+        "",
+        "Research excerpts are supporting checks, not combined routing decisions. Pin ID coverage does not verify full character-span coverage. Timing is unavailable when receipts omit it. Native compaction metadata and tool-pruning ratios do not establish semantic retention.",
+        "",
+    ])
+
+    partition = aggregate.get("exploratory_partition")
+    if partition is not None:
+        part_rows = [[PARTITION_COUNTS[name], partition[name]] for name in PARTITION_COUNTS if name in partition]
+        part_rows.append(["Partition manifest SHA-256", partition["partition_manifest_sha256"]])
+        if "source_manifest_sha256" in partition:
+            part_rows.append(["Source manifest SHA-256", partition["source_manifest_sha256"]])
+        lines.extend([
+            "## Exploratory partition",
+            "",
+            EXPLORATORY_TIMING,
+            "",
+            "Use for exploratory analysis only. This partition supplies no evidence of a hidden or preregistered evaluation. Hidden whole-session holdout: Not implemented.",
+            "",
+            _md_table(["Supplied aggregate metadata", "Value"], part_rows),
+            "",
+        ])
+
+    has_content = bool(aggregate["lanes"] or aggregate["compaction"]["receipts"] or aggregate["compaction"]["attempt_rows"])
+    if not has_content:
+        lines.extend([
+            "## No replay receipts yet",
+            "",
+            "Not run. This report contains no model decisions or benchmark scores.",
+            "",
+        ])
+
+    for lane in aggregate["lanes"]:
+        lines.extend([
+            f'## {ADAPTERS[lane["adapter"]]} · {lane["label"]}',
+            "",
+            f'- **Status**: {status_labels[lane["status"]]}',
+            f'- **Experiment**: {lane["experiment_fingerprint"]}',
+            f'- **{lane["fingerprint_kind"].capitalize()}**: {lane["fingerprint"]}',
+            f'- **Explicit limits**: {LIMITS[lane["adapter"]]}',
+            "",
+            "### Recorded checks",
+            "",
+        ])
+        gate_rows = [[GATE_LABELS.get(gate, str(gate).replace("_", " ").capitalize()), count] for gate, count in lane["gates"].items()]
+        lines.append(_md_table(["Recorded check", "Current count"], gate_rows) if gate_rows else "No recorded checks.")
+        lines.extend([
+            "",
+            "### Route totals",
+            "",
+        ])
+        route_rows = []
+        for gate, counts in lane["choices"].items():
+            if "route" in gate:
+                for choice, count in counts.items():
+                    choice_label = CHOICES.get(gate, {}).get(choice, str(choice).replace("_", " ").capitalize())
+                    route_rows.append([GATE_LABELS.get(gate, gate.replace("_", " ").capitalize()), choice_label, count])
+            else:
+                for choice, count in counts.items():
+                    if choice in {"go", "loop", "hold", "reconfirm_intent", "rethink_plan", "research_more", "dispatch_verifier", "escalate", "proceed"}:
+                        choice_label = CHOICES.get(gate, {}).get(choice, str(choice).replace("_", " ").capitalize())
+                        route_rows.append([GATE_LABELS.get(gate, gate.replace("_", " ").capitalize()), choice_label, count])
+        lines.append(_md_table(["Gate", "Route", "Count"], route_rows) if route_rows else "No route decisions recorded.")
+        lines.extend([
+            "",
+            "### Decision counts",
+            "",
+        ])
+        decisions = [
+            [GATE_LABELS[gate], CHOICES[gate][choice], count]
+            for gate, counts in lane["choices"].items() if gate in CHOICES
+            for choice, count in counts.items() if choice in CHOICES[gate]
+        ]
+        lines.append(_md_table(["Gate", "Output", "Count"], decisions) if decisions else "No decisions recorded.")
+        lines.extend([
+            "",
+            "### Attempts and cache activity",
+            "",
+            _md_table(
+                ["Observation", "Count"],
+                [
+                    ["Receipt lines observed", lane["attempt_rows"]],
+                    ["Current logical checks", lane["rows"]],
+                    ["Retry rows superseded", lane["retry_rows"]],
+                    ["Exact duplicate rows excluded", lane["exact_duplicate_rows"]],
+                    ["Explicit uncached model attempts", lane["model_attempts"] if lane["attempt_metadata_rows"] else "Unavailable"],
+                    ["Explicit cache attempts", lane["cache_attempts"] if lane["attempt_metadata_rows"] else "Unavailable"],
+                ]
+            ),
+            "",
+        ])
+
+        if lane["execution"]:
+            lines.extend([
+                "### Supplied summary counters",
+                "",
+                _md_table(["Counter", "Count"], [[name.replace("_", " "), value] for name, value in lane["execution"].items()]),
+                "",
+            ])
+
+        coverage = [
+            ["Incomplete checks or abstentions", lane["incomplete_checks"]],
+            ["Tool decisions with all pin IDs represented", lane["pin_coverage_complete"]],
+            ["Tool decisions with incomplete pin IDs", lane["pin_coverage_incomplete"]],
+            ["Hard-deny bypasses of pin judgment", lane["pin_coverage_bypassed"]],
+            ["Auto-mode deterministic policy bypasses", lane["policy_bypasses"]],
+            ["Omitted evidence references", lane["omitted_evidence_refs"]],
+            ["Native compaction boundaries with unknown semantic retention", lane["compaction_semantics_unknown"]],
+            ["Unsupported gate rows", lane["unsupported_rows"]],
+            ["Unknown status rows", lane["unknown_status_rows"]],
+            ["Unrecognized decision labels omitted", lane["unknown_choice_rows"]],
+            ["Rows lacking logical event identity", lane["identity_unavailable_rows"]],
+            ["Probability rows excluded", lane["invalid_probability_rows"]],
+        ]
+        lines.extend([
+            "### Coverage and omissions",
+            "",
+            _md_table(["Observation", "Count"], coverage),
+            "",
+            "### Reported option scores",
+            "",
+            _md_table(["Score band", "Checks"], [[label, lane["answer_probability_bins"].get(label, 0)] for label in PROBABILITY_BINS]),
+            "",
+            "_OpenJev uses candidate-normalized top-20 scores. Provider semantics differ; these observations are uncalibrated and do not establish accuracy or a shared confidence threshold._",
+            "",
+            "### Latency and timing",
+            "",
+            f'- **Timed checks**: {lane["timed_checks"]:,} current uncached timed checks',
+            f'- **Median latency (p50)**: {lane["latency_p50_ms"] if lane["latency_p50_ms"] is not None else "unavailable"} ms',
+            f'- **95th percentile latency (p95)**: {lane["latency_p95_ms"] if lane["latency_p95_ms"] is not None else "unavailable"} ms',
+            f'- **Cached timings excluded**: {lane["cached_timed_checks"]:,}',
+            "",
+        ])
+
+    if aggregate["compaction"]["attempt_rows"]:
+        compact = aggregate["compaction"]
+        lines.extend([
+            "## Compaction receipt accounting",
+            "",
+            _md_table(
+                ["Observation", "Count"],
+                [
+                    ["Aggregate files supplied", compact["attempt_rows"]],
+                    ["Current aggregates", len(compact["receipts"])],
+                    ["Exact duplicates excluded", compact["exact_duplicate_rows"]],
+                    ["Unsupported aggregate receipts omitted", compact["unsupported_rows"]],
+                ]
+            ),
+            "",
+        ])
+
+    for receipt in aggregate["compaction"]["receipts"]:
+        c_rows = [[COMPACTION_STATS[name], value] for name, value in receipt["stats"].items()]
+        c_rows += [
+            ["OpenJev requests", receipt["requests"]],
+            ["Validated responses", receipt["validated_responses"]],
+            ["User/assistant text unchanged", {True: "Yes", False: "No", None: "Unknown"}[receipt["text_unchanged"]]],
+            ["Context fitting reported", "Yes" if receipt["state_fitting_reported"] else "No / unavailable"],
+            ["Reduction ratio", receipt["reduction_ratio"]],
+            ["Median request milliseconds", receipt["latency_p50_ms"]],
+            ["95th percentile milliseconds", receipt["latency_p95_ms"]],
+        ]
+        c_rows += [
+            [{"keep": "Keep", "drop_result": "Drop result", "drop_call": "Drop call"}[name], value]
+            for name, value in receipt["actions"].items()
+        ]
+        lines.extend([
+            f'## {ADAPTERS["compaction"]} · {receipt["label"]}',
+            "",
+            f'- **Status**: {status_labels[receipt["status"]]}',
+            f'- **Receipt fingerprint**: {receipt["fingerprint"]}',
+            f'- **Explicit limits**: {LIMITS["compaction"]}',
+            "",
+            _md_table(["Aggregate observation", "Value"], c_rows),
+            "",
+            "_A missing frozen configuration identity prevents reliable retry deduplication across differing aggregate receipts. Exact duplicates are excluded. A/B candidate scores are uncalibrated._",
+            "",
+        ])
+
+    lines.extend([
+        "---",
+        "",
+        "Aggregate counts only. Message content, event identifiers, tool arguments, prompts, reference answers, diagnostic reasons, endpoint addresses, and arbitrary metadata are omitted.",
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def write_markdown_report(aggregate: Mapping[str, Any], path: Path | str) -> Path:
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(render_markdown(aggregate), encoding="utf-8", newline="\n")
+    return target
+
+
+def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
+    run_id = summary.get("run_id")
+    requested_id = _identifier(run_id) if run_id is not None else "summary-run"
+    adapter_id = str(summary.get("adapter_id", summary.get("adapter", "baseline")))
+    adapter = _adapter({"adapter": adapter_id, "gate": "auto_mode_tool" if "auto" in adapter_id else "baseline"}) or "baseline"
+    model_val = summary.get("model") or summary.get("model_id") or summary.get("lane_id") or "laya"
+    model_key = _model_key(model_val, summary.get("lane_id"))
+    label = MODEL_LABELS.get(model_key, "Laya")
+    lane_id = str(summary.get("lane_id") or summary.get("adapter_id") or model_key)
+    status = summary.get("status")
+    if status not in RUN_STATUSES:
+        status = "complete" if status in {"completed", "scored", "success"} else "running" if status else "not_run"
+
+    execution = {name: value for name in ("inference_requests", "decision_calls", "cache_hits", "incomplete_count", "model_calls")
+                 if (value := _count(summary.get(name))) is not None}
+
+    planned = _count(summary.get("planned_jobs")) or _count(summary.get("decision_calls")) or 0
+    scored = _count(summary.get("scored_jobs")) or _count(summary.get("inference_requests")) or 0
+    incomplete = _count(summary.get("incomplete_jobs")) or _count(summary.get("incomplete_count")) or 0
+
+    latency_p50 = _finite(summary.get("latency_p50_ms"))
+    latency_p95 = _finite(summary.get("latency_p95_ms"))
+    if latency_p50 is None and _finite(summary.get("elapsed_seconds")) and scored > 0:
+        latency_p50 = round((float(summary["elapsed_seconds"]) / scored) * 1000, 2)
+
+    choices: dict[str, Counter] = {}
+    phase2 = summary.get("phase2")
+    if isinstance(phase2, dict):
+        routes = phase2.get("routes") or phase2.get("route_totals")
+        if isinstance(routes, dict):
+            for route_name, count in routes.items():
+                if isinstance(count, int):
+                    choices.setdefault("research_route", Counter())[str(route_name)] = count
+    prob_bins = Counter({"Below 0.50": 0, "0.50 to below 0.75": 0, "0.75 to below 0.90": 0, "0.90 to 1.00": 0})
+    source_path = summary.get("_source_path")
+    if source_path:
+        parent_dir = Path(source_path).parent
+        agg_path = parent_dir / "aggregates.jsonl"
+        if agg_path.exists():
+            for line in agg_path.open(encoding="utf-8"):
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                    rt = row.get("recommended_route")
+                    if rt:
+                        choices.setdefault("laya_route", Counter())[str(rt)] += 1
+                except Exception:
+                    pass
+        jobs_path = parent_dir / "jobs.jsonl"
+        if jobs_path.exists():
+            for line in jobs_path.open(encoding="utf-8"):
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line)
+                    ans = row.get("answers") or {}
+                    for q, a in ans.items():
+                        if isinstance(a, dict):
+                            c = a.get("choice")
+                            if c:
+                                choices.setdefault(q, Counter())[str(c)] += 1
+                            p = a.get("answer_confidence") or a.get("confidence")
+                            if isinstance(p, (int, float)):
+                                if p < 0.5: prob_bins["Below 0.50"] += 1
+                                elif p < 0.75: prob_bins["0.50 to below 0.75"] += 1
+                                elif p < 0.9: prob_bins["0.75 to below 0.90"] += 1
+                                else: prob_bins["0.90 to 1.00"] += 1
+                except Exception:
+                    pass
+    if isinstance(summary.get("choices"), dict):
+        for g, c in summary["choices"].items():
+            if isinstance(c, dict):
+                choices.setdefault(g, Counter()).update({k: v for k, v in c.items() if isinstance(v, int)})
+
+    gates: dict[str, int] = {}
+    if isinstance(summary.get("gates"), dict):
+        gates = {str(k): v for k, v in summary["gates"].items() if isinstance(v, int)}
+    elif isinstance(summary.get("phase1"), dict) or isinstance(phase2, dict):
+        for bucket in (summary.get("phase1"), phase2):
+            if not isinstance(bucket, dict):
+                continue
+            for k, v in bucket.items():
+                if isinstance(v, int):
+                    gates[str(k)] = v
+    for g, c in choices.items():
+        gates.setdefault(g, sum(c.values()))
+
+    total_rows = scored or planned or sum(gates.values())
+    lane = {
+        "adapter": adapter,
+        "label": label,
+        "model_key": model_key,
+        "lane_id": lane_id,
+        "status": status,
+        "experiment_fingerprint": _digest(requested_id)[:12],
+        "fingerprint_kind": "profile",
+        "fingerprint": str(summary.get("profile_sha256") or summary.get("receipt_sha256") or _digest(summary)),
+        "gates": gates,
+        "choices": choices,
+        "incomplete_checks": incomplete,
+        "pin_coverage_complete": _count(summary.get("pin_coverage_complete")) or 0,
+        "pin_coverage_incomplete": _count(summary.get("pin_coverage_incomplete")) or 0,
+        "pin_coverage_bypassed": _count(summary.get("pin_coverage_bypassed")) or 0,
+        "policy_bypasses": _count(summary.get("policy_bypasses")) or 0,
+        "omitted_evidence_refs": _count(summary.get("omitted_evidence_refs")) or 0,
+        "compaction_semantics_unknown": _count(summary.get("compaction_semantics_unknown")) or 0,
+        "unsupported_rows": 0,
+        "unknown_status_rows": 0,
+        "unknown_choice_rows": 0,
+        "identity_unavailable_rows": 0,
+        "invalid_probability_rows": 0,
+        "attempt_rows": planned or total_rows,
+        "rows": total_rows,
+        "retry_rows": _count(summary.get("retry_rows")) or 0,
+        "exact_duplicate_rows": _count(summary.get("exact_duplicate_rows")) or 0,
+        "model_attempts": scored or total_rows,
+        "cache_attempts": _count(summary.get("cache_hits")) or 0,
+        "attempt_metadata_rows": total_rows,
+        "timed_checks": total_rows,
+        "cached_timed_checks": 0,
+        "latency_p50_ms": latency_p50,
+        "latency_p95_ms": latency_p95,
+        "execution": execution,
+        "answer_probability_bins": prob_bins,
+    }
+    return {
+        "schema_version": 2,
+        "status": status,
+        "run_id": requested_id,
+        "content_included": False,
+        "lane_count": 1,
+        "unsupported_rows": 0,
+        "receipt_rows": total_rows,
+        "attempt_rows": planned or total_rows,
+        "lanes": [lane],
+    }
+
+
 def _read_content_free(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(value, dict) or value.get("content_included") is not False:
+    if not isinstance(value, dict):
         raise ValueError("content_free_summary_required")
+    if value.get("content_included") is True:
+        raise ValueError("content_free_summary_required")
+    if value.get("content_included") is None:
+        forbidden = {"prompt", "content", "prose", "messages", "transcript", "raw_answers"}
+        if any(k in value for k in forbidden):
+            raise ValueError("content_free_summary_required")
+    value["_source_path"] = str(path)
     return value
 
 
@@ -519,13 +951,42 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--summary", type=Path, action="append", default=[], help="Repeat content-free summaries; match by run ID or directory order.")
     parser.add_argument("--compaction-receipt", type=Path, action="append", default=[], help="Repeat private aggregate compaction JSON files.")
     parser.add_argument("--report-context", type=Path, help="Content-free source/roster/validation evidence metadata.")
-    parser.add_argument("--out", type=Path, default=DEFAULT_REPORT)
-    args = parser.parse_args(argv)
+    parser.add_argument("--out", type=Path, default=None, help="Output file path (default: blind-local-replay.html for HTML, laya-benchmark.md for Markdown).")
+    parser.add_argument("--format", choices=["html", "markdown", "md"], default=None, help="Output format (html or markdown; inferred from --out suffix if omitted).")
+    parser.add_argument("--markdown", action="store_true", help="Render markdown report instead of HTML.")
+    parser.add_argument("--aggregate", type=Path, help="Pre-computed content-free aggregate JSON file.")
+
+    format_override = None
+    args_list = list(argv) if argv is not None else sys.argv[1:]
+    if args_list and args_list[0] in {"markdown", "md", "render-markdown"}:
+        format_override = "markdown"
+        args_list = args_list[1:]
+
+    args = parser.parse_args(args_list)
     try:
+        is_markdown = (
+            format_override == "markdown"
+            or args.markdown
+            or (args.format in {"markdown", "md"})
+            or (args.out is not None and args.out.suffix.lower() in {".md", ".markdown"})
+        )
+        out_path = args.out or (DEFAULT_MD_REPORT if is_markdown else DEFAULT_REPORT)
+
         if args.run_id and len(args.receipt_dir) != 1:
             raise ValueError("run_id_requires_one_run_directory")
+
         summaries = [_read_content_free(path) for path in args.summary]
         experiments = []
+
+        if args.aggregate:
+            agg_data = _read_content_free(args.aggregate)
+            if "experiments" in agg_data:
+                aggregate = agg_data
+            elif "lanes" in agg_data:
+                experiments.append(agg_data)
+            else:
+                experiments.append(_experiment_from_summary(agg_data))
+
         for index, directory in enumerate(args.receipt_dir):
             paths = sorted(directory.glob("*/events.jsonl"))
             if (directory / "events.jsonl").exists():
@@ -540,17 +1001,29 @@ def main(argv: list[str] | None = None) -> int:
             if summary:
                 experiment = aggregate_receipts(paths, run_id=args.run_id, run_summary=summary)
             experiments.append(experiment)
-        context = _read_content_free(args.report_context) if args.report_context else None
-        aggregate = aggregate_experiments(experiments, aggregate_compaction(args.compaction_receipt), context)
-        args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(render_report(aggregate), encoding="utf-8", newline="\n")
+
+        if not args.receipt_dir and summaries and not args.aggregate:
+            for summary in summaries:
+                if "lanes" in summary:
+                    experiments.append(summary)
+                elif "experiments" in summary:
+                    aggregate = summary
+                    break
+                else:
+                    experiments.append(_experiment_from_summary(summary))
+
+        if 'aggregate' not in locals():
+            context = _read_content_free(args.report_context) if args.report_context else None
+            aggregate = aggregate_experiments(experiments, aggregate_compaction(args.compaction_receipt), context)
+
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        content = render_markdown(aggregate) if is_markdown else render_report(aggregate)
+        out_path.write_text(content, encoding="utf-8", newline="\n")
     except (OSError, ValueError, TypeError, KeyError, AttributeError, RecursionError):
         print(json.dumps({"status": "rejected", "reason": "report_input_invalid", "inference_called": False}))
         return 2
     print(json.dumps({"status": "rendered", "receipt_rows": aggregate["receipt_rows"],
                       "attempt_rows": aggregate["attempt_rows"], "content_included": False, "inference_called": False}, sort_keys=True))
     return 0
-
-
 if __name__ == "__main__":
     raise SystemExit(main())
