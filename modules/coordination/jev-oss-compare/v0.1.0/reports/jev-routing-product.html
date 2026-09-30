@@ -129,7 +129,7 @@
       <p class="lead">You wrote the constraint in plain words: hosted API only, never self-host. Two hours later there is a cloned repo in your working tree. <strong>Jev routing puts a cheap decision gate in front of the agent&rsquo;s next move</strong>, so it catches its own mistakes earlier &mdash; and gets a recovery route instead of a shrug.</p>
       <div class="cta">
         <a class="go" href="#routes">See the six routes</a>
-        <a class="alt" href="jev-routing-technical.html">Read the technical breakdown</a>
+        <a class="alt" href="jev-routing-technical.html">See the Jev numbers</a>
       </div>
     </div>
     <div class="hero-art">
@@ -175,7 +175,7 @@
       </div>
       <div class="step">
         <h3>Gate the next move</h3>
-        <p>Before a risky tool call, a plan boundary, or a strong claim, a cheap check compares the moment against your pins. Milliseconds, not another full model pass.</p>
+        <p>Before a risky tool call, a plan boundary, or a strong claim, a cheap Jev check compares the moment against your pins. A few hundred milliseconds, not another full model pass.</p>
       </div>
       <div class="step">
         <h3>Route the recovery</h3>
@@ -227,9 +227,8 @@
     <div class="honest">
       <ul>
         <li>The routing architecture runs as coordination modules in <a href="https://github.com/Pukujan/agent-custom-setup">Agent Custom Setup</a>, with adapters for Claude, Codex, and Kilo workflows.</li>
-        <li>A local pilot scored <strong>59 of 59</strong> decision jobs on one real session stream with a cheap specialist model &mdash; the pipeline works end to end on CPU.</li>
-        <li>A hosted decision lane answers in roughly <strong>180&ndash;310&nbsp;ms</strong> per call (third-party service, priced per million input tokens).</li>
-        <li class="not">Not measured yet: accuracy, catch-rate, or recovered task outcomes. The pilot was a discovery run, not a benchmark.</li>
+        <li>The Jev decision lane is live: the current run scored <strong>69 of 69</strong> gate decisions on one session stream, median <strong>238&nbsp;ms</strong>, for about <strong>$0.002</strong> total. <a href="jev-routing-technical.html">The numbers are on the technical page.</a></li>
+        <li class="not">Not measured yet: accuracy, catch-rate, or recovered task outcomes. The runs so far are plumbing checks, not a benchmark verdict.</li>
       </ul>
     </div>
   </section>
