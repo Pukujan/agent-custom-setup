@@ -8,8 +8,8 @@ Baseline walk-forward decisions, auto-mode tool decisions, and upstream compacti
 
 | Observation                           | Count |
 | ------------------------------------- | ----- |
-| Current checks and aggregate receipts | 59    |
-| Receipt lines and aggregate inputs    | 59    |
+| Current checks and aggregate receipts | 69    |
+| Receipt lines and aggregate inputs    | 69    |
 | Unsupported adapter rows omitted      | 0     |
 
 ## Validation and remaining coverage
@@ -41,20 +41,20 @@ Current decision counts use the latest receipt for each stable event/gate/chunk 
 
 Research excerpts are supporting checks, not combined routing decisions. Pin ID coverage does not verify full character-span coverage. Timing is unavailable when receipts omit it. Native compaction metadata and tool-pruning ratios do not establish semantic retention.
 
-## Laya typed-decision DAG · Laya
+## Jev typed-decision DAG · Jev 1.13
 
 - **Status**: Replay complete
-- **Experiment**: 720d230fcb59
-- **Profile**: 3d37a131e70c43a08a756dfe218c67077d615bf7662376ae3fe94e32699b0bde
-- **Explicit limits**: Laya is a specialist typed-decision checkpoint fine-tuned on four synthetic workflows, not coding-agent transcripts. Scores are model-defined and uncalibrated; routes are recovery suggestions, not measured correctness, catch-rate, or generalization. Content-free counts only.
+- **Experiment**: b1ba5cbd19b7
+- **Profile**: c3bef2db64d9d9edf11bba51adf7b67243f59260ea9c0dda3379875323ed0909
+- **Explicit limits**: Jev is a hosted System-1 decision model (TypeSafe, via OpenRouter) served through the same typed-decision DAG as the Laya lane. Route tallies are deduplicated to distinct event+route decisions, not per receipt row. Discovery-only: accuracy and catch-rate are not measured. Content-free counts only.
 
 ### Recorded checks
 
 | Recorded check                 | Current count |
 | ------------------------------ | ------------- |
-| Ack expectation not required   | 2             |
-| Ack expectation required       | 4             |
-| Ack expectation unclear        | 3             |
+| Ack expectation not required   | 9             |
+| Ack expectation required       | 0             |
+| Ack expectation unclear        | 0             |
 | Assistant boundary incomplete  | 0             |
 | Assistant boundary jobs        | 6             |
 | Assistant boundary scored      | 6             |
@@ -67,19 +67,19 @@ Research excerpts are supporting checks, not combined routing decisions. Pin ID 
 | Relation job scored            | 36            |
 | Relation jobs                  | 36            |
 | Ack response jobs              | 2             |
-| Ack spans incomplete           | 5             |
-| Ack spans missing response     | 2             |
-| Ack spans not required         | 0             |
-| Ack spans required             | 4             |
+| Ack spans incomplete           | 4             |
+| Ack spans missing response     | 1             |
+| Ack spans not required         | 2             |
+| Ack spans required             | 3             |
 | Ack spans seen                 | 9             |
-| Assistant plan boundaries      | 1             |
+| Assistant plan boundaries      | 5             |
 | Compact boundaries             | 0             |
 | Fixed denies                   | 0             |
-| Phase2 jobs                    | 8             |
+| Phase2 jobs                    | 18            |
 | Pin id checks                  | 0             |
-| Plan boundary incomplete       | 5             |
-| Plan intent jobs               | 6             |
-| Research boundaries            | 0             |
+| Plan boundary incomplete       | 0             |
+| Plan intent jobs               | 16            |
+| Research boundaries            | 6             |
 | Research incomplete boundaries | 0             |
 | Research jobs                  | 0             |
 | Semantic unknown               | 0             |
@@ -88,60 +88,59 @@ Research excerpts are supporting checks, not combined routing decisions. Pin ID 
 | Tool pin jobs                  | 0             |
 | Tool unpinned                  | 0             |
 | Unresolved sidechain streams   | 0             |
-| Recovery routes                | 14            |
-| Assistant boundary             | 6             |
+| Recovery routes                | 17            |
 | User relations                 | 36            |
 | Task context                   | 36            |
 | Acknowledgment expectation     | 9             |
 | Pin status                     | 9             |
+| Assistant boundary             | 6             |
+| Plan intent                    | 16            |
 | Acknowledgment response        | 2             |
-| Plan intent                    | 6             |
 
 ### Route totals
 
-| Gate            | Route            | Count |
-| --------------- | ---------------- | ----- |
-| Recovery routes | Escalate         | 11    |
-| Recovery routes | Reconfirm intent | 3     |
+| Gate            | Route             | Count |
+| --------------- | ----------------- | ----- |
+| Recovery routes | Escalate          | 9     |
+| Recovery routes | Dispatch verifier | 5     |
+| Recovery routes | Reconfirm intent  | 3     |
 
 ### Decision counts
 
 | Gate                       | Output                   | Count |
 | -------------------------- | ------------------------ | ----- |
-| Recovery routes            | Escalate                 | 11    |
+| Recovery routes            | Escalate                 | 9     |
+| Recovery routes            | Dispatch verifier        | 5     |
 | Recovery routes            | Reconfirm intent         | 3     |
-| Assistant boundary         | Unclear                  | 5     |
-| Assistant boundary         | Proposed plan            | 1     |
-| User relations             | Conflicts                | 4     |
-| User relations             | Revises or supersedes    | 1     |
-| User relations             | Unrelated                | 2     |
-| User relations             | Questions earlier intent | 1     |
+| User relations             | Supports                 | 4     |
 | User relations             | Unclear                  | 8     |
-| User relations             | Same topic               | 12    |
-| User relations             | Supports                 | 6     |
-| User relations             | Reopens or uncertain     | 2     |
-| Task context               | Same task                | 20    |
-| Task context               | New task                 | 13    |
-| Task context               | Unclear                  | 3     |
-| Acknowledgment expectation | Unclear                  | 3     |
-| Acknowledgment expectation | Required                 | 4     |
-| Acknowledgment expectation | Not required             | 2     |
-| Pin status                 | Unclear                  | 3     |
-| Pin status                 | Context                  | 3     |
+| User relations             | Unrelated                | 15    |
+| User relations             | Questions earlier intent | 5     |
+| User relations             | Same topic               | 2     |
+| User relations             | Revises or supersedes    | 2     |
+| Task context               | Same task                | 7     |
+| Task context               | Unclear                  | 28    |
+| Task context               | New task                 | 1     |
+| Acknowledgment expectation | Not required             | 9     |
+| Pin status                 | Unclear                  | 4     |
 | Pin status                 | Durable                  | 3     |
-| Acknowledgment response    | Unclear                  | 1     |
-| Acknowledgment response    | Partial                  | 1     |
-| Plan intent                | Uncertain                | 6     |
+| Pin status                 | Context                  | 1     |
+| Pin status                 | Question                 | 1     |
+| Assistant boundary         | Factual claim            | 1     |
+| Assistant boundary         | Plan and claim           | 5     |
+| Plan intent                | Irrelevant               | 13    |
+| Plan intent                | Uncertain                | 3     |
+| Acknowledgment response    | Omitted                  | 2     |
 
 ### Attempts and cache activity
 
 | Observation                      | Count |
 | -------------------------------- | ----- |
-| Receipt lines observed           | 59    |
-| Current logical checks           | 59    |
+| Receipt lines observed           | 69    |
+| Current logical checks           | 69    |
 | Retry rows superseded            | 0     |
 | Exact duplicate rows excluded    | 0     |
-| Explicit uncached model attempts | 59    |
+| Explicit uncached model attempts | 69    |
 | Explicit cache attempts          | 0     |
 
 ### Coverage and omissions
@@ -163,19 +162,19 @@ Research excerpts are supporting checks, not combined routing decisions. Pin ID 
 
 ### Reported option scores
 
-| Score band         | Laya answer scores |
-| ------------------ | ------------------ |
-| Below 0.50         | 97                 |
-| 0.50 to below 0.75 | 7                  |
-| 0.75 to below 0.90 | 0                  |
-| 0.90 to 1.00       | 0                  |
+| Score band         | Checks |
+| ------------------ | ------ |
+| Below 0.50         | 0      |
+| 0.50 to below 0.75 | 0      |
+| 0.75 to below 0.90 | 0      |
+| 0.90 to 1.00       | 0      |
 
-_Laya records each chosen option's probability (answer_confidence). The checkpoint ships temperatures inherited from the base model, so these bands are uncalibrated and do not establish accuracy or a shared confidence threshold._
+_OpenJev uses candidate-normalized top-20 scores. Provider semantics differ; these observations are uncalibrated and do not establish accuracy or a shared confidence threshold._
 
 ### Latency and timing
 
-- **Timed checks**: 59 current uncached timed checks
-- **Median latency (p50)**: 4752.66 ms
+- **Timed checks**: 69 current uncached timed checks
+- **Median latency (p50)**: 297.78 ms
 - **95th percentile latency (p95)**: unavailable ms
 - **Cached timings excluded**: 0
 

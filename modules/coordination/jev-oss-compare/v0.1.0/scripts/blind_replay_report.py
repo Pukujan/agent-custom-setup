@@ -22,6 +22,7 @@ RUN_STATUSES = frozenset({"not_run", "planned", "running", "complete", "incomple
 ADAPTERS = {"baseline": "Baseline walk-forward", "auto_mode": "Auto-mode tool adapter",
             "compaction": "Fast-jev-compaction adapter"}
 ADAPTERS["laya_dag"] = "Laya typed-decision DAG"
+ADAPTERS["jev"] = "Jev typed-decision DAG"
 LIMITS = {
     "baseline": "Research excerpt outputs are separate from tool permission. Native compaction metadata does not establish semantic retention. Coverage and correctness are separate observations. Baseline context uses conversation/root/sidechain stream IDs. Task-level context IDs are not implemented. A stream may contain multiple tasks, so exhaustive pair checks can include cross-task comparisons. This is a scope caveat; individual decision correctness remains unmeasured.",
     "auto_mode": "Tool-only replay using prior user history. No user pin/relation or research gate. Deterministic shell policy may bypass model judgment; oversized context escalates.",
@@ -30,6 +31,9 @@ LIMITS = {
 LIMITS["laya_dag"] = ("Laya is a specialist typed-decision checkpoint fine-tuned on four synthetic workflows, not coding-agent "
                       "transcripts. Scores are model-defined and uncalibrated; routes are recovery suggestions, not measured "
                       "correctness, catch-rate, or generalization. Content-free counts only.")
+LIMITS["jev"] = ("Jev is a hosted System-1 decision model (TypeSafe, via OpenRouter) served through the same typed-decision DAG "
+                 "as the Laya lane. Route tallies are deduplicated to distinct event+route decisions, not per receipt row. "
+                 "Discovery-only: accuracy and catch-rate are not measured. Content-free counts only.")
 GATE_LABELS = {
     "user_pin": "User pins", "user_relation": "User relationships", "research": "Research excerpts",
     "research_aggregate": "Research boundary decisions", "research_outcome": "Research boundary outcomes", "research_route": "Research shadow routes",
@@ -48,7 +52,7 @@ CHOICES = {
     "user_relation": {"unrelated": "Unrelated", "same_topic": "Same topic",
                       "asks_about_or_questions": "Questions earlier intent", "adds_constraint_or_refinement": "Refines",
                       "supports_or_commits": "Supports", "revises_or_supersedes": "Revises or supersedes",
-                      "reopens_or_uncertain": "Reopens or uncertain", "unclear": "Unclear"},
+                      "reopens_or_uncertain": "Reopens or uncertain", "conflicts": "Conflicts", "unclear": "Unclear"},
     "research": {"ready": "Ready", "research_more": "Research more", "insufficient": "Insufficient"},
     "tool": {"allow": "Allow", "deny": "Deny", "escalate": "Escalate"},
 }
@@ -62,7 +66,8 @@ CHOICES["laya_route"] = {"reconfirm_intent": "Reconfirm intent", "rethink_plan":
 CHOICES["pin_status"] = CHOICES["user_pin"]
 CHOICES["relation"] = CHOICES["user_relation"]
 CHOICES["task_context"] = {"same_task": "Same task", "new_task": "New task", "unclear": "Unclear"}
-CHOICES["plan_intent"] = {"consistent": "Consistent", "conflicts": "Conflicts", "uncertain": "Uncertain"}
+CHOICES["plan_intent"] = {"consistent": "Consistent", "conflict": "Conflict", "conflicts": "Conflicts",
+                          "irrelevant": "Irrelevant", "uncertain": "Uncertain"}
 CHOICES["assistant_boundary"] = {"factual_claim": "Factual claim", "proposed_plan": "Proposed plan",
                                   "plan_and_claim": "Plan and claim", "other": "Other", "unclear": "Unclear"}
 CHOICES["ack_expectation"] = {"required": "Required", "not_required": "Not required", "unclear": "Unclear"}
@@ -70,7 +75,7 @@ CHOICES["acknowledgment_response"] = {"accurate": "Accurate", "partial": "Partia
                                        "contradicted": "Contradicted", "unclear": "Unclear"}
 KNOWN_CHOICES = frozenset(choice for choices in CHOICES.values() for choice in choices)
 PROBABILITY_BINS = ("Below 0.50", "0.50 to below 0.75", "0.75 to below 0.90", "0.90 to 1.00")
-MODEL_LABELS = {"laya": "Laya", "openjev4": "OpenJev 4B", "openjev9": "OpenJev 9B",
+MODEL_LABELS = {"laya": "Laya", "jev": "Jev 1.13", "openjev4": "OpenJev 4B", "openjev9": "OpenJev 9B",
                 "kev08": "Kev 0.8B", "kev4": "Kev 4B", "kev9": "Kev 9B", "local": "Local model"}
 REQUESTED_MODELS = ("laya", "openjev4", "openjev9", "kev08", "kev4", "kev9")
 EXPLORATORY_TIMING = "post-inference / pre-analysis exploratory partition"
@@ -120,6 +125,8 @@ def _model_key(value: Any, lane_id: Any = None) -> str:
         return "kev08"
     if "laya" in name:
         return "laya"
+    if "typesafe/jev" in name or ("jev" in name and "openjev" not in name and "kev" not in name):
+        return "jev"
     if "openjev" in name or "open-jev" in name:
         return "openjev9" if "9b" in name else "openjev4" if "4b" in name else "local"
     if "kev" in name:
@@ -143,8 +150,10 @@ def _adapter(row: Mapping[str, Any]) -> str | None:
 def _summary_adapter(summary: Mapping[str, Any]) -> str:
     """Laya summaries must not be framed as a Baseline walk-forward lane."""
     adapter_id = str(summary.get("adapter_id", summary.get("adapter", ""))).lower()
-    if adapter_id == "laya-typed-decisions-dag" or adapter_id.startswith("laya-typed"):
+    if adapter_id.startswith("laya-typed"):
         return "laya_dag"
+    if adapter_id.startswith("jev-typed"):
+        return "jev"
     return _adapter({"adapter": adapter_id or "baseline",
                      "gate": "auto_mode_tool" if "auto" in adapter_id else "baseline"}) or "baseline"
 
@@ -858,16 +867,21 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
         parent_dir = Path(source_path).parent
         agg_path = parent_dir / "aggregates.jsonl"
         if agg_path.exists():
+            route_pairs: set[tuple[str, str]] = set()
             for line in agg_path.open(encoding="utf-8"):
                 if not line.strip():
                     continue
                 try:
                     row = json.loads(line)
                     rt = row.get("recommended_route")
-                    if rt:
-                        choices.setdefault("laya_route", Counter())[str(rt)] += 1
+                    rid = str(row.get("record_type") or "")
+                    eid = row.get("event_id")
+                    if rt and eid and not rid.endswith("_plan"):
+                        route_pairs.add((str(eid), str(rt)))
                 except json.JSONDecodeError:
                     skipped_rows += 1
+            for _eid, rt in route_pairs:
+                choices.setdefault("laya_route", Counter())[rt] += 1
         jobs_path = parent_dir / "jobs.jsonl"
         if jobs_path.exists():
             for line in jobs_path.open(encoding="utf-8"):
