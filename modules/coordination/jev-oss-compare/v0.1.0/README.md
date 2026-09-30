@@ -32,3 +32,11 @@ python -m pytest modules/coordination/jev-oss-compare/v0.1.0/tests -q
 ```
 
 Report: [`reports/jev-oss-compare.html`](reports/jev-oss-compare.html) (appendable).
+
+Blind-replay benchmark (content-free, discovery-only, Markdown — not the HTML dashboard):
+
+- [`reports/laya-benchmark.md`](reports/laya-benchmark.md) — Laya typed-decision DAG stream pilot.
+- [`reports/jev-benchmark.md`](reports/jev-benchmark.md) — Jev 1.13 hosted DAG replay over the same job set.
+
+Regenerate either from a private run's `summary.json`:
+`python modules/coordination/jev-oss-compare/v0.1.0/scripts/blind_replay_report.py --summary <run>/summary.json --out reports/<lane>-benchmark.md`

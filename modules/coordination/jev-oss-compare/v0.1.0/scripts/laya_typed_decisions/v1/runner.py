@@ -2034,8 +2034,9 @@ def _ensure_private_output(path: Path) -> None:
 
 
 def _run_identity(run_id: str, profile: Mapping[str, Any], profile_hash: str,
-                  source_manifest: Mapping[str, Any], workers: int, batch_size: int) -> Dict[str, Any]:
-    return {
+                  source_manifest: Mapping[str, Any], workers: int, batch_size: int,
+                  stream_filter: Optional[str] = None) -> Dict[str, Any]:
+    identity: Dict[str, Any] = {
         "run_id": run_id,
         "adapter_id": profile["adapter_id"],
         "adapter_version": profile["adapter_version"],
@@ -2051,6 +2052,9 @@ def _run_identity(run_id: str, profile: Mapping[str, Any], profile_hash: str,
         "source_manifest_sha256": source_manifest["source_manifest_sha256"],
         "source_hashes": source_manifest["source_hashes"],
     }
+    if stream_filter:
+        identity["stream_filter"] = stream_filter
+    return identity
 
 
 def _load_existing_or_create_manifest(path: Path, identity: Mapping[str, Any]) -> Dict[str, Any]:
@@ -2099,6 +2103,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--run-id", required=True)
     run.add_argument("--workers", type=int)
     run.add_argument("--batch-size", type=int)
+    run.add_argument("--stream", help="Replay only streams matching this session/stream-id substring.")
     run.add_argument("--execute-local", action="store_true", help="Required explicit local-inference opt-in.")
     run.set_defaults(func=command_run)
     return parser
@@ -2185,7 +2190,9 @@ def command_run(args: argparse.Namespace) -> int:
         _verify_full_corpus(events, report)
         source_manifest = _public_source_manifest(report)
         profile_hash = profile_fingerprint(profile)
-        identity = _run_identity(args.run_id, profile, profile_hash, source_manifest, workers, batch_size)
+        stream_filter = getattr(args, "stream", None)
+        identity = _run_identity(args.run_id, profile, profile_hash, source_manifest, workers, batch_size,
+                                 stream_filter=stream_filter)
         manifest_path = output / "manifest.json"
         manifest = _load_existing_or_create_manifest(manifest_path, identity)
         receipts_path = output / "jobs.jsonl"
@@ -2195,6 +2202,12 @@ def command_run(args: argparse.Namespace) -> int:
         cache = _OutputCache(cache_path)
         tokenizer = _load_tokenizer(model_path)
         streams = _stream_groups(events)
+        if stream_filter:
+            matched = {k: v for k, v in streams.items() if stream_filter in k}
+            if not matched:
+                raise AdapterError(f"no_streams_matched_filter:{stream_filter}")
+            streams = matched
+            events = [e for sid in matched for e in matched[sid]]
         atoms_by_event = _event_atoms(
             events, tokenizer, int(profile["inference"]["state_chunk_tokens"]),
             int(profile["inference"]["state_chunk_overlap_tokens"]))
@@ -2244,6 +2257,7 @@ def command_run(args: argparse.Namespace) -> int:
                        "events": len(events), "duplicate_rows": report.duplicate_rows,
                        "malformed_rows": report.malformed_rows,
                        "streams": len(streams),
+                       "stream_filter": stream_filter,
                        "source_manifest_sha256": source_manifest["source_manifest_sha256"],
                        "public_event_manifest_sha256": _sha(_canonical(source_manifest["source_hashes"]))},
             "workers": ready_at_start,
