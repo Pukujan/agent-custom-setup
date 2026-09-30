@@ -21,11 +21,15 @@ STATUSES = frozenset({"scored", "aggregated", "scored_chunk", "scored_empty", "i
 RUN_STATUSES = frozenset({"not_run", "planned", "running", "complete", "incomplete", "failed_closed"})
 ADAPTERS = {"baseline": "Baseline walk-forward", "auto_mode": "Auto-mode tool adapter",
             "compaction": "Fast-jev-compaction adapter"}
+ADAPTERS["laya_dag"] = "Laya typed-decision DAG"
 LIMITS = {
     "baseline": "Research excerpt outputs are separate from tool permission. Native compaction metadata does not establish semantic retention. Coverage and correctness are separate observations. Baseline context uses conversation/root/sidechain stream IDs. Task-level context IDs are not implemented. A stream may contain multiple tasks, so exhaustive pair checks can include cross-task comparisons. This is a scope caveat; individual decision correctness remains unmeasured.",
     "auto_mode": "Tool-only replay using prior user history. No user pin/relation or research gate. Deterministic shell policy may bypass model judgment; oversized context escalates.",
     "compaction": "One normalized conversation per receipt, not replay at every historical boundary. Tool call/result pruning and unchanged user/assistant text do not establish semantic instruction retention. Upstream context fitting may omit history.",
 }
+LIMITS["laya_dag"] = ("Laya is a specialist typed-decision checkpoint fine-tuned on four synthetic workflows, not coding-agent "
+                      "transcripts. Scores are model-defined and uncalibrated; routes are recovery suggestions, not measured "
+                      "correctness, catch-rate, or generalization. Content-free counts only.")
 GATE_LABELS = {
     "user_pin": "User pins", "user_relation": "User relationships", "research": "Research excerpts",
     "research_aggregate": "Research boundary decisions", "research_outcome": "Research boundary outcomes", "research_route": "Research shadow routes",
@@ -136,6 +140,26 @@ def _adapter(row: Mapping[str, Any]) -> str | None:
     return None
 
 
+def _summary_adapter(summary: Mapping[str, Any]) -> str:
+    """Laya summaries must not be framed as a Baseline walk-forward lane."""
+    adapter_id = str(summary.get("adapter_id", summary.get("adapter", ""))).lower()
+    if adapter_id == "laya-typed-decisions-dag" or adapter_id.startswith("laya-typed"):
+        return "laya_dag"
+    return _adapter({"adapter": adapter_id or "baseline",
+                     "gate": "auto_mode_tool" if "auto" in adapter_id else "baseline"}) or "baseline"
+
+
+
+def _score_meta(lane: Mapping[str, Any]) -> tuple[str, str]:
+    """(column label, caveat) for the reported-score band, keyed to the lane model."""
+    if lane.get("model_key") == "laya" or lane.get("adapter") == "laya_dag":
+        return ("Laya answer scores",
+                "Laya records each chosen option's probability (answer_confidence). The checkpoint "
+                "ships temperatures inherited from the base model, so these bands are uncalibrated "
+                "and do not establish accuracy or a shared confidence threshold.")
+    return ("Checks",
+            "OpenJev uses candidate-normalized top-20 scores. Provider semantics differ; these "
+            "observations are uncalibrated and do not establish accuracy or a shared confidence threshold.")
 def _logical_key(row: Mapping[str, Any], adapter: str) -> tuple[str, bool]:
     """Private IDs distinguish decisions; no ID or source text is returned."""
     if not isinstance(row.get("event_id"), str) or not row["event_id"]:
@@ -441,7 +465,8 @@ def render_report(aggregate: Mapping[str, Any]) -> str:
     status_labels = {"not_run": "Not run", "planned": "Planned", "running": "In progress",
                      "complete": "Replay complete", "incomplete": "Coverage incomplete", "failed_closed": "Stopped"}
     for lane in aggregate["lanes"]:
-        decisions = [[GATE_LABELS[gate], CHOICES[gate][choice], count]
+        decisions = [[GATE_LABELS.get(gate, str(gate).replace("_", " ").capitalize()),
+                      CHOICES.get(gate, {}).get(choice, str(choice).replace("_", " ").capitalize()), count]
                      for gate, counts in lane["choices"].items() for choice, count in counts.items()]
         coverage = [["Incomplete checks or abstentions", lane["incomplete_checks"]],
             ["Tool decisions with all pin IDs represented", lane["pin_coverage_complete"]],
@@ -467,8 +492,8 @@ def render_report(aggregate: Mapping[str, Any]) -> str:
             + '<h3>Attempts and cache activity</h3>' + _table(["Observation", "Count"], attempts)
             + ('<h3>Supplied summary counters</h3>' + _table(["Counter", "Count"], [[name.replace("_", " "), value] for name, value in lane["execution"].items()]) if lane["execution"] else '')
             + '<h3>Coverage and omissions</h3>' + _table(["Observation", "Count"], coverage)
-            + '<h3>Reported option scores</h3>' + _table(["Score band", "Checks"], [[label, lane["answer_probability_bins"].get(label, 0)] for label in PROBABILITY_BINS])
-            + '<p class="muted">OpenJev uses candidate-normalized top-20 scores. Provider semantics differ; these observations are uncalibrated and do not establish accuracy or a shared confidence threshold.</p>'
+            + '<h3>Reported option scores</h3>' + _table(["Score band", _score_meta(lane)[0]], [[label, lane["answer_probability_bins"].get(label, 0)] for label in PROBABILITY_BINS])
+            + f'<p class="muted">{_score_meta(lane)[1]}</p>'
             + f'<p class="muted">{timing}</p></section>')
     if aggregate["compaction"]["attempt_rows"]:
         compact = aggregate["compaction"]
@@ -717,9 +742,9 @@ def render_markdown(aggregate: Mapping[str, Any]) -> str:
             "",
             "### Reported option scores",
             "",
-            _md_table(["Score band", "Checks"], [[label, lane["answer_probability_bins"].get(label, 0)] for label in PROBABILITY_BINS]),
+            _md_table(["Score band", _score_meta(lane)[0]], [[label, lane["answer_probability_bins"].get(label, 0)] for label in PROBABILITY_BINS]),
             "",
-            "_OpenJev uses candidate-normalized top-20 scores. Provider semantics differ; these observations are uncalibrated and do not establish accuracy or a shared confidence threshold._",
+            f"_{_score_meta(lane)[1]}_",
             "",
             "### Latency and timing",
             "",
@@ -795,7 +820,7 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
     run_id = summary.get("run_id")
     requested_id = _identifier(run_id) if run_id is not None else "summary-run"
     adapter_id = str(summary.get("adapter_id", summary.get("adapter", "baseline")))
-    adapter = _adapter({"adapter": adapter_id, "gate": "auto_mode_tool" if "auto" in adapter_id else "baseline"}) or "baseline"
+    adapter = _summary_adapter(summary)
     model_val = summary.get("model") or summary.get("model_id") or summary.get("lane_id") or "laya"
     model_key = _model_key(model_val, summary.get("lane_id"))
     label = MODEL_LABELS.get(model_key, "Laya")
@@ -803,6 +828,8 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
     status = summary.get("status")
     if status not in RUN_STATUSES:
         status = "complete" if status in {"completed", "scored", "success"} else "running" if status else "not_run"
+    if status == "completed_with_incomplete_jobs":
+        status = "incomplete"
 
     execution = {name: value for name in ("inference_requests", "decision_calls", "cache_hits", "incomplete_count", "model_calls")
                  if (value := _count(summary.get(name))) is not None}
@@ -823,8 +850,9 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
         if isinstance(routes, dict):
             for route_name, count in routes.items():
                 if isinstance(count, int):
-                    choices.setdefault("research_route", Counter())[str(route_name)] = count
+                    choices.setdefault("laya_route", Counter())[str(route_name)] = count
     prob_bins = Counter({"Below 0.50": 0, "0.50 to below 0.75": 0, "0.75 to below 0.90": 0, "0.90 to 1.00": 0})
+    skipped_rows = 0
     source_path = summary.get("_source_path")
     if source_path:
         parent_dir = Path(source_path).parent
@@ -838,8 +866,8 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
                     rt = row.get("recommended_route")
                     if rt:
                         choices.setdefault("laya_route", Counter())[str(rt)] += 1
-                except Exception:
-                    pass
+                except json.JSONDecodeError:
+                    skipped_rows += 1
         jobs_path = parent_dir / "jobs.jsonl"
         if jobs_path.exists():
             for line in jobs_path.open(encoding="utf-8"):
@@ -853,14 +881,14 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
                             c = a.get("choice")
                             if c:
                                 choices.setdefault(q, Counter())[str(c)] += 1
-                            p = a.get("answer_confidence") or a.get("confidence")
+                            p = a.get("answer_confidence")
                             if isinstance(p, (int, float)):
                                 if p < 0.5: prob_bins["Below 0.50"] += 1
                                 elif p < 0.75: prob_bins["0.50 to below 0.75"] += 1
                                 elif p < 0.9: prob_bins["0.75 to below 0.90"] += 1
                                 else: prob_bins["0.90 to 1.00"] += 1
-                except Exception:
-                    pass
+                except json.JSONDecodeError:
+                    skipped_rows += 1
     if isinstance(summary.get("choices"), dict):
         for g, c in summary["choices"].items():
             if isinstance(c, dict):
@@ -898,11 +926,11 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
         "policy_bypasses": _count(summary.get("policy_bypasses")) or 0,
         "omitted_evidence_refs": _count(summary.get("omitted_evidence_refs")) or 0,
         "compaction_semantics_unknown": _count(summary.get("compaction_semantics_unknown")) or 0,
-        "unsupported_rows": 0,
+        "unsupported_rows": skipped_rows,
         "unknown_status_rows": 0,
         "unknown_choice_rows": 0,
         "identity_unavailable_rows": 0,
-        "invalid_probability_rows": 0,
+        "invalid_probability_rows": _count(summary.get("invalid_probability_rows")) or 0,
         "attempt_rows": planned or total_rows,
         "rows": total_rows,
         "retry_rows": _count(summary.get("retry_rows")) or 0,

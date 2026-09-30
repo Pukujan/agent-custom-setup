@@ -23,7 +23,7 @@ _Supplied evidence metadata is shown as supplied; the renderer does not run vali
 
 | Requested baseline model | Availability          |
 | ------------------------ | --------------------- |
-| Laya                     | Receipts available    |
+| Laya                     | Not run / unavailable |
 | OpenJev 4B               | Not run / unavailable |
 | OpenJev 9B               | Not run / unavailable |
 | Kev 0.8B                 | Not run / unavailable |
@@ -41,12 +41,12 @@ Current decision counts use the latest receipt for each stable event/gate/chunk 
 
 Research excerpts are supporting checks, not combined routing decisions. Pin ID coverage does not verify full character-span coverage. Timing is unavailable when receipts omit it. Native compaction metadata and tool-pruning ratios do not establish semantic retention.
 
-## Baseline walk-forward · Laya
+## Laya typed-decision DAG · Laya
 
 - **Status**: Replay complete
 - **Experiment**: 720d230fcb59
 - **Profile**: 3d37a131e70c43a08a756dfe218c67077d615bf7662376ae3fe94e32699b0bde
-- **Explicit limits**: Research excerpt outputs are separate from tool permission. Native compaction metadata does not establish semantic retention. Coverage and correctness are separate observations. Baseline context uses conversation/root/sidechain stream IDs. Task-level context IDs are not implemented. A stream may contain multiple tasks, so exhaustive pair checks can include cross-task comparisons. This is a scope caveat; individual decision correctness remains unmeasured.
+- **Explicit limits**: Laya is a specialist typed-decision checkpoint fine-tuned on four synthetic workflows, not coding-agent transcripts. Scores are model-defined and uncalibrated; routes are recovery suggestions, not measured correctness, catch-rate, or generalization. Content-free counts only.
 
 ### Recorded checks
 
@@ -162,14 +162,14 @@ Research excerpts are supporting checks, not combined routing decisions. Pin ID 
 
 ### Reported option scores
 
-| Score band         | Checks |
-| ------------------ | ------ |
-| Below 0.50         | 97     |
-| 0.50 to below 0.75 | 7      |
-| 0.75 to below 0.90 | 0      |
-| 0.90 to 1.00       | 0      |
+| Score band         | Laya answer scores |
+| ------------------ | ------------------ |
+| Below 0.50         | 97                 |
+| 0.50 to below 0.75 | 7                  |
+| 0.75 to below 0.90 | 0                  |
+| 0.90 to 1.00       | 0                  |
 
-_OpenJev uses candidate-normalized top-20 scores. Provider semantics differ; these observations are uncalibrated and do not establish accuracy or a shared confidence threshold._
+_Laya records each chosen option's probability (answer_confidence). The checkpoint ships temperatures inherited from the base model, so these bands are uncalibrated and do not establish accuracy or a shared confidence threshold._
 
 ### Latency and timing
 
