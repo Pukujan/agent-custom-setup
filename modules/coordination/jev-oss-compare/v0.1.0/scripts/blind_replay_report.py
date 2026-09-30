@@ -161,11 +161,18 @@ def _summary_adapter(summary: Mapping[str, Any]) -> str:
 
 def _score_meta(lane: Mapping[str, Any]) -> tuple[str, str]:
     """(column label, caveat) for the reported-score band, keyed to the lane model."""
-    if lane.get("model_key") == "laya" or lane.get("adapter") == "laya_dag":
+    key = lane.get("model_key")
+    if key == "laya" or lane.get("adapter") == "laya_dag":
         return ("Laya answer scores",
-                "Laya records each chosen option's probability (answer_confidence). The checkpoint "
-                "ships temperatures inherited from the base model, so these bands are uncalibrated "
-                "and do not establish accuracy or a shared confidence threshold.")
+                "One band per answered question (the checkpoint's answer_confidence for its chosen "
+                "option), so these can exceed the check count. The checkpoint ships temperatures "
+                "inherited from the base model, so the bands are uncalibrated and do not establish "
+                "accuracy or a shared confidence threshold.")
+    if key == "jev" or lane.get("adapter") == "jev":
+        return ("Jev option probabilities",
+                "One band per answered question (the hosted model's probability for its chosen option). "
+                "Provider semantics differ; these are model-defined, not a calibrated correctness or a "
+                "shared confidence threshold.")
     return ("Checks",
             "OpenJev uses candidate-normalized top-20 scores. Provider semantics differ; these "
             "observations are uncalibrated and do not establish accuracy or a shared confidence threshold.")
@@ -883,12 +890,16 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
             for _eid, rt in route_pairs:
                 choices.setdefault("laya_route", Counter())[rt] += 1
         jobs_path = parent_dir / "jobs.jsonl"
+        latencies: List[float] = []
         if jobs_path.exists():
             for line in jobs_path.open(encoding="utf-8"):
                 if not line.strip():
                     continue
                 try:
                     row = json.loads(line)
+                    am = row.get("amortized_item_ms")
+                    if isinstance(am, (int, float)):
+                        latencies.append(float(am))
                     ans = row.get("answers") or {}
                     for q, a in ans.items():
                         if isinstance(a, dict):
@@ -896,6 +907,8 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
                             if c:
                                 choices.setdefault(q, Counter())[str(c)] += 1
                             p = a.get("answer_confidence")
+                            if not isinstance(p, (int, float)):
+                                p = a.get("confidence")
                             if isinstance(p, (int, float)):
                                 if p < 0.5: prob_bins["Below 0.50"] += 1
                                 elif p < 0.75: prob_bins["0.50 to below 0.75"] += 1
@@ -903,6 +916,9 @@ def _experiment_from_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
                                 else: prob_bins["0.90 to 1.00"] += 1
                 except json.JSONDecodeError:
                     skipped_rows += 1
+            if latencies:
+                latency_p50 = _percentile(latencies, 0.5)
+                latency_p95 = _percentile(latencies, 0.95)
     if isinstance(summary.get("choices"), dict):
         for g, c in summary["choices"].items():
             if isinstance(c, dict):

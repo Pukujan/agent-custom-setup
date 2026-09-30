@@ -102,16 +102,16 @@ Research excerpts are supporting checks, not combined routing decisions. Pin ID 
 | Gate            | Route             | Count |
 | --------------- | ----------------- | ----- |
 | Recovery routes | Escalate          | 9     |
-| Recovery routes | Dispatch verifier | 5     |
 | Recovery routes | Reconfirm intent  | 3     |
+| Recovery routes | Dispatch verifier | 5     |
 
 ### Decision counts
 
 | Gate                       | Output                   | Count |
 | -------------------------- | ------------------------ | ----- |
 | Recovery routes            | Escalate                 | 9     |
-| Recovery routes            | Dispatch verifier        | 5     |
 | Recovery routes            | Reconfirm intent         | 3     |
+| Recovery routes            | Dispatch verifier        | 5     |
 | User relations             | Supports                 | 4     |
 | User relations             | Unclear                  | 8     |
 | User relations             | Unrelated                | 15    |
@@ -162,20 +162,20 @@ Research excerpts are supporting checks, not combined routing decisions. Pin ID 
 
 ### Reported option scores
 
-| Score band         | Checks |
-| ------------------ | ------ |
-| Below 0.50         | 0      |
-| 0.50 to below 0.75 | 0      |
-| 0.75 to below 0.90 | 0      |
-| 0.90 to 1.00       | 0      |
+| Score band         | Jev option probabilities |
+| ------------------ | ------------------------ |
+| Below 0.50         | 63                       |
+| 0.50 to below 0.75 | 37                       |
+| 0.75 to below 0.90 | 5                        |
+| 0.90 to 1.00       | 9                        |
 
-_OpenJev uses candidate-normalized top-20 scores. Provider semantics differ; these observations are uncalibrated and do not establish accuracy or a shared confidence threshold._
+_One band per answered question (the hosted model's probability for its chosen option). Provider semantics differ; these are model-defined, not a calibrated correctness or a shared confidence threshold._
 
 ### Latency and timing
 
 - **Timed checks**: 69 current uncached timed checks
-- **Median latency (p50)**: 297.78 ms
-- **95th percentile latency (p95)**: unavailable ms
+- **Median latency (p50)**: 238.28 ms
+- **95th percentile latency (p95)**: 430.66 ms
 - **Cached timings excluded**: 0
 
 ---

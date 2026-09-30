@@ -170,13 +170,13 @@ Research excerpts are supporting checks, not combined routing decisions. Pin ID 
 | 0.75 to below 0.90 | 0                  |
 | 0.90 to 1.00       | 0                  |
 
-_Laya records each chosen option's probability (answer_confidence). The checkpoint ships temperatures inherited from the base model, so these bands are uncalibrated and do not establish accuracy or a shared confidence threshold._
+_One band per answered question (the checkpoint's answer_confidence for its chosen option), so these can exceed the check count. The checkpoint ships temperatures inherited from the base model, so the bands are uncalibrated and do not establish accuracy or a shared confidence threshold._
 
 ### Latency and timing
 
 - **Timed checks**: 59 current uncached timed checks
-- **Median latency (p50)**: 4752.66 ms
-- **95th percentile latency (p95)**: unavailable ms
+- **Median latency (p50)**: 13085.41 ms
+- **95th percentile latency (p95)**: 21092.62 ms
 - **Cached timings excluded**: 0
 
 ---
