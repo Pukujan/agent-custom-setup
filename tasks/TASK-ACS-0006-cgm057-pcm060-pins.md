@@ -90,3 +90,20 @@ Decisions:
 Blocked/uncertain: none.
 
 Next: green `gates` on the updated PR #45 head → merge → receipts on #19/#44/#46/#11 → sync CURRENT.md.
+
+### 2026-10-01 — final hero re-render with the new image model (as-of; live issues own progression)
+
+Completed:
+- Owner added `xai-oauth/grok-imagine-image` to the image role; re-rendered both README rasters with it and inspected before shipping: `assets/acs-readme-hero.png` (2816x1584; title "Catch mistakes earlier" + subtitle "Jev routing turns your constraints into checkpoints" legible, correctly spelled) and `assets/acs-three-modules.png` (hub-and-spoke; hotloader card dominant, jev-omp gavel + jev-benchmark CPU satellites smaller; zero lettering).
+- Manifest hashes + both prompt records updated to the new SHA-256s (`6eb48ad8…`, `9606df3c…`); validator re-run helper+adapter VALID.
+
+Evidence: `validate_content_system.py` @ `c069613` → `VALID: content-generation-modules contract and target adapter`; visual inspection of both PNGs at use size before acceptance.
+
+Changed: `assets/acs-readme-hero.png`, `assets/acs-three-modules.png`, `assets/acs-readme-hero-prompt.md`, `assets/acs-three-modules-prompt.md`, `.content-system/asset-manifest.json`.
+
+Decisions:
+- Superseded the earlier grok-imagine renders (same prompts, cleaner composition); kept `jev-routing-hero.png` untouched for the product HTML page.
+
+Blocked/uncertain: none.
+
+Next: green `gates` on this refresh PR → merge with the owner's approving review (no `--admin`) → append the refresh receipt to #19.
