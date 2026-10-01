@@ -329,21 +329,10 @@ def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):
 
 
 def test_external_research_gate_heading_present():
-    """Heading-only assertion; CGM pin/modules unchanged."""
+    """Heading-only assertion; pin constants are covered by test_cgm_pin_constants_057."""
     mod = _load_mod()
     errors = mod.check_external_research_gate(MODULE_ROOT)
     assert errors == [], errors
-    assert mod.CGM_PIN_VERSION == "0.5.4"
-    assert mod.CGM_PIN_REVISION.startswith("c95d73a")
-    assert set(mod.REQUIRED_CGM_MODULES) == {
-        "brand-foundation",
-        "content-context",
-        "writing-direction",
-        "human-sounding-writing",
-        "visual-direction",
-        "image-generation",
-        "html-demo",
-    }
 
 
 def test_external_research_gate_fails_when_heading_removed(tmp_path: Path):

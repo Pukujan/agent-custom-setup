@@ -41,10 +41,10 @@
     {
       "id": "multi-agent-hotload",
       "name": "Multi-agent hotload coordination",
-      "purpose": "Install surface: hot-load FULL PCM + FULL CGM 0.5.1 + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
+      "purpose": "Install surface: hot-load FULL PCM + FULL CGM 0.5.7 + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
       "harness": "coordination",
       "created": "2026-09-27",
-      "updated": "2026-09-27",
+      "updated": "2026-10-01",
       "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/11",
       "owning_agent": "agent-custom-setup",
       "deploy_mirrors": [
@@ -62,10 +62,10 @@
         "end": null
       },
       "status": "active",
-      "summary": "FULL PCM + FULL CGM 0.5.1 + coordination runtime (join-order, 30m lease, claim_queue, agent-less watchdog). Slim subsets are incomplete installs.",
+      "summary": "FULL PCM + FULL CGM 0.5.7 + coordination runtime (join-order, 30m lease, claim_queue, agent-less watchdog). Slim subsets are incomplete installs.",
       "dependencies": [
         "PCM @ 4e2385474b4af9249ca009cbdcb38c4498932475 (CLI 0.6.0) full stack",
-        "CGM @ 9874b26dc46499137bf22e1ca163874ef2dd5e7a (0.5.1) full seven modules"
+        "CGM @ c069613ca8b3e02bcf5aba1960160583537f8a3a (0.5.7) full eight modules incl. human-output-naming"
       ]
     },
     {
