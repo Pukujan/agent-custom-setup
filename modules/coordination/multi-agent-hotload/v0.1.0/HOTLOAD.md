@@ -62,7 +62,7 @@ Pin [Pukujan/content-generation-modules](https://github.com/Pukujan/content-gene
 - **Version:** `0.5.7`
 - **Commit:** `c069613ca8b3e02bcf5aba1960160583537f8a3a`
 - Do **not** silently follow moving `main`. Do **not** copy CGM source into ACS.
-- Adapter shape: target `.content-system/system-version.json` lists all seven module ids; validate with `python scripts/validate_content_system.py --root <cgm> --adapter <target>/.content-system --project-root <target>`.
+- Adapter shape: target `.content-system/system-version.json` lists all eight module ids; validate with `python scripts/validate_content_system.py --root <cgm> --adapter <target>/.content-system --project-root <target>`.
 
 **Required modules** (complete stack — a two-module pin is incomplete):
 
