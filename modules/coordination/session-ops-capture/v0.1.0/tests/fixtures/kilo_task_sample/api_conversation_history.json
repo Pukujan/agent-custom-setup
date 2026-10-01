@@ -1,0 +1,16 @@
+[
+  {"role": "user", "content": "List files; api_key=sk-test-KILOSECRET01", "timestamp": "2026-09-27T23:00:00.000Z"},
+  {"role": "assistant", "content": [
+    {"type": "text", "text": "Listing"},
+    {"type": "tool_use", "id": "kilo-call-1", "name": "execute_command", "input": {"command": "dir"}}
+  ], "timestamp": "2026-09-27T23:00:01.000Z"},
+  {"role": "user", "content": [
+    {"type": "tool_result", "tool_use_id": "kilo-call-1", "content": "ok\nghp-KLMNOPQRSTUVWXYZ1234567890ab"}
+  ], "timestamp": "2026-09-27T23:00:02.000Z"},
+  {"role": "assistant", "content": [
+    {"type": "tool_use", "id": "kilo-call-2", "name": "read_file", "input": {"path": "README.md"}}
+  ], "timestamp": "2026-09-27T23:00:03.000Z"},
+  {"role": "user", "content": [
+    {"type": "tool_result", "tool_use_id": "kilo-call-2", "content": "# README"}
+  ], "timestamp": "2026-09-27T23:00:04.000Z"}
+]

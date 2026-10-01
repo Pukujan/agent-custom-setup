@@ -1,12 +1,20 @@
-# Advisor roster: external-validation critic + scope control alongside the plan model.
-# Judge role (config.yml modelRoles.judge = openrouter/~typesafe/jev-latest) tie-breaks
+# Advisor roster: external-validation critic; scope gate DISABLED pending hardening.
+# Issue #35: two unrestricted advisors produced 94 notes in one session; the scope
+# gate's "untraceable unit = blocker" rule made it the highest-volume, lowest-value
+# stream. Silence is the default; notes must change the primary's NEXT action.
+# Judge role (config.yml modelRoles.judge = openrouter-jev/typesafe/jev-1.13) tie-breaks
 # plan-vs-research disputes; judge is invoked explicitly, never automatic.
 # Scope rules validated by: ADaPT (as-needed decomposition), Coarse-to-Fine ACL 2026
 # (over-fine plans degrade), arXiv:2510.07772 (complexity-gated decomposition).
+maxNotesPerUpdate: 1
 instructions: |
   Only flag claims that change behavior or architecture.
   Never invent external facts — a citation must come from a tool fetch in this session,
   else label the claim UNVERIFIED.
+  Silence is the default output. Emit at most one note per update, and only when it
+  changes the primary's next action AND names the check that would confirm it.
+  Never re-raise or rephrase a finding that was dismissed, suppressed, or is already
+  visible in the transcript; rephrasing a rejected finding is a violation.
 advisors:
   - name: research
     enabled: true
@@ -28,7 +36,7 @@ advisors:
       If the primary disputes a finding, produce a two-column brief (plan position vs
       your finding + citations) for the Jev tie-break; do not argue further.
   - name: scope
-    enabled: true
+    enabled: false  # #35: blocker-factory severity rule; re-enable only with hardened rules
     model: inferhub/deepseek-v4.1-flash
     tools: [read, grep, glob]
     instructions: |

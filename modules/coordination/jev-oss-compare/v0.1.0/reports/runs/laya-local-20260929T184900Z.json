@@ -1,0 +1,45 @@
+{
+  "record_type": "laya_local_runtime_receipt",
+  "schema_version": 1,
+  "created_at": "2026-09-29T18:49:00Z",
+  "label": "mechanics-only; not benchmark evidence; no corpus replay; no catch-rate claims",
+  "host": {"platform": "darwin-arm64", "device": "cpu"},
+  "model": {
+    "repo_id": "convaiinnovations/laya-typed-decisions",
+    "revision": "1a793eb568e6718f15941d08f85432581df534e3",
+    "sdk_version": "0.3.20",
+    "sdk_revision": "23a17522aa4942da6cce53a995a275760320b691"
+  },
+  "smoke": {
+    "status": "passed",
+    "synthetic_jobs": 7,
+    "scored": 7,
+    "workers": 2,
+    "batch_size": 4,
+    "batch_elapsed_ms": [591.526, 622.915, 433.942, 493.46, 342.051, 691.975, 1124.748],
+    "cache": "cold TMPDIR; an earlier warm run was cache-hit-only and is superseded by this receipt"
+  },
+  "corpus_guard": {
+    "source": "checked-in capped harvest (claude_full_raw.jsonl) staged under a neutral directory",
+    "inspect_status": "rejected",
+    "run_status": "failed",
+    "reason": "source_must_be_the_verified_81_file_corpus",
+    "run_id": "laya-probe-20260929",
+    "conclusion": "full DAG replay requires the verified 81-file raw corpus; the capped harvest cannot produce benchmark evidence"
+  },
+  "tests": {
+    "command": ".venv-laya/bin/python modules/coordination/jev-oss-compare/v0.1.0/tests/test_laya_typed_decisions_v1.py",
+    "result": "13/13 OK",
+    "production_fixes": [
+      "_OutputCache chmod applies only to directories it creates",
+      "_WorkerPool.infer carries enqueued_monotonic into the inflight record"
+    ],
+    "regression_proof": "mutation A (drop task_queues put) -> AdapterError worker_batch_timeout; mutation B (drop enqueue stamp) -> KeyError enqueued_monotonic; restored -> green"
+  },
+  "remote_runtime": {
+    "gravebuster_ssh": "permission denied (publickey,password) from this device on 2026-09-29",
+    "cortex_tailscale": "Cortex node reachable over the tailnet; its Ollama serves generative GGUF only and cannot host the ModernBERT typed-decisions classifier; ssh/22 timed out for all candidate users",
+    "conclusion": "typed-decisions inference runs locally on this M1 CPU host; full-corpus replay is blocked on corpus-host access"
+  },
+  "next_action": "grant corpus-host access (Gravebuster key or Cortex SSH), then run the full raw Claude DAG replay on that host"
+}

@@ -4,18 +4,20 @@ Versioned setup for [omp](https://github.com/can1306/oh-my-pi) (oh-my-pi coding 
 advisor roster, JEV judge wiring, and the `jev-court` advisor-adjudication extension.
 
 Install: copy `config/*` into `~/.omp/agent/` (as `config.yml`, `models.yml`,
-`WATCHDOG.yml`, `jev-court.json`) and `extensions/jev-court.ts` into
-`~/.omp/agent/extensions/`. Put real secret values in `~/.omp/agent/.env`
-(see `config/.env.example` — the file itself is never committed here or there).
+`WATCHDOG.yml`, `jev-court.json`) and `extensions/jev-court.ts` +
+`extensions/loop-guard.ts` into `~/.omp/agent/extensions/`. Put real secret values
+in `~/.omp/agent/.env` (see `config/.env.example` — the file itself is never
+committed here or there).
 
 ## What this module provides
 
 | Surface | Purpose |
 |---|---|
 | `config/models.yml` | Providers + the **judge** role pointed at TypeSafe JEV (`openrouter-jev/typesafe/jev-1.13`, OpenRouter decisions API). `apiKey` fields are variable NAMES resolved from `~/.omp/agent/.env`. |
-| `config/WATCHDOG.yml` | Advisor roster: `research` (external validation critic) + `scope` (scope-blowout gate), severity rubrics, and the rule that plan-vs-research disputes go to JEV for tie-break. |
-| `config/config.yml` | Model roles + `advisor.enabled`, `advisor.syncBacklog: 1` (bounds advisor staleness against the primary transcript). |
-| `extensions/jev-court.ts` | Mechanical pipeline: tails advisor transcript JSONL → chunks each `advise` note with its provenance + primary digest → POSTs to JEV → routes by risk-tiered confidence threshold (act/ignore/insufficient_evidence). Fail-open on court errors; decisions remembered so advisor resets cannot resurrect adjudicated claims. Slash command `/jev` shows status/ledger. |
+| `config/WATCHDOG.yml` | Advisor roster: `research` (external-validation critic; silence-first, budget 1/update) + `scope` (DISABLED — #35 blocker-factory severity rule), severity rubrics, and the rule that plan-vs-research disputes go to JEV for tie-break. |
+| `config/config.yml` | Model roles + advisor storm bounds (`enabled`, `syncBacklog: "3"` — quoted, string enum; `immuneTurns: 6`, `maxNotesPerUpdate: 2`, `goal.continuationModes: []`, `todo.remindersMax: 1`). |
+| `extensions/jev-court.ts` | **v2 (opt-in, `enabled: false` by default)**: tails advisor transcript JSONL → adjudicates each `advise` note with its provenance + primary digest via JEV → routes by risk-tiered thresholds. v2 contract: fail-QUIET (court down → nothing injected), per-minute + per-session delivery budgets, never `steer`, `nextTurn` when idle (no wake-ups), owner-stop suppression, transcript reconciliation (notes already visible natively are not re-sent), re-raise signature reuse, durable per-decision records rehydrated from the session branch. Verdict wording is non-mandatory: no acknowledgement turn required. |
+| `extensions/loop-guard.ts` | Delivery hygiene for channels the court doesn't own: redelivered background results persist as `custom_message`/`async-result` entries naming job ids; a job-id set seen earlier is MARKED in-place as an already-consumed replay needing no acknowledgement turn (stateless per-request marking; no removals, tool-pairing intact; the wake itself is harness-owned). Also flags `task` results that echo the subagent's own tool-call JSON via passive `additionalContext`. Observation-only: never blocks, sends, or steers. `/loopguard` shows counters. |
 
 ## Verified behavior (2026-09-25)
 
@@ -27,6 +29,47 @@ Install: copy `config/*` into `~/.omp/agent/` (as `config.yml`, `models.yml`,
   (`provider proxy resolved, source:none`), so JEV had never contributed a decision.
 - Advisor tool grant corrected: `web_fetch` is not a builtin name (was dropped
   with warning 49×); roster now grants `web_search`.
+
+## Loop hardening (2026-09-29 — issues #35/#37)
+
+Measured cause of "omp loops on injected advisories, sessions never finish": in
+the #35 session the harness emission guard accepted ~11 native advisory cards from
+94 advisor notes, while jev-court v1 injected **83** messages — bypassing
+`maxNotesPerUpdate`/`immuneTurns`/stop-suppression, `steer`-interrupting or
+waking idle sessions (`aside` starts a turn when idle), fail-OPENING court errors
+as `act`, delivering its least-confident verdict (`insufficient_evidence`)
+unthresholded, and keeping its dedupe memory in RAM only (the persisted ledger was
+never read back). Separately, `advisor.syncBacklog: 1` (bare YAML number) fails the
+`off|1|3|5` string enum and silently resolved to `off` — the documented staleness
+fix was never in effect (verify with `omp config get advisor.syncBacklog`).
+
+Fixes here: jev-court v2 (above), `loop-guard`, roster hardening (silence-first
+instructions, `scope` advisor disabled pending hardened severity rules), and
+`config.yml` storm keys (`syncBacklog: "3"` quoted, `immuneTurns: 6`,
+`maxNotesPerUpdate: 2`, `goal.continuationModes: []`, `todo.remindersMax: 1`).
+Budget precedence note (per omp://advisor-watchdog.md): the `WATCHDOG.yml`
+top-level `maxNotesPerUpdate: 1` **overrides** the `advisor.maxNotesPerUpdate: 2`
+setting (per-advisor config > shared WATCHDOG top-level > setting > default 4);
+the setting value is the floor for advisor-less sessions.
+Ops layer: `oh-my-pi/ops/storm-report.py` reads session JSONL durably —
+advise-note volume, court injections vs native cards, async-result replays
+(job-id-set identity), post-stop verdicts, and the structured outcome records
+the extensions persist (`com.jev-court.decision`, `com.acs.loopguard.state`) —
+so future regressions are measured, not remembered.
+
+Verified 2026-09-29: real jev-court v2 + loop-guard code replayed against the real
+#35 fixture (94 notes, primary transcript) under mocked harness surfaces — 38/38
+assertions: v1's 83-message storm → **0 injections** (94/94 reconciled as
+`dup_in_transcript`); fresh-transcript run capped 2/min; zero `steer`/idle wakes;
+reworded re-raises reuse prior verdicts with no fetch; rehydration blocks
+re-adjudication after restart; no-key mode injects nothing (one warning only);
+post-stop notes suppressed except high-risk; replay marking is pairing-safe; echo
+detection never mutates tool content. Extensions additionally load cleanly in the
+installed v18.4.4 harness (`omp -p` scratch run, no load diagnostics).
+
+Upstream residue (not reachable from this module): the async-result *wake* itself
+is harness-owned (marking happens per-request), and `todo_reminder`/`goal_updated`
+are notification-only events — reminder suppression uses the config levers above.
 
 ## Files intentionally NOT in this repo
 
