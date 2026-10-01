@@ -85,10 +85,10 @@
       }
     },
     {
-      "claim": "Root README and this adapter pin the full content-generation helper contract at 0.5.7 (eight modules including human-output-naming), product-only for the adopter README, with two narrative rasters shipped.",
+      "claim": "Root README and this adapter pin the full content-generation helper contract at 0.5.7 (eight modules including human-output-naming), product-only for the adopter README, with two regenerated narrative rasters shipped.",
       "source": ".content-system/system-version.json on main (Refs #19; PR #20 merged as 6b02503, pin refresh follows on this branch)",
       "status": "shipped",
-      "supports": "system-version.json pins helper 0.5.7 @ c069613ca8b3e02bcf5aba1960160583537f8a3a with the eight-module list; validate_content_system.py reports helper+adapter VALID and writing mode OK; README carries the accepted hero and three-module visuals with full manifest provenance.",
+      "supports": "system-version.json pins helper 0.5.7 @ c069613ca8b3e02bcf5aba1960160583537f8a3a with the eight-module list; validate_content_system.py reports helper+adapter VALID and writing mode OK; README carries the regenerated hero (legible exact title/subtitle) plus a hotloader-centered module map, both with full manifest provenance.",
       "limits": "Pin refresh lands with this branch's merge; the multi-agent-hotload module docs already pin 0.5.7 independently.",
       "recorded_at": "2026-10-01T12:00:00Z",
       "valid_time": {

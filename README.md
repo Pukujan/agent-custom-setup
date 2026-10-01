@@ -1,6 +1,6 @@
 # Agent Custom Setup
 
-![Catch mistakes earlier - Jev routing turns your constraints into checkpoints: a designer holding a constraint checklist at a warm evening desk while a small robot companion highlights one branch of a glowing route diagram](modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero.png)
+![Catch mistakes earlier - Jev routing turns your constraints into checkpoints: a designer holding a constraints card at a warm evening desk beside a small robot companion who highlights one branch of a glowing route diagram](assets/acs-readme-hero.png)
 
 > **One hotload pack that gives your coding agents decision gates, live loop defense, and offline benchmark receipts — installed into any repo without vendoring anything.**
 
@@ -48,7 +48,7 @@ The hotloader carries two supporting capability modules, which you can also run 
 
 ### What the hotloader carries: the supporting modules
 
-![Three glowing cards above a dark desk - a judge gavel with a red loop arrow, a blue CPU chip with a yellow spark, and three agent figures reviewing a checklist - the hotloader's decision gates, live defense, and benchmark lane](assets/acs-three-modules.jpg)
+![One large glowing central card with three agent figures reviewing a shared checklist - the multi-agent hotloader - connected by neon lines to two smaller satellite cards: a judge gavel with a red loop arrow (jev-omp) and a blue CPU chip with a yellow spark (jev-benchmark)](assets/acs-three-modules.png)
 
 Once installed, the hotloader brings the Jev decision gates and these two capability modules into the working repo:
 

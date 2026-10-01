@@ -1,39 +1,42 @@
-# Prompt record: acs-three-modules.jpg
+# Prompt record: acs-three-modules.png
 
-- **Provider:** openrouter
-- **Model:** black-forest-labs/flux.2-klein-4b (configured `modelRoles.image`)
+- **Provider:** built-in image_gen (role `image` → `xai-oauth/grok-imagine-image`)
+- **Model:** grok-imagine-image
 - **Generated:** 2026-10-01 (session `generate_image` tool)
-- **Size:** 1824x1024 (16:9), JPEG, 334,042 bytes
-- **SHA-256:** `e0b1092e5955d7828a2c584a5ba81890bb727ef7491d0990aa09e5df4fd8b3ec`
+- **Size:** 2816x1584 (16:9), PNG
+- **SHA-256:** `b6b32e51e04f7572112b9caf384c7080bd3f1707cd0764800ffbb4d8defd7a79`
 
 ## Prompt (subject)
 
-Three glowing rounded panel cards floating above a calm dark desk, completely
-blank white card surfaces with NO letters, NO words, NO text anywhere: first
-card holds only a small wooden judge gavel with a red circular arrow (jev-omp
-court + loop guard); second card holds only a blue CPU chip with a yellow spark
-(jev-benchmark local lane); third card holds only three friendly agent figures
-in helmets reviewing a checklist board with red X and circle marks
-(multi-agent-hotload roles); connected by thin soft neon blue lines; absolutely
-no typography.
+Anime-inspired editorial diagram, completely blank surfaces with NO letters, NO
+words, NO text anywhere: one LARGE dominant glowing rounded card at the center
+holding three friendly helmeted agent figures gathered around a shared checklist
+board with red X and circle marks — the multi-agent hotloader — radiating soft
+neon blue connector lines outward to TWO SMALLER dimmer satellite cards: the left
+small card holds only a wooden judge gavel with a red circular loop arrow
+(jev-omp), the right small card holds only a blue CPU chip with a yellow spark
+(jev-benchmark). The central card is clearly bigger and brighter than the two
+side cards. Calm dark evening desk backdrop with warm lamp glow, blue-violet
+palette; absolutely no typography.
 
-## Style / composition
+## Caption intent (carried by adjacent README prose, never baked in)
 
-Clean anime-inspired editorial illustration, flat soft shading, warm desk lamp
-glow, quiet blue-violet night palette, generous whitespace; three evenly spaced
-vertical cards centered, wide 16:9 framing.
+- Title: **Three modules, one registry**
+- Subtitle: **the hotloader ships live defense and offline receipts into any repo**
 
 ## Rejection history
 
-- Attempt 1 (`omp-image-15948f4e6a0521e9.jpg`): **rejected** — in-image module
-  labels rendered garbled ("jev-benchmunk", "mutti Agesthotload"); violates
-  IMAGE_GUIDE exact-text rule.
-- Attempt 2 (this asset): **accepted** — text-free by design; module names are
-  carried by adjacent README prose and alt text instead of baked lettering.
+- Attempt 1 (flux model, in-image module labels): **rejected** — garbled lettering
+  ("jev-benchmunk", "mutti Agesthotload") violates IMAGE_GUIDE exact-text rules.
+- Attempt 2 (flux model, text-free equal cards): accepted then **superseded** —
+  equal-weight cards did not read as "hotloader is the main module".
+- Attempt 3 (this asset, grok-imagine, hub-and-spoke): **accepted** — central
+  hotloader card dominant, satellites visibly secondary, zero typography.
 
 ## Review
 
 - review_decision: accepted
 - reviewer: owner-directed regeneration (Refs #19 #44)
-- alt intent: identify the three ACS modules at a glance without language
-  dependency on rendered text
+- alt intent: show the multi-agent hotloader as the primary install surface with
+  jev-omp and jev-benchmark as secondary capability modules, without any
+  language dependency on rendered text

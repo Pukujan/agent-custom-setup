@@ -1,6 +1,6 @@
 {
   "schema_version": "content-generation.visual-style.v1",
-  "reference_asset": "modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero.png",
+  "reference_asset": "assets/acs-readme-hero.png",
   "generation_workflow": "built-in image_gen",
   "narrative_roles": [
     "hero",
@@ -16,19 +16,19 @@
   ],
   "subjects": [
     "designer + robot companion catching constraint drift at a route fork (hero)",
-    "three module cards: gavel/loop, CPU spark, agents at a checklist (supporting)"
+    "hotloader hub card dominant, jev-omp gavel and jev-benchmark CPU as smaller satellites (supporting)"
   ],
-  "composition": "wide 16:9 narrative cards; exact title/subtitle only in a quiet panel; no fake metrics or dense UI chrome",
-  "text_policy": "exact title and subtitle only, correctly spelled and legible; reject garbled or extra lettering",
+  "composition": "wide 16:9; primary module drawn dominant and central, secondary modules smaller and dimmer; exact title/subtitle only in a quiet panel; no fake metrics or dense UI chrome",
+  "text_policy": "exact title and subtitle only, correctly spelled and legible; reject garbled or extra lettering; text-free diagrams carry names in adjacent prose",
   "roles": {
     "documentation": "non-narrative helper records and placeholders",
-    "hero": "root README + product-page hero (jev-routing-hero.png)",
-    "supporting": "module-separation overview (acs-three-modules.jpg)"
+    "hero": "root README hero (acs-readme-hero.png); product-page hero stays jev-routing-hero.png",
+    "supporting": "hotloader-centered module map (acs-three-modules.png)"
   },
   "reject_when": [
     "secrets in images",
     "Desktop path treated as SoT",
     "SVG substituted for required narrative raster"
   ],
-  "status_note": "Two narrative rasters shipped (Refs #19 #44): accepted hero plus text-free three-module supporting visual; placeholder remains documentation-role only."
+  "status_note": "Two narrative rasters ship with the root README (Refs #19 #44), both regenerated with the updated image model: legible hero panel + hub-and-spoke module map where the multi-agent hotloader is visually primary; placeholder remains documentation-role only."
 }

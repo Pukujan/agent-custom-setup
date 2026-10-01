@@ -70,3 +70,23 @@ Decisions:
 Blocked/uncertain: none for this increment; live issue states (#19/#44/#46) own progression beyond the merge.
 
 Next: green `gates` on PR #45 → merge → receipts on #19/#44/#46/#11 → sync CURRENT.md.
+
+### 2026-10-01 — regenerated visuals + hotloader-first art (as-of; live issues own progression)
+
+Completed:
+- Owner added the `xai-oauth/grok-imagine-image` model to the image role; regenerated both README rasters with it: `assets/acs-readme-hero.png` (2816x1584; exact title/subtitle legible on first pass) and a new hub-and-spoke `assets/acs-three-modules.png` where the multi-agent hotloader card is dominant/central and `jev-omp` + `jev-benchmark` are smaller satellites — matching the README's hotloader-first framing. Old flux-era `.jpg` removed.
+- Manifest, visual-style, filename legend, IMAGE_NOTES, README alt text, and project-brief evidence synced to the regenerated assets (new SHA-256 hashes, review notes, prompt records).
+
+Evidence:
+- Visual inspection of both PNGs before acceptance (hero panel text spelled correctly at full size; module map has zero lettering).
+- `validate_content_system.py` @ `c069613` re-run after edits (helper+adapter VALID recorded below).
+
+Changed: `assets/acs-readme-hero.png` (new), `assets/acs-readme-hero-prompt.md` (new), `assets/acs-three-modules.png` (regenerated), `assets/acs-three-modules.jpg` (deleted), `assets/acs-three-modules-prompt.md`, `assets/IMAGE_NOTES.md`, `README.md`, `.content-system/{asset-manifest,visual-style,project-brief}.json`, `.content-system/filename-legends/module-separation.json`.
+
+Decisions:
+- Keep `jev-routing-hero.png` for the product HTML page; only the root README swaps to the regenerated hero.
+- Module map stays text-free; names carried by alt text + adjacent prose (IMAGE_GUIDE).
+
+Blocked/uncertain: none.
+
+Next: green `gates` on the updated PR #45 head → merge → receipts on #19/#44/#46/#11 → sync CURRENT.md.

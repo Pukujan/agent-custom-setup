@@ -28,12 +28,12 @@
   ],
   "files": [
     {
-      "path": "assets/acs-three-modules.jpg",
+      "path": "assets/acs-three-modules.png",
       "identity": "ACS three modules",
       "pitch": null,
       "speed_pct": null,
       "style": "safe_twin",
-      "note": "Generated narrative supporting raster for the root README module overview."
+      "note": "Generated narrative supporting raster for the root README hotloader-centered module map."
     },
     {
       "path": "assets/acs-three-modules-prompt.md",
@@ -42,6 +42,22 @@
       "speed_pct": null,
       "style": "safe_twin",
       "note": "Prompt record for the supporting visual; regenerates it safely."
+    },
+    {
+      "path": "assets/acs-readme-hero.png",
+      "identity": "ACS readme hero",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "safe_twin",
+      "note": "Regenerated root README hero raster (Refs #19)."
+    },
+    {
+      "path": "assets/acs-readme-hero-prompt.md",
+      "identity": "ACS readme hero prompt",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "safe_twin",
+      "note": "Prompt record for the regenerated hero; regenerates it safely."
     }
   ]
 }
