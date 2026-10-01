@@ -6,13 +6,14 @@ This is an as-of projection; live GitHub issues own progression. Link the owning
 
 ## Program state
 
-Phase: registry + module + docs live on main; CI enforcement remains the open gap.
+Phase: registry + modules + hotloader-first docs on main; CI enforcement live (required `gates` + protection); open gaps are the physical module split (#44), pin-manifest automation (#46), the live session-ops receipt (#22), and the blind replay (#28).
 
 ## Completed
 
 - continuity protocol initialized.
 - ACS-0001 (#3) oh-my-pi module — merged 7df54a1; #3 closed with verified closeout (owner-directed merge; hosted gates unverified, recorded).
 - ACS-0003 (#7) story-first README + CGM 0.4.0 adapter + omp reader-eval harness (suite PASS, holdout not_run) — merged f0d84fb; #7 closed with verified closeout.
+- ACS-0006 (leaf #19) pin sync + regenerated README visuals — PR #45 merged `main` @ `5bb85de`, `gates` SUCCESS (run 36805930988). Adapter + projections now pin CGM 0.5.7 @ `c069613` (eight modules) and PCM CLI 0.6.0 @ `4e23854` (ci.yml `PCM_PIN` bumped from 0.5.0-era `743d50e`); root README regenerated product-only with the multi-agent hotloader as the primary feature and two narrative rasters (`assets/acs-readme-hero.png`, hub-and-spoke `assets/acs-three-modules.png`) with full manifest provenance; validator helper+adapter VALID + writing OK recorded on #19; #19 closed. Receipts on #19/#44/#46/#11. Related merged PRs: #16→`3253b39` (#15 closed), #18→`57f6888` (#17 closed), #20→`6b02503`, #23→`e5c5cc3` (#22 reopened — module landed but the live ≥30-interaction Langfuse/SQLite receipt is unmet; stays open).
 
 ## Active
 
