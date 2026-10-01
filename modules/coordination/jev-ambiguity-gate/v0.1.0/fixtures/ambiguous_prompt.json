@@ -1,0 +1,7 @@
+{
+  "id": "amb-ambiguous-001",
+  "event": "UserPromptSubmit",
+  "prompt": "Fix it somehow, maybe the thing from earlier? You know what I mean. Or not. Whatever works.",
+  "resume_context": "prior thread mentioned several unrelated bugs",
+  "gold_decision": "ambiguous"
+}

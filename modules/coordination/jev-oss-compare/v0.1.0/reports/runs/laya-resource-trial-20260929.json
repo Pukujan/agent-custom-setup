@@ -1,0 +1,23 @@
+{
+  "record_type": "laya_local_resource_trial",
+  "schema_version": 1,
+  "created_at": "2026-09-29T20:35:00Z",
+  "label": "bounded smoke measurement (7 tiny synthetic jobs); NOT a feasibility or duration estimate for the full replay",
+  "request": "owner sequencing item: time-limited local resource attempt before full transcript inference (issue #28)",
+  "observed": {
+    "host": "darwin-arm64 M1, CPU device, 2 workers, batch_size 4",
+    "cold_run_wall_seconds": 11.05,
+    "cpu_seconds_user_sys": [9.33, 2.9],
+    "peak_rss_bytes_total": 1840578560,
+    "per_batch_ms": [870.4, 872.7, 416.0, 481.6, 326.6, 638.4, 1066.2],
+    "jobs_scored": "7/7",
+    "model_revision": "1a793eb568e6718f15941d08f85432581df534e3",
+    "sdk": "0.3.20 @23a17522aa4942da6cce53a995a275760320b691"
+  },
+  "boundary": {
+    "why_not_extrapolable": "synthetic states are ~10-15 words (_synthetic_jobs, runner.py:2293-2318); real corpus jobs fill up to max_len 1024 tokens, so per-batch cost, memory and wall time do not transfer",
+    "corpus_context": "18,350 events / 198 eligible human messages (protocol inventory) recorded as scope context only, not used for any estimate here",
+    "conclusion": "the local runtime loads, schedules and scores the pinned model end-to-end; full-replay feasibility on this host remains unmeasured pending corpus-host access"
+  },
+  "next_action": "corpus-host access (Gravebuster key or Cortex SSH), then the full 81-file DAG replay"
+}

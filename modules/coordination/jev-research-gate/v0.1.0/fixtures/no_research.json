@@ -1,0 +1,9 @@
+{
+  "id": "res-no-001",
+  "issue_ref": "#17",
+  "claim_text": "Add a unit test asserting extract_pins keeps MUST hosted lines from an in-repo fixture. No external API changes.",
+  "known_docs": [
+    "modules/coordination/jev-gate-pin/v0.1.0/README.md"
+  ],
+  "gold_decision": "no"
+}

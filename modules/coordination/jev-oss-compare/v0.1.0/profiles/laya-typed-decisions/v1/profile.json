@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "adapter_id": "laya-typed-decisions-dag",
+  "adapter_version": "1.2.0",
+  "profile_version": "1.2.0",
+  "shared_event_contract": {
+    "module": "scripts/replay_sources.py",
+    "version": 1
+  },
+  "pin_gate_contract": {
+    "module": "scripts/laya_typed_decisions/v1/runner.py",
+    "version": 2,
+    "status_mapping": {
+      "durable_assertion": "hard",
+      "tentative_or_reconsidering": "soft_or_exploring",
+      "question_only": "non_restrictive",
+      "context_only": "non_restrictive",
+      "unclear": "incomplete_and_escalate",
+      "superseded": "derived_from_exact_relation_edge"
+    }
+  },
+  "acknowledgment_gate_contract": {
+    "version": 1,
+    "scope": "next_assistant_response_only",
+    "missing_response": "deterministic_omission",
+    "unscored_or_unclear": "escalate"
+  },
+  "assistant_boundary_gate_contract": {
+    "version": 1,
+    "scope": "assistant_text_spans_only",
+    "unclear": "escalate",
+    "plan_authority": "agent_proposal_not_user_intent"
+  },
+  "model": {
+    "repo_id": "convaiinnovations/laya-typed-decisions",
+    "revision": "1a793eb568e6718f15941d08f85432581df534e3",
+    "sdk_repo": "https://github.com/NandhaKishorM/laya",
+    "sdk_version": "0.3.20",
+    "sdk_revision": "23a17522aa4942da6cce53a995a275760320b691",
+    "device": "cpu",
+    "dtype": "checkpoint-default"
+  },
+  "inference": {
+    "max_len": 1024,
+    "head_max_len": 256,
+    "max_options_per_question": 20,
+    "state_chunk_tokens": 220,
+    "state_chunk_overlap_tokens": 32,
+    "max_research_pairs_per_boundary": 1024,
+    "batch_size": 4,
+    "workers": 2,
+    "torch_threads_per_worker": 1,
+    "max_queued_batches_per_worker": 2,
+    "sort_by_length": false,
+    "confidence_semantics": "Preserve Laya choice confidence and answer_confidence separately; report both as model-defined values, not cross-model calibrated correctness."
+  },
+  "aggregation": {
+    "user_span_conflicts": "retain_per_span",
+    "message_pair_disagreement": "mixed",
+    "durable_tool_conflict": "deny",
+    "tentative_tool_conflict": "escalate",
+    "uncertainty_or_missing_coverage": "escalate",
+    "research_contradiction_or_gap": "research_more",
+    "acknowledgment_miss": "reconfirm_intent",
+    "direct_intent_conflict": "rethink_plan",
+    "unmatched_as_of_claim": "dispatch_verifier",
+    "compaction_without_captured_text": "semantic_unknown"
+  },
+  "question_groups": {
+    "user_pin_status": ["pin_status", "ack_expectation"],
+    "user_message_pair": ["relation", "task_context"],
+    "tool_pin_pair": ["tool_pin"],
+    "research_evidence_pair": ["research_evidence"],
+    "acknowledgment_response_pair": ["acknowledgment_response"],
+    "assistant_boundary_pair": ["assistant_boundary"],
+    "plan_intent_pair": ["plan_intent"]
+  },
+  "questions": {
+    "pin_status": {
+      "type": "choice",
+      "instructions": "Classify only the attributed human message excerpt. Is it a durable instruction or decision, tentative exploration, a question only, context only, or unclear? Do not infer intent from agent text.",
+      "criteria": {
+        "durable_assertion": "A stable user instruction, preference, constraint, or decision.",
+        "tentative_or_reconsidering": "A provisional thought, exploration, doubt, or possible withdrawal.",
+        "question_only": "A question without a user decision or constraint.",
+        "context_only": "Background information without a user instruction or decision.",
+        "unclear": "This excerpt does not support a safe classification."
+      }
+    },
+    "ack_expectation": {
+      "type": "choice",
+      "instructions": "For this exact attributed human excerpt, should the next assistant response clearly reflect it so the user can catch a misunderstanding? Require this when it contains a consequential instruction, success criterion, constraint, or explicit request to repeat back understanding. Do not require it for a question or background context alone. Do not infer from agent text.",
+      "criteria": {
+        "required": "The next response should reflect a consequential instruction/constraint or explicitly requested repeat-back.",
+        "not_required": "The excerpt is only a question or context, with no meaningful instruction or repeat-back request.",
+        "unclear": "The excerpt is too incomplete or ambiguous to decide safely."
+      }
+    },
+    "relation": {
+      "type": "choice",
+      "instructions": "Classify the relation from the earlier user excerpt to the later user excerpt. Judge only the two exact excerpts and their source timestamps; timestamps are context, while source sequence determines order. Do not invent a supersession target outside this pair.",
+      "criteria": {
+        "unrelated": "No material relation between these excerpts.",
+        "same_topic": "Same topic, with no clearer relation.",
+        "asks_about_or_questions": "The later excerpt asks about or questions the earlier one.",
+        "adds_constraint_or_refinement": "The later excerpt narrows or adds a requirement.",
+        "supports_or_commits": "The later excerpt supports or commits to the earlier intent.",
+        "revises_or_supersedes": "The later excerpt explicitly replaces or withdraws the earlier intent.",
+        "conflicts": "The excerpts make incompatible claims or requirements.",
+        "reopens_or_uncertain": "The later excerpt reopens the decision or expresses uncertainty.",
+        "unclear": "The excerpts are too incomplete to establish a relation."
+      }
+    },
+    "task_context": {
+      "type": "choice",
+      "instructions": "Do the earlier and later attributed user excerpts belong to the same task context? Use only the two excerpts and their source timestamps. Timestamps are context, while source sequence determines order.",
+      "criteria": {
+        "same_task": "Both excerpts concern the same task or its constraints.",
+        "new_task": "The later excerpt starts a materially different task.",
+        "unclear": "The excerpts do not establish task continuity."
+      }
+    },
+    "tool_pin": {
+      "type": "choice",
+      "instructions": "Compare this exact proposed historical tool action with this exact active user-pin excerpt. Choose one relationship; do not execute the action.",
+      "criteria": {
+        "consistent": "The action is consistent with this user pin.",
+        "conflict": "The action conflicts with this user pin.",
+        "uncertain": "The relationship cannot be determined safely.",
+        "irrelevant": "This pin does not constrain this action."
+      }
+    },
+    "research_evidence": {
+      "type": "choice",
+      "instructions": "Assess this exact as-of source excerpt against this exact claim excerpt. Judge evidence relation only; do not use future events or outside knowledge.",
+      "criteria": {
+        "supports": "The source directly supports the stated claim.",
+        "contradicts": "The source conflicts with the stated claim.",
+        "relevant_but_incomplete": "The source is relevant but does not establish the claim.",
+        "irrelevant": "The source does not address the claim.",
+        "insufficient": "The excerpts do not support a reliable comparison."
+      }
+    },
+    "acknowledgment_response": {
+      "type": "choice",
+      "instructions": "Compare the exact consequential user-intent span with only this chunk from the next assistant response. Check whether the user could correct a misunderstanding from what the assistant said. A generic 'got it' is not an accurate repeat-back when the user asked for understanding to be repeated. Do not use later assistant messages or outside knowledge.",
+      "criteria": {
+        "accurate": "This response chunk clearly carries forward the full relevant instruction and constraints.",
+        "partial": "It reflects part of the instruction but omits or weakens a consequential part.",
+        "omitted": "It does not meaningfully reflect the instruction.",
+        "contradicted": "It states a materially different or conflicting instruction.",
+        "unclear": "The response chunk or intent span is insufficient for a safe judgment."
+      }
+    },
+    "assistant_boundary": {
+      "type": "choice",
+      "instructions": "Classify only this exact assistant-written text span. Mark a proposed plan when it sets a next step, commitment, strategy, or transition toward action. Mark a factual claim when it states verifiable availability, cost, capability, completion, or source-backed fact. Use plan_and_claim if it does both. Do not treat agent text as user intent or tool execution.",
+      "criteria": {
+        "proposed_plan": "This span proposes a next step, commitment, strategy, or research-to-plan/action transition.",
+        "factual_claim": "This span asserts a verifiable fact about availability, cost, capability, completion, or evidence.",
+        "plan_and_claim": "This span both proposes a plan/transition and makes a verifiable factual claim.",
+        "other": "This span is neither a proposed plan nor a verifiable factual claim.",
+        "unclear": "The span is insufficient to classify safely."
+      }
+    },
+    "plan_intent": {
+      "type": "choice",
+      "instructions": "This assistant text has already been classified as a proposed plan or commitment. Compare the exact proposed plan span with this exact active user-intent span. Agent plans remain proposals and cannot supersede user intent. Do not execute or reinterpret either span.",
+      "criteria": {
+        "consistent": "The proposed plan is consistent with the active user intent.",
+        "conflict": "The proposed plan conflicts with an active user instruction or constraint.",
+        "uncertain": "The relationship cannot be determined safely.",
+        "irrelevant": "This user-intent span does not constrain the proposed plan."
+      }
+    }
+  }
+}

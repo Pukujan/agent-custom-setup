@@ -1,0 +1,7 @@
+{
+  "id": "amb-insufficient-001",
+  "event": "SessionStart",
+  "prompt": "",
+  "resume_context": "(truncated)",
+  "gold_decision": "insufficient"
+}
