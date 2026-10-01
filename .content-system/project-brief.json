@@ -2,40 +2,116 @@
   "schema_version": "content-generation.project-brief.v2",
   "project": "Agent Custom Setup",
   "audience": [
-    "agents and humans installing multi-agent hotload into a working repo",
-    "maintainers of ACS module registry"
+    "operators running coding agents (Claude Code, Kilo, oh-my-pi) on real briefs who need drift caught before it ships",
+    "maintainers hot-loading multi-agent coordination into a working repo",
+    "authors benchmarking cheap local vs hosted decision lanes on real transcripts"
   ],
-  "problem": "Multi-agent work needs a shared install surface for roles, leases, and proposals, but without FULL PCM and FULL CGM the install is incomplete and titles/README quality drift.",
-  "solution": "ACS registers versioned setup modules and ships multi-agent-hotload as the install surface that wires FULL PCM + FULL CGM 0.5.1 + coordination runtime without vendoring those helpers.",
+  "problem": "Long agent sessions drift from pinned instructions: constraints vanish after compaction, plans contradict what the user asked, unsupported claims turn into risky tool actions, and the human finds out late. Multi-agent work needs a shared install surface for roles, leases, and proposals, and quality of human-facing output (titles, README) drifts too when no writing contract is pinned.",
+  "solution": "ACS registers versioned Jev-routing modules: three cheap decision gates (ambiguity, research-needed, tool pin), the jev-court advisor adjudicator, a local Laya benchmark lane with receipts, shared ops capture, and the multi-agent-hotload install surface that wires FULL PCM + FULL CGM 0.5.5 + the coordination runtime without vendoring those helpers.",
   "mechanism": [
-    "registry.json + POLICY.md define harness/setup/version layout",
-    "multi-agent-hotload HOTLOAD.md load order: ACS policy \u2192 FULL PCM \u2192 FULL CGM \u2192 runtime",
-    "hotload_check validates assignment pins and runs CGM validate_content_system.py"
+    "gates pack a tiny constrained package (pins + corrections + proposed action) and ask a cheap judge (local Laya CPU, mock in CI, or third-party hosted lane) for a typed decision",
+    "deterministic route policy emits reconfirm_intent / rethink_plan / research_more / dispatch_verifier / escalate / proceed; incomplete or contradictory coverage can never silently proceed",
+    "registry.json + POLICY.md define harness/setup/version layout; multi-agent-hotload load order is ACS policy -> FULL PCM -> FULL CGM -> runtime; hotload_check validates pins",
+    "decisions append to one shared ops.sqlite and pinned JSON receipts in git; GitHub issues/PRs own progression"
   ],
   "evidence": [
     {
-      "claim": "multi-agent-hotload pack is registered and documents FULL PCM + FULL CGM pins.",
-      "source": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md and registry.json",
+      "claim": "jev-court v2 + loop-guard stop the advisory storm: replay of the real 94-note #35 fixture passes 38/38 assertions and turns v1's 83 injections into 0.",
+      "source": "oh-my-pi/README.md",
       "status": "shipped",
-      "supports": "The pack files and registry entry exist on the task branch and name full-stack pins.",
-      "limits": "Does not prove every adopter has run validate yet; CI may be budget-blocked.",
-      "recorded_at": "2026-09-27T01:47:00-04:00",
+      "supports": "The module README records the measured root cause, the v2 delivery contract (fail-quiet, budgets, no steer/wake), and the fixture-replay verification dated 2026-09-29.",
+      "limits": "Opt-in and disabled by default; the async-result wake itself remains harness-owned; a fresh-live-session confirmation receipt is still pending on issue #37.",
+      "recorded_at": "2026-09-29T15:00:00Z",
       "cite_in_readme": false,
       "source_revision": {
         "kind": "repository_artifact",
-        "reference": "HOTLOAD.md on task/multi-agent-hotload-coordination-11",
+        "reference": "oh-my-pi module README, Loop hardening section, on origin/main",
         "repository": "Pukujan/agent-custom-setup",
-        "commit": "0441bb19390870e354d3f60d7f4123228bdb2ec2",
-        "path": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
-        "locator": "section FULL CGM 0.5.1",
-        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/0441bb19390870e354d3f60d7f4123228bdb2ec2/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
+        "commit": "8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4",
+        "path": "oh-my-pi/README.md",
+        "locator": "heading 'Loop hardening (2026-09-29 — issues #35/#37)'",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4/oh-my-pi/README.md"
+      }
+    },
+    {
+      "claim": "The local Laya lane scores typed recovery decisions end-to-end on CPU: capped local pilot completed 805/805 planned jobs over 7 of 80 streams.",
+      "source": "modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-pilot-20260929.json",
+      "status": "experimentally_supported",
+      "supports": "Content-free pilot receipt with pinned model/sdk revisions and job accounting; adapter suite 13/13 and a 24-case mutation-proven metamorphic suite exist alongside.",
+      "limits": "Discovery-only, non-blind, on a truncated export; checkpoint confidence is uncalibrated (reported ECE 0.213); escalates on truncated tool text are model uncertainty, not detected drift; no catch-rate claim until the full 81-file blind replay (issue #28 open).",
+      "recorded_at": "2026-09-29T15:00:00Z",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "laya-pilot-20260929 receipt merged via PR #36",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "9999d870dd6e2b7b36b4066c5aee3cf0e67ff21c",
+        "path": "modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-pilot-20260929.json",
+        "locator": "fields job_accounting, label, annotations.confidence",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/9999d870dd6e2b7b36b4066c5aee3cf0e67ff21c/modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-pilot-20260929.json"
+      }
+    },
+    {
+      "claim": "The tool gate must deny a self-host proposal that contradicts a hosted-only brief (Fish fixture), with zero missed blocks required on the block set.",
+      "source": "modules/coordination/jev-gate-pin/v0.1.0/README.md",
+      "status": "shipped",
+      "supports": "Module tree on main ships pin/gather/gate scripts, labeled Fish fixtures (block_selfhost_despite_hosted_brief.json expects deny), and tests requiring FN=0 on block.",
+      "limits": "Registered as a draft, optional and advisory; live production wiring and binding hotload load-order are explicitly out of v0.1.0 scope.",
+      "recorded_at": "2026-09-29T15:00:00Z",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "jev-gate-pin README five-part architecture + Fish fixtures",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4",
+        "path": "modules/coordination/jev-gate-pin/v0.1.0/README.md",
+        "locator": "section 'Five-part architecture' item 4",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4/modules/coordination/jev-gate-pin/v0.1.0/README.md"
+      }
+    },
+    {
+      "claim": "A hosted comparison lane exists: provider lists typesafe/jev-1.13 as a text-to-decisions model at $0.042 per million prompt tokens with no completion charge.",
+      "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints",
+      "status": "shipped",
+      "supports": "The third-party endpoint record shows the decisions modality and pricing that jev-shared's live client targets; ACS code only references the model id and an env-var key name.",
+      "limits": "Third-party availability and pricing can change without notice; not exercised in CI; provider claims are traceable here, not independently verified by ACS.",
+      "recorded_at": "2026-09-29T15:00:00Z",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "external_source",
+        "reference": "OpenRouter model endpoint record for typesafe/jev-1.13",
+        "uri": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints",
+        "accessed_at": "2026-09-29"
+      }
+    },
+    {
+      "claim": "Root README and this adapter pin the full content-generation helper contract at 0.5.5 (eight modules including human-output-naming), product-only for the adopter README.",
+      "source": ".content-system/system-version.json on this branch (supersedes the PR #20 0.5.5 attempt; issue #19 remains open until merged)",
+      "status": "planned",
+      "supports": "system-version.json pins helper 0.5.5 @ 085aeb174619191f5c2a51a1f0715dd71113e386 with the eight-module list, and the validator reports helper+adapter VALID on this branch.",
+      "limits": "Not delivered until this PR merges and passes required checks; the multi-agent-hotload module docs keep their own older pins (out of scope per issue #19).",
+      "recorded_at": "2026-09-29T15:00:00Z",
+      "valid_time": {
+        "start": "2026-09-29T15:00:00Z",
+        "end": null
+      },
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "adapter pin refresh on task/ACS-readme-cgm-0.5.5 (open PR)",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4",
+        "path": ".content-system/system-version.json",
+        "locator": "fields helper_version, helper_commit, modules",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4/.content-system/system-version.json"
       }
     }
   ],
   "boundaries": [
-    "ACS does not replace PCM or CGM",
-    "ACS does not vendor helper source trees",
-    "Narrative marketing imagery for ACS root README is deferred",
-    "Slim HSW+writing-direction-only pins are incomplete installs"
+    "ACS does not replace PCM or CGM and does not vendor helper source trees",
+    "Gates and the court are advisory seatbelts; the boss/human keeps authority",
+    "Pilot receipts are discovery-only scope, not accuracy or catch-rate evidence",
+    "No API keys, tokens, cookies, or .env contents enter the repository; provider keys are referenced by env-var name only",
+    "Live status as of 2026-09-29 (main @ 8c62ba1, PRs #30-#39 merged): session-ops capture PR #23 and the blind replay leaf #28 remain open; narrative marketing imagery for the ACS root README stays deferred"
   ]
 }

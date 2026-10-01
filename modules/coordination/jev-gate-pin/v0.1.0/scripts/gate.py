@@ -104,6 +104,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--judge", choices=["mock", "inferhub"], default="mock")
     ap.add_argument("--log", help="Optional JSONL path to append gate event")
     ap.add_argument("--json", action="store_true", help="Emit full JSON result")
+    ap.add_argument("--ops-db", default=None, help="Shared ACS ops.sqlite path")
+    ap.add_argument("--session-id", default=None)
     args = ap.parse_args(argv)
 
     if not args.package and not args.fixture:
@@ -130,7 +132,27 @@ def main(argv: Optional[List[str]] = None) -> int:
         "judge": args.judge,
         "fixture_id": fixture_id,
         "gold_decision": gold,
+        "gate_kind": "tool_pin",
     }
+
+
+    if args.ops_db:
+        import sys as _sys
+        from pathlib import Path as _P
+        _ops = _P(__file__).resolve().parents[3] / "ops-db" / "v0.1.0" / "scripts"
+        if str(_ops) not in _sys.path:
+            _sys.path.insert(0, str(_ops))
+        from ops_db import append_gate_event as _append_ops  # noqa: E402
+        _append_ops(
+            gate_kind="tool_pin",
+            decision=decision,
+            reason_code=reason,
+            tool_name=tool_name,
+            judge=args.judge,
+            session_id=args.session_id,
+            payload={"fixture_id": fixture_id},
+            db_path=_P(args.ops_db),
+        )
 
     if args.log:
         ev = make_event(

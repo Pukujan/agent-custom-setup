@@ -1,0 +1,3 @@
+{"ts":"2026-09-27T20:00:01.100Z","decision":"allow","tool_name":"Bash","reason_code":"mock_allow","judge":"mock","notes":"ok","session_id":"sess-probe-001"}
+{"ts":"2026-09-27T20:00:01.200Z","decision":"deny","tool_name":"Bash","reason_code":"mock_deny_selfhost","judge":"mock","notes":"blocked api_key=sk-test-GATESECRET01","session_id":"sess-probe-001"}
+{"ts":"2026-09-27T20:00:03.100Z","decision":"allow","tool_name":"Glob","reason_code":"mock_allow","judge":"mock","session_id":"sess-probe-001"}

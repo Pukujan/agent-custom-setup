@@ -39,6 +39,7 @@ def make_event(
         ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     ev: Dict[str, Any] = {
         "ts": ts,
+        "gate_kind": "tool_pin",
         "decision": decision,
         "tool_name": redact(tool_name),
         "reason_code": reason_code,

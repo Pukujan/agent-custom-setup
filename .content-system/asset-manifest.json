@@ -1,6 +1,6 @@
 {
   "schema_version": "content-generation.asset-manifest.v1",
-  "system_version": "0.5.4",
+  "system_version": "0.5.5",
   "assets": [
     {
       "id": "acs-adapter-placeholder",
@@ -10,6 +10,32 @@
       "usage": "adapter completeness only; not a README hero",
       "review_decision": "accepted-as-placeholder",
       "status_note": "Replace with narrative raster under IMAGE_GUIDE when ACS root README gets art."
+    },
+    {
+      "id": "jev-routing-hero",
+      "path": "modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero.png",
+      "role": "hero",
+      "feature": "jev-routing-demo",
+      "orientation": "wide",
+      "dimensions": "1822x1024",
+      "text_policy": "exact title and subtitle only, in a quiet right-side panel; no other copy",
+      "prompt_recipe": "Anime-inspired editorial hero: a focused young content designer at a warm desk holds a paper card of written constraints while a small friendly rounded companion robot points at a highlighted branch of a floating route diagram; cozy evening workspace, blue-violet night light with warm desk lamp, soft neon connector lines; exact text - title 'Catch mistakes earlier', subtitle 'Jev routing turns your constraints into checkpoints'; 16:9 wide hero; no fake metrics, no dense UI chrome, no cyberpunk darkness.",
+      "exact_title": "Catch mistakes earlier",
+      "exact_subtitle": "Jev routing turns your constraints into checkpoints",
+      "alt_text": "Illustration: a designer holding a checklist of constraints sits at a warm evening desk beside a small robot companion who highlights one branch of a glowing route diagram; a quiet panel reads 'Catch mistakes earlier - Jev routing turns your constraints into checkpoints'.",
+      "usage": "top of reports/jev-routing-product.html hero section",
+      "crop_behavior": "center crop on narrow screens; keep both characters and the title panel visible",
+      "rejection_conditions": [
+        "garbled or extra text in the panel",
+        "characters obscured or competing focal points",
+        "secrets or private paths visible"
+      ],
+      "review_decision": "accepted",
+      "review": "accepted",
+      "provider": "built-in image_gen",
+      "prompt_record": "modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero-prompt.md",
+      "hash": "43773a8b6b65ac22dd307c91f8221938985cae11053cb1e6085d9f2f600b0641",
+      "status_note": "Narrative art for the Jev routing product pages (Refs #28); ACS root README art remains deferred."
     }
   ]
 }

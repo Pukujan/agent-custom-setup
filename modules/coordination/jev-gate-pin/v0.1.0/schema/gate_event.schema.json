@@ -45,6 +45,10 @@
     "notes": {
       "type": "string",
       "description": "Optional short note; must not contain secrets"
+    },
+    "gate_kind": {
+      "type": "string",
+      "const": "tool_pin"
     }
   }
 }

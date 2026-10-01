@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ambiguity gate event",
+  "type": "object",
+  "required": [
+    "ts",
+    "decision",
+    "reason_code",
+    "gate_kind"
+  ],
+  "properties": {
+    "ts": {
+      "type": "string"
+    },
+    "gate_kind": {
+      "const": "ambiguity"
+    },
+    "decision": {
+      "enum": [
+        "clear",
+        "ambiguous",
+        "insufficient"
+      ]
+    },
+    "reason_code": {
+      "type": "string"
+    },
+    "tool_name": {
+      "type": "string"
+    },
+    "judge": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "fixture_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

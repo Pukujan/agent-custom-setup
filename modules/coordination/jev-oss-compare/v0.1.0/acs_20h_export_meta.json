@@ -1,0 +1,20 @@
+{
+  "agent_id": "7fecc0d8-64b8-4909-aad8-c4b461d3d75a",
+  "window_hours": 20,
+  "timezone": "America/New_York",
+  "cutoff_et": "2026-09-27T08:00:41.047510-04:00",
+  "exported_at_et": "2026-09-28T04:00:41.047510-04:00",
+  "first_ts": "2026-09-27T14:57:00-04:00",
+  "last_ts": "2026-09-28T04:08:00-04:00",
+  "n_user": 70,
+  "n_tool": 66,
+  "n_events": 136,
+  "span_hours": 13.183,
+  "readtranscript": false,
+  "readtranscript_block": "Executor subagent has no ReadTranscript tool; local agent store.db has 0 transcript_entries and empty latestRootBlobId (cloud-only). Fallback: users from acs_chat_gold/turns.json + tools from acs_tx/tools.jsonl (Shell machine-parse; results=null). Parent should re-run with ReadTranscript agent_id=7fecc0d8-64b8-4909-aad8-c4b461d3d75a limit=200 paging before=.",
+  "paths": {
+    "raw_jsonl": "modules/coordination/jev-oss-compare/v0.1.0/acs_20h_raw.jsonl",
+    "walkforward_harvest": "modules/coordination/jev-oss-compare/v0.1.0/acs_20h_walkforward_harvest.json",
+    "meta": "modules/coordination/jev-oss-compare/v0.1.0/acs_20h_export_meta.json"
+  }
+}
