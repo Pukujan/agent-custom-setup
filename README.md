@@ -1,6 +1,6 @@
 # Agent Custom Setup
 
-![Catch mistakes earlier - Jev routing turns your constraints into checkpoints: a designer holding a constraints card at a warm evening desk beside a small robot companion who highlights one branch of a glowing route diagram](assets/acs-readme-hero.png)
+![One pack. Any repo. - The multi-agent hotloader installs decision gates into your coding agents: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram](assets/acs-readme-hero.png)
 
 > **One hotload pack that gives your coding agents decision gates, live loop defense, and offline benchmark receipts — installed into any repo without vendoring anything.**
 
@@ -102,7 +102,7 @@ ACS grounds every public claim in versioned repository artifacts, committed eval
 - **Advisory safety net:** The gates and `jev-court` are advisory seatbelts. Final authority always belongs to the human operator.
 - **Pilot vs. catch rate:** Benchmark pilot numbers are discovery-only sanity checks, not statistical guarantees of live detection.
 - **Zero secrets in repository:** No API keys, credentials, session tokens, or `.env` files enter this repository. External model/provider keys are referenced only by environment-variable name.
-- **Visual assets:** Two narrative rasters ship with the README (the brand hero and the three-module overview); full provenance — role, exact text, dimensions, prompt record, hash, review — lives in `.content-system/asset-manifest.json`. The compact blue SVG mark (`assets/registry-icon.svg`) remains the small registry seal.
+- **Visual assets:** Two narrative rasters ship with the README — the hotloader install hero ("One pack. Any repo.") and the hub-and-spoke module map — both rendered with the current image model; full provenance (role, exact text, dimensions, prompt record, hash, review) lives in `.content-system/asset-manifest.json`. The compact blue SVG mark (`assets/registry-icon.svg`) remains the small registry seal.
 
 ## Try it
 

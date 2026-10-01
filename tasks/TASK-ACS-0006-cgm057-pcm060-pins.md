@@ -107,3 +107,21 @@ Decisions:
 Blocked/uncertain: none.
 
 Next: green `gates` on this refresh PR → merge with the owner's approving review (no `--admin`) → append the refresh receipt to #19.
+
+### 2026-10-01 — hero re-branded to the hotloader (as-of; live issues own progression)
+
+Completed:
+- Owner: the hero still said "Jev routing…", contradicting the hotloader-first README. Re-rendered `assets/acs-readme-hero.png` (2816x1584, SHA-256 `6b03b93a…`) with the hotloader install story — panel text now "One pack. Any repo." / "The multi-agent hotloader installs decision gates into your coding agents", legible and correctly spelled.
+- Synced `README.md` alt text + Visual-assets boundary line, `asset-manifest.json` (prompt_recipe/exact_title/exact_subtitle/alt/hash/review), `assets/acs-readme-hero-prompt.md`, `assets/IMAGE_NOTES.md`, `visual-style.json` subjects.
+- Branch protection (owner direction, recorded on #5): required approving reviews 1 → 0; `gates` stays strict. Merges no longer need review or `--admin`.
+
+Evidence: `validate_content_system.py` @ `c069613` helper+adapter **VALID** after the manifest rewrite; visual inspection of the new hero at use size (panel lettering correct).
+
+Changed: `assets/acs-readme-hero.png`, `assets/acs-readme-hero-prompt.md`, `assets/IMAGE_NOTES.md`, `README.md`, `.content-system/asset-manifest.json`, `.content-system/visual-style.json`, this task file.
+
+Decisions:
+- The old "Catch mistakes earlier" hero stays only as `jev-routing-hero.png` for the product HTML page; the root README hero is now hotloader-branded.
+
+Blocked/uncertain: none.
+
+Next: green `gates` → merge (no review needed under the new policy) → append the re-brand receipt to #19.

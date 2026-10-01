@@ -3,10 +3,10 @@
 The ACS root README carries **two narrative rasters**, both regenerated with the
 updated image model (role `image` → `xai-oauth/grok-imagine-image`, Refs #19 #44):
 
-1. **Hero** — `assets/acs-readme-hero.png` (2816x1584; exact title "Catch mistakes
-   earlier", subtitle "Jev routing turns your constraints into checkpoints" rendered
-   legibly in a quiet right-side panel; prompt record
-   `assets/acs-readme-hero-prompt.md`).
+1. **Hero** — `assets/acs-readme-hero.png` (2816x1584; exact title "One pack.
+   Any repo.", subtitle "The multi-agent hotloader installs decision gates into
+   your coding agents" rendered legibly in a quiet right-side panel; prompt
+   record `assets/acs-readme-hero-prompt.md`).
 2. **Hotloader-centered module map** — `assets/acs-three-modules.png` (2816x1584;
    hub-and-spoke: the multi-agent hotloader card is dominant and central, `jev-omp`
    and `jev-benchmark` are smaller satellites; text-free by design after an earlier

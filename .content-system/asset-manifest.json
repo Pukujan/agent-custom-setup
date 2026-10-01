@@ -70,10 +70,10 @@
       "orientation": "wide",
       "dimensions": "2816x1584",
       "text_policy": "exact title and subtitle only, in a quiet right-side panel; no other copy",
-      "prompt_recipe": "Anime-inspired editorial hero: a focused young content designer at a warm evening desk holds a paper card of written constraints while a small friendly rounded companion robot points at a highlighted branch of a floating glowing route diagram; cozy workspace, blue-violet night light with warm desk lamp, soft neon connector lines; a quiet right-side panel carries the exact text - title 'Catch mistakes earlier', subtitle 'Jev routing turns your constraints into checkpoints'; no fake metrics, no dense UI chrome, no cyberpunk darkness",
-      "exact_title": "Catch mistakes earlier",
-      "exact_subtitle": "Jev routing turns your constraints into checkpoints",
-      "alt_text": "Illustration: a designer holding a constraints card sits at a warm evening desk beside a small robot companion who highlights one branch of a glowing route diagram; a quiet panel reads 'Catch mistakes earlier - Jev routing turns your constraints into checkpoints'.",
+      "prompt_recipe": "Anime-inspired editorial hero: a focused developer at a warm evening desk slides a single glowing rounded module pack into an open laptop showing a repository tree; around the laptop, three friendly helmeted agent figures light up checkpoint nodes along a branching route diagram, and a small companion robot holds a checklist with green checks and one red X; cozy workspace, blue-violet night light with warm desk lamp, soft neon connector lines; a quiet right-side panel carries the exact text - title 'One pack. Any repo.', subtitle 'The multi-agent hotloader installs decision gates into your coding agents'; no fake metrics, no dense UI chrome, no cyberpunk darkness",
+      "exact_title": "One pack. Any repo.",
+      "exact_subtitle": "The multi-agent hotloader installs decision gates into your coding agents",
+      "alt_text": "Illustration: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram and a companion robot holds a checklist; a quiet panel reads 'One pack. Any repo. - The multi-agent hotloader installs decision gates into your coding agents'.",
       "usage": "root README hero (Refs #19)",
       "crop_behavior": "center crop on narrow screens; keep both characters and the title panel visible",
       "rejection_conditions": [
@@ -82,11 +82,11 @@
         "secrets or private paths visible"
       ],
       "review_decision": "accepted",
-      "review": "accepted on first pass with the updated image model; panel lettering legible at 1200/720 px",
+      "review": "accepted; re-branded to the hotloader install story per owner direction (previous pass said 'Jev routing', which read as the wrong primary module); panel lettering legible",
       "provider": "built-in image_gen",
       "prompt_record": "assets/acs-readme-hero-prompt.md",
-      "hash": "6eb48ad8cbc57cf28f10853b7edcf5783701b7483ff7fc906c39797d1d457e63",
-      "status_note": "Regenerated root README hero with the updated image model (Refs #19)."
+      "hash": "6b03b93ad7f5b34bffc3309a8a68ea7f371e5372cf0c4270a710ec5372a4036f",
+      "status_note": "Root README hero: the multi-agent hotloader as the install surface (Refs #19)."
     }
   ]
 }
