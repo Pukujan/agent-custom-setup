@@ -37,3 +37,19 @@ Langfuse UI: `http://100.93.66.34:3000`
 
 ## Status
 `draft` / `optional`. **Not** bound into multi-agent-hotload `HOTLOAD.md` yet.
+
+
+## Embeddings + JEV hot path (Alex lock 2026-09-28 / #25)
+
+For already-working / super-fast decisions:
+
+1. **Hot path** (ambiguity / research-needed / jev-gate-pin allow|deny|escalate) = **DETERMINISTIC only**.
+   - **NO** embedding lookup
+   - **NO** numpy
+   - **NO** SQLite vector scan on the decision path
+2. **Storage** = one shared `ops-db` SQLite; embeddings as **float32 BLOBs** on the embed stream (same FIFO family as parent stream).
+3. **Similarity** = numpy exact scan over those BLOBs (or a warm cached matrix), **batched/offline only** — never on JEV hot path.
+4. **No** Chroma / Pinecone / sqlite-vec unless corpus later demands it.
+
+Lasting proof stays in **git + GitHub issues + benchmarks**. Ops DB is a FIFO buffer (per-partition), not a self-learning forever store.
+

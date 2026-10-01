@@ -1,0 +1,102 @@
+{
+  "annotations": {
+    "confidence": "uncalibrated: checkpoint ships invalid temperatures clamped to [0.5,5] (SDK warning) and README reports ECE 0.213 over-confidence; probabilities/choices are model-defined, not correctness",
+    "escalate_driver": "tool_gate escalates are model 'uncertain' choices on harvest-truncated tool text (500-char args_summary, no assistant framing), not detected conflicts; 'allow' rows are no_active_intent_constraint"
+  },
+  "choice_distribution": {
+    "ack_expectation|not_required": 5,
+    "ack_expectation|required": 10,
+    "ack_expectation|unclear": 7,
+    "pin_status|context_only": 2,
+    "pin_status|durable_assertion": 8,
+    "pin_status|question_only": 1,
+    "pin_status|tentative_or_reconsidering": 6,
+    "pin_status|unclear": 5,
+    "relation|adds_constraint_or_refinement": 10,
+    "relation|asks_about_or_questions": 2,
+    "relation|conflicts": 2,
+    "relation|reopens_or_uncertain": 1,
+    "relation|same_topic": 12,
+    "relation|supports_or_commits": 20,
+    "relation|unclear": 6,
+    "relation|unrelated": 8,
+    "task_context|new_task": 32,
+    "task_context|same_task": 21,
+    "task_context|unclear": 8,
+    "tool_pin|conflict": 3,
+    "tool_pin|consistent": 3,
+    "tool_pin|uncertain": 716
+  },
+  "gate_outcomes": {
+    "acknowledgment_gate_aggregate|None": 1,
+    "acknowledgment_gate_aggregate|escalate": 10,
+    "acknowledgment_gate_aggregate|reconfirm_intent": 11,
+    "acknowledgment_message_aggregate|None": 1,
+    "acknowledgment_message_aggregate|escalate": 8,
+    "acknowledgment_message_aggregate|reconfirm_intent": 4,
+    "message_pair_aggregate|None": 13,
+    "research_gate_aggregate|None": 43,
+    "tool_gate_aggregate|escalate": 322,
+    "tool_gate_aggregate|proceed": 57
+  },
+  "identity": {
+    "batch_size": 4,
+    "model_revision": "1a793eb568e6718f15941d08f85432581df534e3",
+    "profile_sha256": "809574d7aa0c99b4115630c0bcad7947f5efabbc241d77e6143e391b2ba400de",
+    "sdk_revision": "23a17522aa4942da6cce53a995a275760320b691",
+    "sdk_version": "0.3.20",
+    "source_file_sha256": "74ecc648b10bbfbf67cd505dd89e191d90d6628266dde01ac5dc229fec13616d",
+    "workers": 2
+  },
+  "job_accounting": {
+    "complete": true,
+    "emitted": 805,
+    "planned": 805
+  },
+  "job_status": {
+    "tool_pin_relation|scored": 722,
+    "user_message_relation|scored": 61,
+    "user_pin_status|scored": 22
+  },
+  "label": "capped-harvest LOCAL PILOT; non-blind; non-evidence; NOT the 81-file benchmark replay",
+  "next_action": "corpus-host access, then the full 81-file blind replay via `runner.py run`",
+  "record_type": "laya_pilot_receipt",
+  "run_id": "laya-pilot-20260929",
+  "schema_version": 1,
+  "scope": {
+    "adapt_stats": {
+      "collapsed_duplicates": 645,
+      "events": 7540,
+      "rows": 8185
+    },
+    "budget": 1500,
+    "budget_estimate_used": 1106,
+    "expected_message_pairs_included": 13,
+    "harvest_rows": 8185,
+    "human_messages_included": 13,
+    "phase1_jobs": 83,
+    "phase2_jobs": 722,
+    "streams_excluded": 73,
+    "streams_included": 7,
+    "streams_total": 80
+  },
+  "structural_limits": {
+    "artifact_rows": "acknowledgment omitted/reconfirm rows are EXPORT ARTIFACTS: the harvest schema strips assistant messages, so 'no next response' reflects export truncation, not agent drift — never a catch-rate signal",
+    "assistant_rows_in_export": 0,
+    "exercised": "pin status, message-pair relation, and the recorded tool-action half of intent conflict (tool_pin_relation verdicts/routes on real tool calls + human pins)",
+    "unexercised": "assistant-prose plan boundaries/plan_intent and research claim-evidence matching (issue #28 modes 2-prose/3/4): no assistant claim atoms exist in this export"
+  },
+  "timing": {
+    "batch_ms_min_med_max": [
+      771,
+      2809,
+      18266
+    ],
+    "note": "wall_seconds measures THIS process only; on a cache-resumed run it is the resume time, not the original compute time (first full pass of this pilot: 386.64s)",
+    "wall_seconds": 4.01
+  },
+  "tool_verdicts": {
+    "allow|no_active_intent_constraint": 57,
+    "escalate|tool_pin_uncertain_or_coverage_incomplete": 322
+  }
+}

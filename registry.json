@@ -2,8 +2,8 @@
   "system": "agent-custom-setup",
   "version": "0.2.0",
   "created": "2026-09-25",
-  "updated": "2026-09-27",
-  "recorded_at": "2026-09-27T04:55:00Z",
+  "updated": "2026-09-28",
+  "recorded_at": "2026-09-28T04:35:00Z",
   "valid_time": {
     "start": "2026-09-25T00:00:00-04:00",
     "end": null
@@ -69,31 +69,137 @@
       ]
     },
     {
-      "id": "session-ops-capture",
-      "name": "Session ops capture (ACS-wide JSONL \u2192 SQLite + OTLP + Pass2)",
-      "purpose": "ACS-wide idempotent ops capture for any hotloaded agent: adapter\u2192canonical SQLite+OTLP (Pass1) + classify/embed (Pass2). Claude JSONL adapter #1; Kilo Code VS Code tasks adapter #2.",
+      "id": "ops-db",
+      "name": "ACS shared ops SQLite (bi-temporal)",
+      "purpose": "ONE shared ops.sqlite: transcript/gate/claim/embed namespaces; bi-temporal as-of backward queries.",
+      "harness": "coordination",
+      "created": "2026-09-28",
+      "updated": "2026-09-28",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
+      "owning_agent": "agent-custom-setup",
+      "version": "0.1.0",
+      "path": "modules/coordination/ops-db/v0.1.0/",
+      "recorded_at": "2026-09-28T04:20:00Z",
+      "valid_time": {
+        "start": "2026-09-28T00:00:00-04:00",
+        "end": null
+      },
+      "status": "draft",
+      "summary": "Shared bi-temporal ops.sqlite module. HOTLOAD full. Embeds offline only."
+    },
+    {
+      "id": "jev-ambiguity-gate",
+      "name": "JEV ambiguity gate (prompt/resume)",
+      "purpose": "Optional JEV on prompt/resume: clear|ambiguous|insufficient.",
+      "harness": "coordination",
+      "created": "2026-09-28",
+      "updated": "2026-09-28",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
+      "owning_agent": "agent-custom-setup",
+      "version": "0.1.0",
+      "path": "modules/coordination/jev-ambiguity-gate/v0.1.0/",
+      "recorded_at": "2026-09-28T04:20:00Z",
+      "valid_time": {
+        "start": "2026-09-28T00:00:00-04:00",
+        "end": null
+      },
+      "status": "draft",
+      "summary": "Ambiguity JEV. Separate from research. HOTLOAD full optional."
+    },
+    {
+      "id": "jev-research-gate",
+      "name": "JEV research-needed gate",
+      "purpose": "Optional JEV on claim snapshots: yes|no|insufficient; #14 checklist fallback.",
+      "harness": "coordination",
+      "created": "2026-09-28",
+      "updated": "2026-09-28",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/24",
+      "owning_agent": "agent-custom-setup",
+      "version": "0.1.0",
+      "path": "modules/coordination/jev-research-gate/v0.1.0/",
+      "recorded_at": "2026-09-28T04:20:00Z",
+      "valid_time": {
+        "start": "2026-09-28T00:00:00-04:00",
+        "end": null
+      },
+      "status": "draft",
+      "summary": "Research-needed JEV. #14 fallback. HOTLOAD full optional."
+    },
+    {
+      "id": "jev-gate-pin",
+      "name": "JEV gate + constraint pin",
+      "purpose": "Optional PreToolUse-style gate with constraint pin/gather; Fish FN=0 on block.",
       "harness": "coordination",
       "created": "2026-09-27",
-      "updated": "2026-09-27",
-      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/22",
+      "updated": "2026-09-28",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/17",
       "owning_agent": "agent-custom-setup",
-      "deploy_mirrors": [
-        {
-          "label": "ACS module tree (SoT; optional draft)",
-          "path": "D:\\\\claude\\\\agent-custom-setup\\\\modules\\\\coordination\\\\session-ops-capture\\\\v0.1.0\\\\",
-          "notes": "ACS is SoT. Optional until proven; not binding in HOTLOAD.md. Multi-harness via adapters (Claude #1, Kilo #2)."
-        }
-      ],
       "version": "0.1.0",
-      "path": "modules/coordination/session-ops-capture/v0.1.0/",
-      "recorded_at": "2026-09-28T03:50:00Z",
+      "path": "modules/coordination/jev-gate-pin/v0.1.0/",
+      "recorded_at": "2026-09-28T04:20:00Z",
       "valid_time": {
         "start": "2026-09-27T00:00:00-04:00",
         "end": null
       },
       "status": "draft",
-      "optional": true,
-      "summary": "Draft optional ACS-wide module: adapters (Claude #1, Kilo #2) \u2192 uuid SQLite + OTLP Pass1 + classify/embed Pass2. FN=0 held-out fixtures. Not binding hotload until proven."
+      "summary": "Tool pin gate + Claude PreToolUse live hook; Kilo stub. HOTLOAD full optional."
+    },
+    {
+      "id": "jev-shared",
+      "name": "ACS JEV shared helpers",
+      "purpose": "OpenRouter typesafe/jev-1.13 client shared by three gates.",
+      "harness": "coordination",
+      "created": "2026-09-28",
+      "updated": "2026-09-28",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
+      "owning_agent": "agent-custom-setup",
+      "version": "0.1.0",
+      "path": "modules/coordination/jev-shared/v0.1.0/",
+      "recorded_at": "2026-09-28T04:20:00Z",
+      "valid_time": {
+        "start": "2026-09-28T00:00:00-04:00",
+        "end": null
+      },
+      "status": "draft",
+      "summary": "OpenRouter decisions helper; ops_db shim \u2192 ops-db module."
+    },
+    {
+      "id": "session-ops-capture",
+      "name": "Session ops capture (transcript + OTLP + Pass2)",
+      "purpose": "Claude+Kilo transcript adapters, OTLP to Langfuse, Pass2 classify/embed offline into shared ops.",
+      "harness": "coordination",
+      "created": "2026-09-27",
+      "updated": "2026-09-28",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/22",
+      "owning_agent": "agent-custom-setup",
+      "version": "0.1.0",
+      "path": "modules/coordination/session-ops-capture/v0.1.0/",
+      "recorded_at": "2026-09-28T04:20:00Z",
+      "valid_time": {
+        "start": "2026-09-27T00:00:00-04:00",
+        "end": null
+      },
+      "status": "draft",
+      "summary": "Transcript+OTLP+Pass2. HOTLOAD full. Shared DB ownership: ops-db module."
+    },
+    {
+      "id": "jev-oss-compare",
+      "name": "JEV OSS comparison lane",
+      "purpose": "Optional ACS vs auto-mode/jev-gate compare + appendable HTML report",
+      "harness": "coordination",
+      "created": "2026-09-28",
+      "updated": "2026-09-28",
+      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
+      "owning_agent": "agent-custom-setup",
+      "version": "0.1.0",
+      "path": "modules/coordination/jev-oss-compare/v0.1.0/",
+      "recorded_at": "2026-09-28T04:35:00Z",
+      "valid_time": {
+        "start": "2026-09-28T00:00:00-04:00",
+        "end": null
+      },
+      "status": "draft",
+      "summary": "Comparison lane only; ACS remains HOTLOAD default for Claude+Kilo."
     }
   ]
 }
