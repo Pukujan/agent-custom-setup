@@ -1,6 +1,6 @@
 {
   "schema_version": "content-generation.visual-style.v1",
-  "reference_asset": ".content-system/assets/adapter-placeholder.txt",
+  "reference_asset": "modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero.png",
   "generation_workflow": "built-in image_gen",
   "narrative_roles": [
     "hero",
@@ -15,19 +15,20 @@
     "ACS registry blue accent"
   ],
   "subjects": [
-    "agents reading HOTLOAD.md",
-    "registry cards"
+    "designer + robot companion catching constraint drift at a route fork (hero)",
+    "three module cards: gavel/loop, CPU spark, agents at a checklist (supporting)"
   ],
-  "composition": "documentation-first; narrative hero deferred",
-  "text_policy": "no baked-in UI chrome text in deferred assets",
+  "composition": "wide 16:9 narrative cards; exact title/subtitle only in a quiet panel; no fake metrics or dense UI chrome",
+  "text_policy": "exact title and subtitle only, correctly spelled and legible; reject garbled or extra lettering",
   "roles": {
     "documentation": "non-narrative helper records and placeholders",
-    "hero": "deferred until narrative art ships"
+    "hero": "root README + product-page hero (jev-routing-hero.png)",
+    "supporting": "module-separation overview (acs-three-modules.jpg)"
   },
   "reject_when": [
     "secrets in images",
     "Desktop path treated as SoT",
     "SVG substituted for required narrative raster"
   ],
-  "status_note": "Narrative raster art deferred; placeholder is non-narrative documentation role only."
+  "status_note": "Two narrative rasters shipped (Refs #19 #44): accepted hero plus text-free three-module supporting visual; placeholder remains documentation-role only."
 }

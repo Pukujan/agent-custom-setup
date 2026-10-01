@@ -1,14 +1,18 @@
 # Image notes
 
-Narrative hero/problem README images are **not generated on this machine yet**. This
-repository ships a text-first README and one small non-narrative SVG icon
-(`assets/registry-icon.svg`) so the CGM adapter has a real asset on day one without
-claiming visuals that do not exist.
+The ACS root README now carries **two narrative rasters** (Refs #19 #44):
 
-When a built-in image generator is available, add wide hero and problem rasters under
-`assets/`, record full provenance for each in `.content-system/asset-manifest.json`
-(role, exact title/subtitle, dimensions, prompt record, SHA-256 hash, alt text, review
-decision), then link them from `README.md`. Until then the visual contract declares
-`generation_workflow: "built-in image_gen"` while the manifest intentionally lists **zero**
-narrative rasters — the honest "text-first, images pending" boundary described in the
-README's "Image generation and use" section.
+1. **Hero** — `modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero.png`
+   (1822x1024; exact title "Catch mistakes earlier", subtitle "Jev routing turns your
+   constraints into checkpoints"; prompt record `jev-routing-hero-prompt.md` beside it).
+2. **Three-module overview** — `assets/acs-three-modules.jpg` (1824x1024; text-free by
+   design after attempt 1 was rejected for garbled lettering; prompt record
+   `assets/acs-three-modules-prompt.md`).
+
+Full provenance for both — role, exact text, dimensions, prompt record, SHA-256 hash,
+alt text, crop behavior, rejection conditions, review decision — lives in
+`.content-system/asset-manifest.json`. Image provenance is never narrated inside the
+README itself.
+
+The small non-narrative SVG mark (`assets/registry-icon.svg`) remains the registry seal
+for eval variants and tooling, not the README hero.

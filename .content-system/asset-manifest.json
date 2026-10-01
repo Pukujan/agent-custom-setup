@@ -1,6 +1,6 @@
 {
   "schema_version": "content-generation.asset-manifest.v1",
-  "system_version": "0.5.5",
+  "system_version": "0.5.7",
   "assets": [
     {
       "id": "acs-adapter-placeholder",
@@ -23,7 +23,7 @@
       "exact_title": "Catch mistakes earlier",
       "exact_subtitle": "Jev routing turns your constraints into checkpoints",
       "alt_text": "Illustration: a designer holding a checklist of constraints sits at a warm evening desk beside a small robot companion who highlights one branch of a glowing route diagram; a quiet panel reads 'Catch mistakes earlier - Jev routing turns your constraints into checkpoints'.",
-      "usage": "top of reports/jev-routing-product.html hero section",
+      "usage": "root README hero (Refs #19) and top of reports/jev-routing-product.html hero section",
       "crop_behavior": "center crop on narrow screens; keep both characters and the title panel visible",
       "rejection_conditions": [
         "garbled or extra text in the panel",
@@ -35,7 +35,33 @@
       "provider": "built-in image_gen",
       "prompt_record": "modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero-prompt.md",
       "hash": "43773a8b6b65ac22dd307c91f8221938985cae11053cb1e6085d9f2f600b0641",
-      "status_note": "Narrative art for the Jev routing product pages (Refs #28); ACS root README art remains deferred."
+      "status_note": "Narrative art for the Jev routing product pages and the ACS root README hero (Refs #28 #19)."
+    },
+    {
+      "id": "acs-three-modules",
+      "path": "assets/acs-three-modules.jpg",
+      "role": "supporting",
+      "feature": "module-separation",
+      "orientation": "wide",
+      "dimensions": "1824x1024",
+      "text_policy": "no baked-in lettering; the exact title and subtitle below are carried by adjacent README prose, not rendered in the image (attempt 1 with in-image labels was rejected for garbled lettering)",
+      "prompt_recipe": "Three glowing rounded panel cards floating above a calm dark desk with blank surfaces and no typography: gavel with red circular arrow (jev-omp), blue CPU chip with yellow spark (jev-benchmark), three helmeted agent figures reviewing a checklist board (multi-agent-hotload); thin soft neon blue connector lines; anime-inspired editorial illustration, blue-violet night palette; caption intent - title 'Three modules, one registry', subtitle 'jev-omp catches drift live, jev-benchmark replays it offline, multi-agent-hotload ships both' stays in adjacent prose; 16:9 wide; no fake metrics, no dense UI chrome.",
+      "exact_title": "Three modules, one registry",
+      "exact_subtitle": "jev-omp catches drift live, jev-benchmark replays it offline, multi-agent-hotload ships both",
+      "alt_text": "Illustration: three glowing cards above a dark desk - a judge gavel with a red loop arrow, a blue CPU chip with a yellow spark, and three agent figures reviewing a checklist - representing the jev-omp, jev-benchmark, and multi-agent-hotload modules.",
+      "usage": "root README 'What you can make or use' module overview (Refs #44)",
+      "crop_behavior": "center crop on narrow screens; keep all three cards visible",
+      "rejection_conditions": [
+        "garbled or extra text rendered inside the image",
+        "a card or figure cropped out at common widths",
+        "secrets or private paths visible"
+      ],
+      "review_decision": "accepted",
+      "review": "accepted after one rejection (attempt 1 garbled lettering); attempt 2 text-free",
+      "provider": "built-in image_gen",
+      "prompt_record": "assets/acs-three-modules-prompt.md",
+      "hash": "e0b1092e5955d7828a2c584a5ba81890bb727ef7491d0990aa09e5df4fd8b3ec",
+      "status_note": "Narrative supporting visual for the three-module separation (Refs #19 #44)."
     }
   ]
 }
