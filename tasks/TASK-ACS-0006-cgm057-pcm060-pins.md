@@ -54,12 +54,19 @@ Open the PR (Refs #19 #44), wait for green `gates`, merge, append the leaf recei
 Completed:
 - Adapter pins CGM 0.5.7 @ `c069613…` (was 0.5.5 @ `085aeb1…`); brand-language + project-brief evidence synced; stale "planned/supersedes PR #20" item rewritten to shipped reality.
 - CI `PCM_PIN` bumped `743d50e…` (CLI 0.5.0) → `4e23854…` (CLI 0.6.0), matching `hotload_check.py`'s pin; proven locally: continuity 0.6.0 `validate` VALID + `preflight` TARGET_VALID on a clean clone of main.
-- README restructured per owner direction: multi-agent hotloader is the main marketing/feature surface; `jev-omp` + `jev-benchmark` are supporting modules. Two narrative rasters now ship (accepted hero + new text-free three-module visual `assets/acs-three-modules.jpg`, attempt 1 rejected for garbled lettering); provenance in `asset-manifest.json` + `filename-legends/module-separation.json`; `IMAGE_NOTES.md` no longer points at the removed image-generation section.
-- `AGENTS.md` hotload sentence synced to FULL CGM 0.5.7 / eight modules (was 0.5.1 / seven).
+- README restructured twice per owner direction: first three-module split, then **hotloader-first** — the multi-agent hotloader is the main marketing/user-facing feature; `jev-omp` + `jev-benchmark` pivot to supporting sections. Two narrative rasters ship (accepted hero + new text-free three-module visual `assets/acs-three-modules.jpg`, attempt 1 rejected for garbled lettering); provenance in `asset-manifest.json` + `filename-legends/module-separation.json`; `IMAGE_NOTES.md` no longer points at the removed image-generation section.
+- `AGENTS.md` hotload sentence synced to FULL CGM 0.5.7 / eight modules (was 0.5.1 / seven); `registry.json` hotloader projection synced 0.5.1 @ `9874b26` → 0.5.7 @ `c069613` / eight modules; `hotload_check.py` "seven" error strings → eight with threshold from `REQUIRED_CGM_MODULES`; removed the self-contradictory 0.5.4/c95d73a pin assertion in `test_hotload_check.py` (heading test now defers to `test_cgm_pin_constants_057`).
 
 Evidence:
 - `validate_content_system.py` @ `c069613`: helper+adapter **VALID**; `--mode writing` **VALID**.
-- `gate.py --fixture block_selfhost… --judge mock --json` → `"decision": "deny"`; jev-gate-pin tests 16 passed.
-- Pending gates: PR `gates` check on this exact candidate.
+- `gate.py --fixture block_selfhost… --judge mock --json` → `"decision": "deny"`; jev-gate-pin tests 16 passed; hotload suite 15 passed / 2 skipped (was 1 failed on `main`).
+- Pin-drift audit recorded as issue #46 (proposal: single `pins.json` + generator + fail-closed drift check in `gates`); hotloader already points adopters at 0.5.7/0.6.0, five projections had drifted and are corrected here.
 
-Next: commit, push, open PR (Refs #19 #44), green gates, merge, receipts on #19/#44, sync CURRENT.md.
+Decisions:
+- Keep pins as reviewed commits (no silent `main`-following) per HOTLOAD.md binding rule; "automatic" updates deferred to issue #46's manifest design.
+- Second README visual ships text-free because the image model garbled in-image lettering; exact title/subtitle carried by adjacent prose + manifest fields per IMAGE_GUIDE rejection rules.
+- CI PCM pin set to `4e23854` (CLI 0.6.0, the hotload module's own pin) rather than moving `main` `465036a`, to keep the required check aligned with what adopters must pin.
+
+Blocked/uncertain: none for this increment; live issue states (#19/#44/#46) own progression beyond the merge.
+
+Next: green `gates` on PR #45 → merge → receipts on #19/#44/#46/#11 → sync CURRENT.md.
