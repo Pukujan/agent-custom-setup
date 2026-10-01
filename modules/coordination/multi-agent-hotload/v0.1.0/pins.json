@@ -1,0 +1,99 @@
+{
+  "schema": "acs.hotload.pins.v1",
+  "note": "Single source of truth for the pins the multi-agent hotload pack advertises to adopters. Every file listed under 'projections' records one or more of these pins and MUST agree; scripts/check_pins.py fails closed on any disagreement, naming the file and the two values (found vs expected). Bumps are reviewed edits to this file (HOTLOAD.md forbids silently following moving upstream main); a sync_pins.py generator is a planned follow-up (#46).",
+  "pins": {
+    "cgm": {
+      "version": "0.5.7",
+      "commit": "c069613ca8b3e02bcf5aba1960160583537f8a3a",
+      "module_count": 8,
+      "module_count_word": "eight",
+      "modules": [
+        "brand-foundation",
+        "content-context",
+        "writing-direction",
+        "human-sounding-writing",
+        "human-output-naming",
+        "visual-direction",
+        "image-generation",
+        "html-demo"
+      ]
+    },
+    "pcm": {
+      "cli_version": "0.6.0",
+      "commit": "4e2385474b4af9249ca009cbdcb38c4498932475"
+    },
+    "acs_hotload_module": {
+      "id": "multi-agent-hotload",
+      "version": "0.1.0"
+    }
+  },
+  "superseded": {
+    "note": "Stale values that MUST NOT reappear as a pin. Presence of the canonical value alone is not enough: a projection that also still carries one of these has drifted.",
+    "cgm.version": ["0.5.1"],
+    "cgm.commit": ["9874b26"],
+    "cgm.module_count": ["seven"],
+    "pcm.commit": ["743d50e"]
+  },
+  "projections": [
+    {
+      "file": "AGENTS.md",
+      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
+    },
+    {
+      "file": "registry.json",
+      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version", "acs.id", "acs.version"]
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "pins": ["pcm.commit"]
+    },
+    {
+      "file": ".content-system/system-version.json",
+      "pins": ["cgm.version", "cgm.commit", "cgm.module_count"]
+    },
+    {
+      "file": ".content-system/review-rubric.json",
+      "pins": ["cgm.version"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/BEHAVIOR.md",
+      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
+      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/NOTES.md",
+      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/PROMPT_INJECT.md",
+      "pins": ["cgm.version", "cgm.commit"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/README.md",
+      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md",
+      "pins": ["cgm.version"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/module.json",
+      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version", "acs.id", "acs.version"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/examples/assignment.example.json",
+      "pins": ["cgm.version", "cgm.commit", "pcm.commit"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py",
+      "pins": ["cgm.version", "cgm.commit", "pcm.commit"]
+    },
+    {
+      "file": "modules/coordination/multi-agent-hotload/v0.1.0/tests/test_hotload_check.py",
+      "pins": ["cgm.version", "cgm.commit", "pcm.commit"]
+    }
+  ]
+}
