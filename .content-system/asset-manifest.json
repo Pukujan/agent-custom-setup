@@ -60,7 +60,7 @@
       "review": "accepted; regenerated with the updated image model (role xai grok-imagine) as a hub-and-spoke composition so the hotloader reads as the primary module and jev-omp / jev-benchmark as secondary satellites; text-free by design",
       "provider": "built-in image_gen",
       "prompt_record": "assets/acs-three-modules-prompt.md",
-      "hash": "b6b32e51e04f7572112b9caf384c7080bd3f1707cd0764800ffbb4d8defd7a79",
+      "hash": "9606df3c13bc8b5245e2372f232768d70e881879370095567032108b924b3044",
       "status_note": "Narrative supporting visual: hotloader-centered module map (Refs #19 #44)."
     },
     {
@@ -85,7 +85,7 @@
       "review": "accepted on first pass with the updated image model; panel lettering legible at 1200/720 px",
       "provider": "built-in image_gen",
       "prompt_record": "assets/acs-readme-hero-prompt.md",
-      "hash": "3a92dc610990d6733e0914499e807c57c8a6452711d70c8300207dd9cd36e39c",
+      "hash": "6eb48ad8cbc57cf28f10853b7edcf5783701b7483ff7fc906c39797d1d457e63",
       "status_note": "Regenerated root README hero with the updated image model (Refs #19)."
     }
   ]
