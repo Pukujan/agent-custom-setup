@@ -7,7 +7,7 @@
     "authors benchmarking cheap local vs hosted decision lanes on real transcripts"
   ],
   "problem": "Long agent sessions drift from pinned instructions: constraints vanish after compaction, plans contradict what the user asked, unsupported claims turn into risky tool actions, and the human finds out late. Multi-agent work needs a shared install surface for roles, leases, and proposals, and quality of human-facing output (titles, README) drifts too when no writing contract is pinned.",
-  "solution": "ACS registers versioned Jev-routing modules: three cheap decision gates (ambiguity, research-needed, tool pin), the jev-court advisor adjudicator, a local Laya benchmark lane with receipts, shared ops capture, and the multi-agent-hotload install surface that wires FULL PCM + FULL CGM 0.5.5 + the coordination runtime without vendoring those helpers.",
+  "solution": "ACS registers versioned Jev-routing modules: three cheap decision gates (ambiguity, research-needed, tool pin), the jev-court advisor adjudicator, a local Laya benchmark lane with receipts, shared ops capture, and the multi-agent-hotload install surface that wires FULL PCM + FULL CGM 0.5.7 + the coordination runtime without vendoring those helpers.",
   "mechanism": [
     "gates pack a tiny constrained package (pins + corrections + proposed action) and ask a cheap judge (local Laya CPU, mock in CI, or third-party hosted lane) for a typed decision",
     "deterministic route policy emits reconfirm_intent / rethink_plan / research_more / dispatch_verifier / escalate / proceed; incomplete or contradictory coverage can never silently proceed",
@@ -85,25 +85,25 @@
       }
     },
     {
-      "claim": "Root README and this adapter pin the full content-generation helper contract at 0.5.5 (eight modules including human-output-naming), product-only for the adopter README.",
-      "source": ".content-system/system-version.json on this branch (supersedes the PR #20 0.5.5 attempt; issue #19 remains open until merged)",
-      "status": "planned",
-      "supports": "system-version.json pins helper 0.5.5 @ 085aeb174619191f5c2a51a1f0715dd71113e386 with the eight-module list, and the validator reports helper+adapter VALID on this branch.",
-      "limits": "Not delivered until this PR merges and passes required checks; the multi-agent-hotload module docs keep their own older pins (out of scope per issue #19).",
-      "recorded_at": "2026-09-29T15:00:00Z",
+      "claim": "Root README and this adapter pin the full content-generation helper contract at 0.5.7 (eight modules including human-output-naming), product-only for the adopter README, with two regenerated narrative rasters shipped.",
+      "source": ".content-system/system-version.json on main (Refs #19; PR #20 merged as 6b02503, pin refresh follows on this branch)",
+      "status": "shipped",
+      "supports": "system-version.json pins helper 0.5.7 @ c069613ca8b3e02bcf5aba1960160583537f8a3a with the eight-module list; validate_content_system.py reports helper+adapter VALID and writing mode OK; README carries the regenerated hero (legible exact title/subtitle) plus a hotloader-centered module map, both with full manifest provenance.",
+      "limits": "Pin refresh lands with this branch's merge; the multi-agent-hotload module docs already pin 0.5.7 independently.",
+      "recorded_at": "2026-10-01T12:00:00Z",
       "valid_time": {
-        "start": "2026-09-29T15:00:00Z",
+        "start": "2026-10-01T12:00:00Z",
         "end": null
       },
       "cite_in_readme": false,
       "source_revision": {
         "kind": "repository_artifact",
-        "reference": "adapter pin refresh on task/ACS-readme-cgm-0.5.5 (open PR)",
+        "reference": "adapter pin refresh on task/ACS-0006-cgm057-pcm060-pins",
         "repository": "Pukujan/agent-custom-setup",
-        "commit": "8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4",
+        "commit": "6b0250399d08aae5c15b676df520f1491e01ee48",
         "path": ".content-system/system-version.json",
         "locator": "fields helper_version, helper_commit, modules",
-        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4/.content-system/system-version.json"
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/6b0250399d08aae5c15b676df520f1491e01ee48/.content-system/system-version.json"
       }
     }
   ],
@@ -112,6 +112,6 @@
     "Gates and the court are advisory seatbelts; the boss/human keeps authority",
     "Pilot receipts are discovery-only scope, not accuracy or catch-rate evidence",
     "No API keys, tokens, cookies, or .env contents enter the repository; provider keys are referenced by env-var name only",
-    "Live status as of 2026-09-29 (main @ 8c62ba1, PRs #30-#39 merged): session-ops capture PR #23 and the blind replay leaf #28 remain open; narrative marketing imagery for the ACS root README stays deferred"
+    "Live status as of 2026-10-01 (main @ 6b02503, PRs #16/#18/#20/#23 merged): the blind replay leaf #28 and module-separation #44 remain open; root README carries two narrative rasters with manifest provenance"
   ]
 }

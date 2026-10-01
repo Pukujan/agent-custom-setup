@@ -1,0 +1,63 @@
+{
+  "schema_version": "content-generation.filename-legend.v1",
+  "feature": "module-separation",
+  "module": "human-output-naming",
+  "title": "Three-module separation README visual",
+  "glossary": [
+    {
+      "token": "acs",
+      "meaning": "agent-custom-setup: this repository, the registry and workshop for Jev routing."
+    },
+    {
+      "token": "three-modules",
+      "meaning": "The three separated capabilities: jev-omp (live runtime), jev-benchmark (offline replay), multi-agent-hotload (install surface)."
+    },
+    {
+      "token": "prompt",
+      "meaning": "The regeneration record (prompt recipe, rejection history, review) kept beside its image."
+    },
+    {
+      "token": "-",
+      "meaning": "Safe-twin separator; basenames avoid spaces so relative web links never need encoding."
+    }
+  ],
+  "rules_summary": [
+    "Identity (acs) first, then the subject words, machine-safe twin style.",
+    "The SHA-256 lives in the asset manifest as a separate field, never in a basename.",
+    "No pitch/speed qualifiers apply to static README assets."
+  ],
+  "files": [
+    {
+      "path": "assets/acs-three-modules.png",
+      "identity": "ACS three modules",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "safe_twin",
+      "note": "Generated narrative supporting raster for the root README hotloader-centered module map."
+    },
+    {
+      "path": "assets/acs-three-modules-prompt.md",
+      "identity": "ACS three modules prompt",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "safe_twin",
+      "note": "Prompt record for the supporting visual; regenerates it safely."
+    },
+    {
+      "path": "assets/acs-readme-hero.png",
+      "identity": "ACS readme hero",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "safe_twin",
+      "note": "Regenerated root README hero raster (Refs #19)."
+    },
+    {
+      "path": "assets/acs-readme-hero-prompt.md",
+      "identity": "ACS readme hero prompt",
+      "pitch": null,
+      "speed_pct": null,
+      "style": "safe_twin",
+      "note": "Prompt record for the regenerated hero; regenerates it safely."
+    }
+  ]
+}

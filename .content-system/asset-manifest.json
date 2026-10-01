@@ -1,6 +1,6 @@
 {
   "schema_version": "content-generation.asset-manifest.v1",
-  "system_version": "0.5.5",
+  "system_version": "0.5.7",
   "assets": [
     {
       "id": "acs-adapter-placeholder",
@@ -35,7 +35,58 @@
       "provider": "built-in image_gen",
       "prompt_record": "modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero-prompt.md",
       "hash": "43773a8b6b65ac22dd307c91f8221938985cae11053cb1e6085d9f2f600b0641",
-      "status_note": "Narrative art for the Jev routing product pages (Refs #28); ACS root README art remains deferred."
+      "status_note": "Narrative art for the Jev routing product pages (Refs #28); the root README now uses the regenerated acs-readme-hero."
+    },
+    {
+      "id": "acs-three-modules",
+      "path": "assets/acs-three-modules.png",
+      "role": "supporting",
+      "feature": "module-separation",
+      "orientation": "wide",
+      "dimensions": "2816x1584",
+      "text_policy": "no baked-in lettering; the exact title and subtitle below are carried by adjacent README prose, not rendered in the image (attempt 1 with in-image labels was rejected for garbled lettering)",
+      "prompt_recipe": "Anime-inspired editorial diagram, blank surfaces with no typography: one LARGE dominant glowing central card holding three friendly helmeted agent figures around a shared checklist board with red X and circle marks (the multi-agent hotloader), radiating thin neon blue connector lines to TWO SMALLER dimmer satellite cards - left holds only a wooden judge gavel with a red circular loop arrow (jev-omp), right holds only a blue CPU chip with a yellow spark (jev-benchmark); calm dark evening desk backdrop, warm lamp glow, blue-violet palette; caption intent - title 'Three modules, one registry', subtitle 'the hotloader ships live defense and offline receipts into any repo' stays in adjacent prose; 16:9 wide; no fake metrics, no dense UI chrome.",
+      "exact_title": "Three modules, one registry",
+      "exact_subtitle": "the hotloader ships live defense and offline receipts into any repo",
+      "alt_text": "Illustration: one large glowing central card with three agent figures reviewing a shared checklist - the multi-agent hotloader - connected by neon lines to two smaller satellite cards, a judge gavel with a red loop arrow (jev-omp) and a blue CPU chip with a yellow spark (jev-benchmark).",
+      "usage": "root README 'What you can make or use' module overview (Refs #44)",
+      "crop_behavior": "center crop on narrow screens; keep the central hotloader card dominant and both satellites visible",
+      "rejection_conditions": [
+        "garbled or extra text rendered inside the image",
+        "a card or figure cropped out at common widths",
+        "secrets or private paths visible"
+      ],
+      "review_decision": "accepted",
+      "review": "accepted; regenerated with the updated image model (role xai grok-imagine) as a hub-and-spoke composition so the hotloader reads as the primary module and jev-omp / jev-benchmark as secondary satellites; text-free by design",
+      "provider": "built-in image_gen",
+      "prompt_record": "assets/acs-three-modules-prompt.md",
+      "hash": "b6b32e51e04f7572112b9caf384c7080bd3f1707cd0764800ffbb4d8defd7a79",
+      "status_note": "Narrative supporting visual: hotloader-centered module map (Refs #19 #44)."
+    },
+    {
+      "id": "acs-readme-hero",
+      "path": "assets/acs-readme-hero.png",
+      "role": "hero",
+      "orientation": "wide",
+      "dimensions": "2816x1584",
+      "text_policy": "exact title and subtitle only, in a quiet right-side panel; no other copy",
+      "prompt_recipe": "Anime-inspired editorial hero: a focused young content designer at a warm evening desk holds a paper card of written constraints while a small friendly rounded companion robot points at a highlighted branch of a floating glowing route diagram; cozy workspace, blue-violet night light with warm desk lamp, soft neon connector lines; a quiet right-side panel carries the exact text - title 'Catch mistakes earlier', subtitle 'Jev routing turns your constraints into checkpoints'; no fake metrics, no dense UI chrome, no cyberpunk darkness",
+      "exact_title": "Catch mistakes earlier",
+      "exact_subtitle": "Jev routing turns your constraints into checkpoints",
+      "alt_text": "Illustration: a designer holding a constraints card sits at a warm evening desk beside a small robot companion who highlights one branch of a glowing route diagram; a quiet panel reads 'Catch mistakes earlier - Jev routing turns your constraints into checkpoints'.",
+      "usage": "root README hero (Refs #19)",
+      "crop_behavior": "center crop on narrow screens; keep both characters and the title panel visible",
+      "rejection_conditions": [
+        "garbled or extra text in the panel",
+        "characters obscured or competing focal points",
+        "secrets or private paths visible"
+      ],
+      "review_decision": "accepted",
+      "review": "accepted on first pass with the updated image model; panel lettering legible at 1200/720 px",
+      "provider": "built-in image_gen",
+      "prompt_record": "assets/acs-readme-hero-prompt.md",
+      "hash": "3a92dc610990d6733e0914499e807c57c8a6452711d70c8300207dd9cd36e39c",
+      "status_note": "Regenerated root README hero with the updated image model (Refs #19)."
     }
   ]
 }

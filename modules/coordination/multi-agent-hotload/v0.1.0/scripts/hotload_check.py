@@ -479,7 +479,7 @@ def validate_pins(data: object) -> list[str]:
             )
         mods = cgm.get("modules")
         if not isinstance(mods, list):
-            errors.append("pins.cgm.modules: required list of all seven CGM module ids")
+            errors.append("pins.cgm.modules: required list of all eight CGM module ids")
         else:
             # accept either bare ids or modules/<id> paths
             normalized = []
@@ -494,9 +494,9 @@ def validate_pins(data: object) -> list[str]:
                     "pins.cgm.modules: FULL CGM requires all eight modules; missing: "
                     + ", ".join(missing)
                 )
-            if len(normalized) < 7:
+            if len(normalized) < len(REQUIRED_CGM_MODULES):
                 errors.append(
-                    "pins.cgm.modules: slim subset incomplete — need all seven CGM modules"
+                    "pins.cgm.modules: slim subset incomplete — need all eight CGM modules"
                 )
         hoc = cgm.get("human_output_contract")
         if not isinstance(hoc, list) or len(hoc) < 5:

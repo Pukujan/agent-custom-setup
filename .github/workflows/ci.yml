@@ -16,7 +16,7 @@ jobs:
   gates:
     runs-on: ubuntu-latest
     env:
-      PCM_PIN: 743d50ede188eb0cd5457967a041880e2ff4cb31
+      PCM_PIN: 4e2385474b4af9249ca009cbdcb38c4498932475
     steps:
       - uses: actions/checkout@v4
 
