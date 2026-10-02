@@ -94,6 +94,21 @@ Evidence:
 - `hotload_check.py --cgm-root /d/claude/content-generation-modules --adopter-root .`
   → OK (PROMPT_INJECT regenerated).
 
+Decisions:
+- Move the pin in place and keep the module at `v0.1.0` rather than cutting a new
+  module version — matches the prior in-place CGM bump (`895ae43`, 0.5.6→0.5.7)
+  and keeps the certified ACS version stable at `0.1.0`.
+- Move the four surfaces outside the checker's scan (`asset-manifest.json`
+  `system_version`, `brand-language.json`, `project-brief.json`, root `README.md`)
+  so no live ACS file still advertises 0.5.7; the checker cannot see them, so a
+  green `check_pins` alone would have left the drift.
+- Do **not** add `project-brief.json` to `pins.json` projections: its frozen
+  evidence SHAs (`8c62ba1d…`, `999d870…`) and historical version strings would
+  trip the commit/version scans, and those are provenance, not pins.
+- Point the rewritten brief evidence item at the pin-move commit's tree
+  (`8ff7e6b`) rather than the prior task's permalink (`6b02503`), which predated
+  the version it claimed.
+
 Blocked/uncertain:
 - `continuity validate` reports 3 errors locally. Two ("task ACS-0002/ACS-0005
   is active but CURRENT.md active task is ACS-0004") pre-exist on `origin/main`
