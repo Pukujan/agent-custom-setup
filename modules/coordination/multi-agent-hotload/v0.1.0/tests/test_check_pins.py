@@ -62,7 +62,7 @@ def test_check_pins_fails_on_drifted_sha(tmp_path: Path):
     text = target.read_text(encoding="utf-8")
     target.write_text(
         text.replace(
-            "c069613ca8b3e02bcf5aba1960160583537f8a3a",
+            "6831f91e165b62d719c05eb492f7375fa932b560",
             "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
         ),
         encoding="utf-8",
@@ -77,7 +77,7 @@ def test_check_pins_fails_on_drifted_version(tmp_path: Path):
     root = _seed_repo(tmp_path)
     target = root / "modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md"
     text = target.read_text(encoding="utf-8")
-    target.write_text(text.replace("0.5.7", "0.5.1"), encoding="utf-8")
+    target.write_text(text.replace("0.5.12", "0.5.1"), encoding="utf-8")
     proc = _run(root)
     assert proc.returncode == 1
     assert "check_pins: FAIL" in proc.stdout
