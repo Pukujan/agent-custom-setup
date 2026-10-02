@@ -3,8 +3,8 @@
   "note": "Single source of truth for the pins the multi-agent hotload pack advertises to adopters. Every file listed under 'projections' records one or more of these pins and MUST agree; scripts/check_pins.py fails closed on any disagreement, naming the file and the two values (found vs expected). Bumps are reviewed edits to this file (HOTLOAD.md forbids silently following moving upstream main); a sync_pins.py generator is a planned follow-up (#46).",
   "pins": {
     "cgm": {
-      "version": "0.5.7",
-      "commit": "c069613ca8b3e02bcf5aba1960160583537f8a3a",
+      "version": "0.5.12",
+      "commit": "6831f91e165b62d719c05eb492f7375fa932b560",
       "module_count": 8,
       "module_count_word": "eight",
       "modules": [
@@ -29,8 +29,8 @@
   },
   "superseded": {
     "note": "Stale values that MUST NOT reappear as a pin. Presence of the canonical value alone is not enough: a projection that also still carries one of these has drifted.",
-    "cgm.version": ["0.5.1"],
-    "cgm.commit": ["9874b26"],
+    "cgm.version": ["0.5.1", "0.5.7"],
+    "cgm.commit": ["9874b26", "c069613"],
     "cgm.module_count": ["seven"],
     "pcm.commit": ["743d50e"]
   },

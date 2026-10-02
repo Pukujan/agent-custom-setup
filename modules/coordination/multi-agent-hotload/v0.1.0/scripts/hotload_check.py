@@ -130,10 +130,10 @@ REQUIRED_PCM_FEATURES = (
     "leaf_parent_dependency_receipts",
 )
 
-CGM_PIN_VERSION = "0.5.7"
-CGM_PIN_REVISION_PREFIX = "c069613"
+CGM_PIN_VERSION = "0.5.12"
+CGM_PIN_REVISION_PREFIX = "6831f91e"
 PCM_PIN_REVISION_PREFIX = "4e23854"
-CGM_PIN_REVISION = "c069613ca8b3e02bcf5aba1960160583537f8a3a"
+CGM_PIN_REVISION = "6831f91e165b62d719c05eb492f7375fa932b560"
 CGM_HELPER_REPO = "https://github.com/Pukujan/content-generation-modules"
 
 
@@ -212,7 +212,7 @@ def validate_cgm_live(
         if require:
             errors.append(
                 "CGM checkout not found: set CGM_ROOT or pass --cgm-root to a "
-                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.7)"
+                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.12)"
             )
         return errors
 
@@ -465,7 +465,7 @@ def validate_pins(data: object) -> list[str]:
 
     cgm = pins.get("cgm")
     if not isinstance(cgm, dict):
-        errors.append("pins.cgm: required (FULL CGM 0.5.7 stack)")
+        errors.append("pins.cgm: required (FULL CGM 0.5.12 stack)")
     else:
         ver = str(cgm.get("version") or "")
         if ver != CGM_PIN_VERSION:
@@ -475,7 +475,7 @@ def validate_pins(data: object) -> list[str]:
         rev = str(cgm.get("revision") or "")
         if not rev.startswith(CGM_PIN_REVISION_PREFIX):
             errors.append(
-                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.7)"
+                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.12)"
             )
         mods = cgm.get("modules")
         if not isinstance(mods, list):
@@ -603,7 +603,7 @@ def run(
     print(f"  cgm_root={resolved_cgm}")
     print(f"  adopter_root={resolved_adopter}")
     print(f"  cgm_pin={CGM_PIN_VERSION}@{CGM_PIN_REVISION}")
-    print("  install_surface=FULL PCM + FULL CGM 0.5.7 + this runtime")
+    print("  install_surface=FULL PCM + FULL CGM 0.5.12 + this runtime")
     print("  cgm_validate=VALID (validate_content_system.py)")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
     print("  claim_queue=FIFO after vacancy; zombie re-reads GitHub claim")

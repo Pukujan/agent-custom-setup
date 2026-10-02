@@ -132,7 +132,7 @@ def _find_cgm_for_tests() -> Path | None:
     env = __import__("os").environ.get("CGM_ROOT")
     if env:
         candidates.insert(0, Path(env))
-    pin_prefix = "c069613"
+    pin_prefix = "6831f91e"
     matched = None
     for cand in candidates:
         if not (cand / "scripts" / "validate_content_system.py").is_file():
@@ -249,8 +249,8 @@ def test_example_pins_are_full_stacks():
     data = json.loads(
         (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
     )
-    assert data["pins"]["cgm"]["version"] == "0.5.7"
-    assert data["pins"]["cgm"]["revision"].startswith("c069613")
+    assert data["pins"]["cgm"]["version"] == "0.5.12"
+    assert data["pins"]["cgm"]["revision"].startswith("6831f91e")
     assert data["pins"]["pcm"]["revision"].startswith("4e23854")
     assert set(mod.REQUIRED_CGM_MODULES).issubset(
         {
@@ -298,10 +298,10 @@ def test_cli_ok_with_cgm_validate():
 
 def test_cgm_pin_constants_057():
     mod = _load_mod()
-    assert mod.CGM_PIN_VERSION == "0.5.7"
-    assert mod.CGM_PIN_REVISION.startswith("c069613")
-    assert mod.CGM_PIN_REVISION == "c069613ca8b3e02bcf5aba1960160583537f8a3a"
-    assert mod.CGM_PIN_REVISION_PREFIX == "c069613"
+    assert mod.CGM_PIN_VERSION == "0.5.12"
+    assert mod.CGM_PIN_REVISION.startswith("6831f91e")
+    assert mod.CGM_PIN_REVISION == "6831f91e165b62d719c05eb492f7375fa932b560"
+    assert mod.CGM_PIN_REVISION_PREFIX == "6831f91e"
 
 
 def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):

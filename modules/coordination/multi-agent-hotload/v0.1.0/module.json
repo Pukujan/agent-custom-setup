@@ -1,7 +1,7 @@
 {
   "id": "multi-agent-hotload",
   "name": "Multi-agent hotload coordination",
-  "purpose": "Install surface: hot-load FULL PCM + FULL CGM 0.5.7 + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
+  "purpose": "Install surface: hot-load FULL PCM + FULL CGM 0.5.12 + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
   "harness": "coordination",
   "created": "2026-09-27",
   "updated": "2026-09-27",
@@ -94,8 +94,8 @@
   },
   "dependencies": [
     "PCM @ 4e2385474b4af9249ca009cbdcb38c4498932475 (CLI 0.6.0, protocol 0.1.0-draft) — FULL stack: continuity + PR-only + required CI + branch protection/auto-merge preference; pin/reference, do not vendor",
-    "CGM @ c069613ca8b3e02bcf5aba1960160583537f8a3a (0.5.7) — FULL eight-module stack (incl. human-output-naming) + human_output_contract; not HSW+writing-direction only; pin/reference, do not vendor",
+    "CGM @ 6831f91e165b62d719c05eb492f7375fa932b560 (0.5.12) — FULL eight-module stack (incl. human-output-naming) + human_output_contract; not HSW+writing-direction only; pin/reference, do not vendor",
     "Python 3 + jsonschema for hotload_check"
   ],
-  "summary": "Hot-load FULL PCM + FULL CGM 0.5.7 + this runtime. Join order fills roles. Boss lease default 30m (15–120). GitHub-canonical claim_queue after vacancy; returning boss joins end; zombie re-reads claim. Agent-less watchdog ~10m. GitHub primary progress. No DAG. Slim subsets are incomplete installs."
+  "summary": "Hot-load FULL PCM + FULL CGM 0.5.12 + this runtime. Join order fills roles. Boss lease default 30m (15–120). GitHub-canonical claim_queue after vacancy; returning boss joins end; zombie re-reads claim. Agent-less watchdog ~10m. GitHub primary progress. No DAG. Slim subsets are incomplete installs."
 }

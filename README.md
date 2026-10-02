@@ -41,7 +41,7 @@ The hotloader carries two supporting capability modules, which you can also run 
 
 [`modules/coordination/multi-agent-hotload/v0.1.0/`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) is the user-facing entry point. An adopter repo loads `HOTLOAD.md` and gets a complete, pinned install:
 
-- **Full-stack wiring** — PCM CLI 0.6.0 (@ `4e23854…`: PR-only delivery, required CI gates, protection/auto-merge preference, leaf/parent receipts) plus the full Content Generation Modules contract 0.5.7 (@ `c069613…`: all eight modules including human-output-naming), joined to the Jev gate runtime. A slim subset fails the install on purpose.
+- **Full-stack wiring** — PCM CLI 0.6.0 (@ `4e23854…`: PR-only delivery, required CI gates, protection/auto-merge preference, leaf/parent receipts) plus the full Content Generation Modules contract 0.5.12 (@ `6831f91e…`: all eight modules including human-output-naming), joined to the Jev gate runtime. A slim subset fails the install on purpose.
 - **Coordination rules** — join-order roles, a boss **lease** with FIFO failover, a **claim queue**, and a **watchdog** that flags stale seats without making decisions ([`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md)).
 - **Boot-time prompt injection** — [`PROMPT_INJECT.md`](modules/coordination/multi-agent-hotload/v0.1.0/PROMPT_INJECT.md) is generated from the pinned writing router and pasted into the agent system prompt at session start, so every fresh session inherits the same rules.
 - **A one-command installer check** — [`hotload_check.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py) fails closed unless the assignment pins, the helper checkout revision, and the adapter validation all pass.
@@ -89,7 +89,7 @@ ACS grounds every public claim in versioned repository artifacts, committed eval
 
 | Claim | Source | Status | What this supports | What this leaves unproven |
 | --- | --- | --- | --- | --- |
-| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; pins PCM CLI 0.6.0 and Content Generation Modules 0.5.7; `hotload_check.py` fails closed on missing/stale pins. | Does not guarantee adopter agents honor every prompt rule; dependent gates remain opt-in. |
+| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; pins PCM CLI 0.6.0 and Content Generation Modules 0.5.12; `hotload_check.py` fails closed on missing/stale pins. | Does not guarantee adopter agents honor every prompt rule; dependent gates remain opt-in. |
 | **jev-court v2 stops advisory storms** | [`oh-my-pi/README.md`](oh-my-pi/README.md) | Shipped | Replay of the 94-note `#35` fixture passes 38/38 assertions; reduces 83 injections to 0. | Disabled by default; the async-result wake is harness-owned; live multi-day confirmation pending (#37). |
 | **Local Laya CPU lane runs end-to-end** | [`laya-pilot-20260929.json`](modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-pilot-20260929.json) | Experimentally supported | Completed 805/805 planned pilot jobs over 7 of 80 streams on local CPU. | Discovery-only on a truncated export; uncalibrated confidence (ECE 0.213); catch rate needs the 81-file blind replay ([#28](https://github.com/Pukujan/agent-custom-setup/issues/28)). |
 | **Tool gate denies unpermitted self-hosting** | [`jev-gate-pin README`](modules/coordination/jev-gate-pin/v0.1.0/README.md) | Shipped | Fish fixtures require `deny` on the self-host proposal; zero false negatives required on the block set. | Registered as draft/optional; binding load-order across third-party harnesses is outside v0.1.0 scope. |
@@ -110,7 +110,7 @@ The fastest path is the installer check; the rest exercise what it brings in:
 
 ```bash
 # 1. Validate a hotload install (schema-only here; a real install drops
-#    --skip-cgm-validate and passes --cgm-root <checkout at c069613…>)
+#    --skip-cgm-validate and passes --cgm-root <checkout at 6831f91e…>)
 python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
   --adopter-root . \
   --assignment modules/coordination/multi-agent-hotload/v0.1.0/examples/assignment.example.json \

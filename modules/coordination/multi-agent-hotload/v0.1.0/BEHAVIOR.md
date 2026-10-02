@@ -9,7 +9,7 @@ Owning issue: [#11](https://github.com/Pukujan/agent-custom-setup/issues/11).
 When told to load the agent hot-loader into a working repo, wire **all three** as **complete** stacks (slim subsets fail closed):
 
 1. **FULL PCM** @ `4e2385474b4af9249ca009cbdcb38c4498932475` (CLI **0.6.0**, protocol `0.1.0-draft`) — continuity/checkpoints **and** PR-only + required CI + branch-protection/auto-merge preference + fail-closed gates + receipts. Still not proposals/ACCEPT. See [adopter-enforcement](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md).
-2. **FULL CGM 0.5.7** @ `c069613ca8b3e02bcf5aba1960160583537f8a3a` — all eight modules + `human_output_contract` (not HSW + writing-direction only). README → writing-direction; posts/papers → hsw.
+2. **FULL CGM 0.5.12** @ `6831f91e165b62d719c05eb492f7375fa932b560` — all eight modules + `human_output_contract` (not HSW + writing-direction only). README → writing-direction; posts/papers → hsw.
 3. **This runtime** — join-order roles, boss lease (minutes), GitHub-canonical claim queue, agent-less watchdog, proposals → claim → PR
 
 ACS installs them together; it does **not** replace or vendor PCM/CGM source. ACS and **all** hotloader adopters must use the full stacks.
@@ -91,7 +91,7 @@ Read these in [Pukujan/jev-classifier](https://github.com/Pukujan/jev-classifier
 | --- | --- |
 | [`docs/AUTHORITY.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/AUTHORITY.md) | Who decides; project does not stop; GitHub canonical |
 | [`docs/AGENT_PROPOSALS.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/AGENT_PROPOSALS.md) | Propose / verdict / claim / receipt mechanics |
-| [`docs/HUMAN_NAMING.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/HUMAN_NAMING.md) | Human-readable titles; align with FULL CGM 0.5.7 pins |
+| [`docs/HUMAN_NAMING.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/HUMAN_NAMING.md) | Human-readable titles; align with FULL CGM 0.5.12 pins |
 
 This pack's local projections of those ideas: [ROLES.md](ROLES.md), [PROPOSALS.md](PROPOSALS.md), [HOTLOAD.md](HOTLOAD.md).
 
