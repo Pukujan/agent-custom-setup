@@ -61,3 +61,49 @@ overrides for fastapi, starlette and sse-starlette.
 Blocked/uncertain: not run on a real Mac. The Finder picker, the Command Line
 Tools prompt and the Node fallback have not been run.
 Next: a Mac run, then review and merge.
+
+### 2026-10-03 21:27:22 UTC — Grok Bot
+
+<!-- continuity:checkpoint {"agent":"Grok Bot","blocked":["Not yet run on a real Mac"],"changed":["modules/claude-code/inferhub-litellm-macos/v0.1.0/, registry.json, tasks/TASK-ACS-0008-macos-launcher.md, checkpoints/CURRENT.md"],"completed":["Added the macOS single-entry launcher module and registry entry; opened PR #65"],"decisions":["Home is ACS (launcher SoT); litellm-ckff-ops scripts reused unchanged for routing"],"evidence":["shellcheck clean; bash -n on 5.2.37 and 3.2.57; tests/dry_run.sh PASS on port 4110; end-to-end seat routing via mock upstream; gates CI pass on 6c9f1ed (run 37155116042)"],"next_action":"Alex runs the launcher on the Mac and reports on #64; owner reviews and merges PR #65","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0008","timestamp":"2026-10-03T21:27:22Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"ef7310895ccb97d317788cb74a065de8d895e4601fa769d58ccbb3cb6966cd81","request_id":"896ca61885b04487a7579964d263c9e3","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0008"} -->
+
+Completed:
+- Added the macOS single-entry launcher module and registry entry; opened PR #65
+
+Evidence:
+- shellcheck clean; bash -n on 5.2.37 and 3.2.57; tests/dry_run.sh PASS on port 4110; end-to-end seat routing via mock upstream; gates CI pass on 6c9f1ed (run 37155116042)
+
+Decisions:
+- Home is ACS (launcher SoT); litellm-ckff-ops scripts reused unchanged for routing
+
+Changed:
+- modules/claude-code/inferhub-litellm-macos/v0.1.0/, registry.json, tasks/TASK-ACS-0008-macos-launcher.md, checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- Not yet run on a real Mac
+
+Next:
+- Alex runs the launcher on the Mac and reports on #64; owner reviews and merges PR #65
+
+### 2026-10-03 21:27:31 UTC — Grok Bot
+
+<!-- continuity:checkpoint {"agent":"Grok Bot","blocked":["Not yet run on a real Mac"],"changed":["modules/claude-code/inferhub-litellm-macos/v0.1.0/, registry.json, tasks/TASK-ACS-0008-macos-launcher.md, checkpoints/CURRENT.md"],"completed":["Added the macOS single-entry launcher module and registry entry; opened PR #65"],"decisions":["Home is ACS (launcher SoT); litellm-ckff-ops scripts reused unchanged for routing"],"evidence":["shellcheck clean; bash -n on 5.2.37 and 3.2.57; tests/dry_run.sh PASS on port 4110; end-to-end seat routing via mock upstream; gates CI pass on 6c9f1ed (run 37155116042)"],"next_action":"Alex runs the launcher on the Mac and reports on #64; owner reviews and merges PR #65","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0008","timestamp":"2026-10-03T21:27:31Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"ef7310895ccb97d317788cb74a065de8d895e4601fa769d58ccbb3cb6966cd81","request_id":"b527b1c20cd34790927fcefbc0339e24","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0008"} -->
+
+Completed:
+- Added the macOS single-entry launcher module and registry entry; opened PR #65
+
+Evidence:
+- shellcheck clean; bash -n on 5.2.37 and 3.2.57; tests/dry_run.sh PASS on port 4110; end-to-end seat routing via mock upstream; gates CI pass on 6c9f1ed (run 37155116042)
+
+Decisions:
+- Home is ACS (launcher SoT); litellm-ckff-ops scripts reused unchanged for routing
+
+Changed:
+- modules/claude-code/inferhub-litellm-macos/v0.1.0/, registry.json, tasks/TASK-ACS-0008-macos-launcher.md, checkpoints/CURRENT.md
+
+Blocked/uncertain:
+- Not yet run on a real Mac
+
+Next:
+- Alex runs the launcher on the Mac and reports on #64; owner reviews and merges PR #65
