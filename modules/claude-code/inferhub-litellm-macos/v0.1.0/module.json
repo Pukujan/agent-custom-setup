@@ -1,0 +1,75 @@
+{
+  "id": "inferhub-litellm-macos",
+  "name": "InferHub Claude Code (LiteLLM) for macOS",
+  "purpose": "One double-click on a Mac: bootstrap, start local LiteLLM, pick folder and InferHub seats, run Claude Code",
+  "harness": "claude-code",
+  "title": "Claude Code via InferHub + local LiteLLM (macOS single entry point)",
+  "version": "0.1.0",
+  "created": "2026-10-03",
+  "updated": "2026-10-03",
+  "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/64",
+  "owning_agent": "agent-custom-setup / Grok Bot (executor for Alex)",
+  "deploy_mirrors": [
+    {
+      "label": "Mac ACS checkout",
+      "path": "~/work/agent-custom-setup/modules/claude-code/inferhub-litellm-macos/v0.1.0/",
+      "notes": "Run from a git checkout of ACS (git pull to update) or via the raw-URL one-liner in README.md. No separate mirror copy."
+    }
+  ],
+  "recorded_at": "2026-10-03T21:30:00Z",
+  "valid_time": {
+    "start": "2026-10-03T00:00:00-04:00",
+    "end": null
+  },
+  "status": "draft",
+  "path": "modules/claude-code/inferhub-litellm-macos/v0.1.0/",
+  "source_paths": [
+    "modules/claude-code/inferhub-litellm/v0.2.0/launch-claude-inferhub.ps1",
+    "Desktop deploy mirror launch-claude-inferhub.ps1 (2026-10-02, newer than v0.2.0; see NOTES.md)",
+    "Pukujan/litellm-ckff-ops@f04adc8 start-litellm.ps1, scripts/apply_inferhub_seat.py, scripts/merge_litellm_config.py, config/inferhub_fallbacks.yaml"
+  ],
+  "files": [
+    {
+      "path": "Launch Claude InferHub.command",
+      "role": "launcher",
+      "notes": "Single entry point; bash 3.2; bootstraps tools, starts LiteLLM, pickers, execs claude"
+    },
+    {
+      "path": "README.md",
+      "role": "operator-guide"
+    },
+    {
+      "path": "NOTES.md",
+      "role": "operator-notes",
+      "notes": "Windows parity, differences, secrets, test evidence"
+    },
+    {
+      "path": "tests/dry_run.sh",
+      "role": "test",
+      "notes": "Mock claude + real local LiteLLM on a non-4000 port"
+    },
+    {
+      "path": "module.json",
+      "role": "module-metadata"
+    }
+  ],
+  "secrets_policy": {
+    "never_commit": [
+      "API keys",
+      "tokens",
+      ".env file contents",
+      "LITELLM_MASTER_KEY values",
+      "InferHub credentials"
+    ],
+    "runtime_secret_locations": [
+      "~/.config/inferhub/.env (mode 600)",
+      "<litellm-ckff-ops>/.env (gitignored)"
+    ],
+    "repo_rule": "The launcher reads keys from files at runtime, prompts with hidden input, writes mode 600, never prints values."
+  },
+  "dependencies": [
+    "Pukujan/litellm-ckff-ops main (includes #34 startup fix and #37 seat fallbacks); cloned to ~/work/litellm-ckff-ops when absent (private: needs GitHub auth)",
+    "Installed on demand: uv, Python 3.12 (uv-managed), litellm[proxy]==1.103.0, Claude Code (native installer; npm fallback)"
+  ],
+  "summary": "Mac port of inferhub-litellm. Same Top 20 model table and defaults, same seat aliases and fallback chains (the workbench's own Python scripts run unchanged), same ANTHROPIC_* environment and env clearing, claude --model sonnet --permission-mode bypassPermissions. Not yet run on a real Mac."
+}
