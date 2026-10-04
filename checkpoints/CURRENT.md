@@ -1,6 +1,6 @@
 # Current Repository Checkpoint
 
-<!-- continuity:current {"active_task":"ACS-0008","active_task_file":"tasks/TASK-ACS-0008-narrow-to-coordination.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
+<!-- continuity:current {"active_task":"ACS-0009","active_task_file":"tasks/TASK-ACS-0009-licensing.md","protocol_version":"0.1.0-draft","schema":"project-continuity.current.v1"} -->
 
 This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
 
@@ -19,7 +19,8 @@ Phase: ACS narrowed to **execution coordination only**. The JEV decision tooling
 
 ## Active
 
-- ACS-0008 (#44, supersedes direction on #52/#63) narrow to coordination — moved the JEV decision tooling (`jev-oss-compare`, `jev-ambiguity-gate`, `jev-research-gate`, `jev-gate-pin`, `jev-shared`, `ops-db`, `session-ops-capture`) and the oh-my-pi runtime + evals out to `Pukujan/jev-dump`; moved the [CC] setup out to `Pukujan/claude-code-launcher`. Rewrote `registry.json` to a single module, filled `PROJECT.md` with the layer-ownership table, rewrote `POLICY.md` and the root `README.md`, `.content-system/project-brief.json`, the pack docs, and the image provenance to the coordination product. Removed the two CI steps that only exercised deleted paths (config-template parse, TypeScript syntax check) rather than leave silent false-passes. Task record `tasks/TASK-ACS-0008-narrow-to-coordination.md`; branch `task/ACS-narrow-to-coordination`. Evidence: `check_pins.py` OK (15 projections agree), hotloader pack tests pass.
+- ACS-0009 (#69) license the stack — stamp ACS with FSL-1.1-ALv2 (`LICENSE`, `NOTICE`, `TRADEMARK.md`, README section) so a third party may use it freely but not compete; stamp the pinned module repos (PCM, CGM, OIO, agent-stack-train) with Apache-2.0; make `jev-dump` private. Cross-repo observation OIO #24. Task record `tasks/TASK-ACS-0009-licensing.md`; branch `task/ACS-licensing`.
+- ACS-0008 (#44, supersedes direction on #52/#63) narrow to coordination — moved the JEV decision tooling (`jev-oss-compare`, `jev-ambiguity-gate`, `jev-research-gate`, `jev-gate-pin`, `jev-shared`, `ops-db`, `session-ops-capture`) and the oh-my-pi runtime + evals out to `Pukujan/jev-dump`; moved the [CC] setup out to `Pukujan/claude-code-launcher`. Rewrote `registry.json` to a single module, filled `PROJECT.md` with the layer-ownership table, rewrote `POLICY.md` and the root `README.md`, `.content-system/project-brief.json`, the pack docs, and the image provenance to the coordination product. Removed the two CI steps that only exercised deleted paths (config-template parse, TypeScript syntax check) rather than leave silent false-passes. Merged `main` @ `e1d7732` (PR #68). Task record `tasks/TASK-ACS-0008-narrow-to-coordination.md`; branch `task/ACS-narrow-to-coordination`. Evidence: `check_pins.py` OK (15 projections agree), hotloader pack tests pass.
 - ACS-0002 (#5) CI-gate ENFORCEMENT — workflow + markers on main (b094c07); **hosted verification UNBLOCKED 2026-09-29** (repo now public): branch protection LIVE via `gh api PUT .../protection` 200 — required check `gates` (strict) + 1 approving review + stale-dismiss; Actions succeeds (PR #38 `gates pass` 19s, run 36640336687); auto-merge ENABLED on #38 (SQUASH; state BLOCKED solely pending the owner's approving review). Superseded 2026-09-26 zero-step/403 plan-gap observations preserved on #5 (comment 5900442805), not rewritten.
 
 ## Queued
@@ -34,5 +35,5 @@ Phase: ACS narrowed to **execution coordination only**. The JEV decision tooling
 
 ## Next atomic action
 
-ACS-0008: run `check_pins.py` + the pack tests, commit the narrowing on `task/ACS-narrow-to-coordination`, push the branch, and open the PR (Refs #44 #52 #63).
+ACS-0009: commit the license files + README section on `task/ACS-licensing`, push the branch, open the PR (Refs #69), and confirm `gates`. Cross-repo: stamp the module repos with Apache-2.0 and make `jev-dump` private.
 Owner plan decision on #5 (Actions capacity/protection) remains the open enforcement gate.
