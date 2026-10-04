@@ -31,7 +31,7 @@
         "repository": "Pukujan/agent-custom-setup",
         "commit": "3a381eba11c6262c702f5d696878c371342e859a",
         "path": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
-        "locator": "sections 'Done when' and 'The coordination install'",
+        "locator": "sections 'Done when' and 'Load order'",
         "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
       }
     },
