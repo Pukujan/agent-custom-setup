@@ -162,7 +162,7 @@ After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-ro
 
 1. `hotload_check` loads `acs_prompt_inject` from pinned CGM `docs/writing-routing.json` (fields: `application`, `human_facing_default`, `routes`, `apply_checklist`, `always_on`, `opt_in_forbidden`, `system_block`, `surfaces`), writes [`PROMPT_INJECT.md`](PROMPT_INJECT.md), and prints `system_block` on OK stdout.
 2. Agents **MUST paste** `acs_prompt_inject.system_block` into the agent **system prompt at session boot** (every CGM adopter). Not per-report. Not per-HTML. Opt-in is forbidden (`always_on: true`).
-3. Before publishing compare / GitHub Pages HTML, run `python "$CGM_ROOT/scripts/verify_hsw_applied.py" --root "$CGM_ROOT" --mode acs-html --html <path-to-jev-oss-compare.html>` and fix any jargon / tool-dump fails.
+3. Before publishing compare / GitHub Pages HTML, run `python "$CGM_ROOT/scripts/verify_hsw_applied.py" --root "$CGM_ROOT" --mode acs-html --html <path-to-published-report.html>` and fix any jargon / tool-dump fails.
 3. Follow `apply_checklist` in `writing-routing.json`. Soft enforcement = no NLP CI grade of prose; contract language is still **MUST / APPLY**.
 
 
@@ -174,37 +174,21 @@ Cite: [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modul
 
 
 
-## Base vs full install (ACS optional layers)
+## The coordination install
 
-Alex lock 2026-09-28 (#25 RESEARCH-ALIGNED): **base excludes the four** seatbelt modules. **full** = base + the four. Do **not** force-bind full until gates green + Alex accept.
-
-### Base (required) — excludes the four
+The pack installs one thing: the coordination runtime over the full stack. There
+are no optional seatbelt layers.
 
 1. ACS policy + registry
 2. FULL PCM + FULL CGM (pins in this file)
 3. This coordination runtime (roles, lease, claim queue, watchdog, proposals)
 
-### Full (optional) = base + these **four**
+Authority: You/GitHub issue → Boss ACCEPT/REJECT → coder.
 
-| # | Module | Role |
-| --- | --- | --- |
-| 1 | `jev-ambiguity-gate` v0.1.0 | prompt/resume clarity JEV |
-| 2 | `jev-research-gate` v0.1.0 | research-needed JEV (#14 checklist fallback) |
-| 3 | `jev-gate-pin` v0.1.0 | PreToolUse tool pin JEV |
-| 4 | `session-ops-capture` v0.1.0 | transcript + OTLP (Langfuse via OTLP only) + Pass2 embeds offline |
-
-Shared buffer SoT (pulled with full): `ops-db` v0.1.0 — per-partition FIFO; lasting proof **only** git + GitHub issues + benchmarks. Helpers: `jev-shared` (OpenRouter).
-
-Authority: You/GitHub issue → Boss ACCEPT/REJECT → JEV seatbelts → coder.
-
-**Verify full (mock CI):**
+**Verify (mock CI):**
 ```bash
-python -m pytest \
-  modules/coordination/ops-db/v0.1.0/tests \
-  modules/coordination/jev-ambiguity-gate/v0.1.0/tests \
-  modules/coordination/jev-research-gate/v0.1.0/tests \
-  modules/coordination/jev-gate-pin/v0.1.0/tests \
-  modules/coordination/session-ops-capture/v0.1.0/tests -q
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py
+python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```
 
 

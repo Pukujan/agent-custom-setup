@@ -31,7 +31,7 @@
     },
     "harness": {
       "type": "string",
-      "description": "Runtime harness id (e.g. claude-code, oh-my-pi)."
+      "description": "Runtime harness id (e.g. coordination)."
     },
     "title": {
       "type": "string"

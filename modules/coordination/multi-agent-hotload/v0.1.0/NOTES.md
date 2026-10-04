@@ -39,7 +39,7 @@ Never commit or print API keys, tokens, cookies, or `.env` contents. This module
 
 ## Base lineage
 
-Branched from ACS policy / multi-setup registry lineage (PR #10 / `POLICY.md` + `registry.json`). Extends the registry; does not replace InferHub or other modules. Full-stack pin tightening Refs #11 (Alex binding: full PCM + full CGM for ACS and adopters).
+Branched from ACS policy / coordination-registry lineage (PR #10 / `POLICY.md` + `registry.json`). Full-stack pin tightening Refs #11 (Alex binding: full PCM + full CGM for ACS and adopters).
 
 ## Verify
 
@@ -52,7 +52,4 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```
 
-After VALID: MUST load modules per CGM writing-routing.json / ACS_VERIFY.md; apply acs_prompt_inject. After VALID: MUST load modules per CGM `docs/writing-routing.json` / `docs/ACS_VERIFY.md` (README→writing-direction; PR/issue/docs/commits/HTML reports/compare/appendable→hsw (default ON); basenames→hon); paste `acs_prompt_inject.system_block` at agent boot (always_on) (hotload_check writes `PROMPT_INJECT.md` and prints instruction). Validate does not enforce prose quality.
-
-## Optional HOTLOAD full (2026-09-28)
-See HOTLOAD.md **Base vs full**: ops-db + 3 JEV gates + session-ops. Not force-bound until gates green.
+After VALID: MUST load modules per CGM `docs/writing-routing.json` / `docs/ACS_VERIFY.md` (README→writing-direction; PR/issue/docs/commits/HTML reports/compare/appendable→hsw (default ON); basenames→hon); paste `acs_prompt_inject.system_block` at agent boot (always_on) (hotload_check writes `PROMPT_INJECT.md` and prints instruction). Validate does not enforce prose quality.

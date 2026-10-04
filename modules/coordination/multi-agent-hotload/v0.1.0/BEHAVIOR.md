@@ -83,21 +83,20 @@ Selective + version-pinned official docs — **not** always-on research. Same st
 - Learned (2–5 lines):
 ```
 
-## Citations (patterns — do not copy wholesale)
+## Coordination patterns
 
-Read these in [Pukujan/jev-classifier](https://github.com/Pukujan/jev-classifier) for proven ops patterns. They are **references**, not files to vendor into ACS:
+This pack defines its own coordination rules; they are not vendored from any other project:
 
-| Doc | Why cite |
+| Doc | What it defines |
 | --- | --- |
-| [`docs/AUTHORITY.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/AUTHORITY.md) | Who decides; project does not stop; GitHub canonical |
-| [`docs/AGENT_PROPOSALS.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/AGENT_PROPOSALS.md) | Propose / verdict / claim / receipt mechanics |
-| [`docs/HUMAN_NAMING.md`](https://github.com/Pukujan/jev-classifier/blob/main/docs/HUMAN_NAMING.md) | Human-readable titles; align with FULL CGM 0.5.12 pins |
-
-This pack's local projections of those ideas: [ROLES.md](ROLES.md), [PROPOSALS.md](PROPOSALS.md), [HOTLOAD.md](HOTLOAD.md).
+| [ROLES.md](ROLES.md) | Join-order role fill, boss lease, claim queue, watchdog-as-liveness-only |
+| [PROPOSALS.md](PROPOSALS.md) | Propose / ACCEPT-REJECT / claim / PR mechanics |
+| [HOTLOAD.md](HOTLOAD.md) | Load order, full-stack pins, verify |
 
 ## Explicit non-goals
 
-- Not an epistemic claim-graph, JEV label store, or paper-claim schema
+- Not an epistemic claim-graph, label store, or paper-claim schema
+- Not a decision-making or adjudication layer
 - Not a DAG engine or second product owner
 - Not a watchdog LLM
 - Not out-of-band DM for lease handoff

@@ -2,7 +2,7 @@
 
 Mechanics for multi-agent work after this pack is hot-loaded. **PCM is continuity only** — do not store proposals, ACCEPT/REJECT rulings, or work locks in PCM checkpoints as authority. GitHub issues hold those.
 
-Pattern references (read via GitHub; do not copy wholesale): project docs such as Jev `docs/AGENT_PROPOSALS.md`, `AUTHORITY.md`, and `HUMAN_NAMING.md`.
+This pack defines its own proposal mechanics; see [ROLES.md](ROLES.md) for who may rule and [HOTLOAD.md](HOTLOAD.md) for load order.
 
 ## Flow
 

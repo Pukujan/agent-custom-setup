@@ -1,108 +1,141 @@
 # Agent Custom Setup
 
-![One pack. Any repo. - The multi-agent hotloader installs decision gates into your coding agents: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram](assets/acs-readme-hero.png)
+![One pack. Any repo. - The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram](assets/acs-readme-hero.png)
 
-> **One hotload pack that gives your coding agents decision gates, live loop defense, and offline benchmark receipts — installed into any repo without vendoring anything.**
+> **One hotload pack that gives several coding agents a shared way to work one repository — roles, a decision boss, lease failover, and proposals that become PRs — installed into any repo without vendoring anything.**
 
 ## Why this exists
 
-You give an agent a real brief: hosted API only, keys live at one path, don't touch that table. For the first hour it obeys. Then context compacts, a subagent paraphrases, or an advisory interrupts the flow, and the agent proposes a self-hosted build against a non-existent key path—confidently, mid-task, on work you thought was proceeding smoothly. You find out hours later: a failed deploy, a wrong turn, or an "impossible" you shouldn't have accepted.
+Put three agents on one repository and the hard problem is not the code. It is
+**who decides, who is working, and who is allowed to act.** Two agents claim the
+same task. A seat goes quiet and nobody notices for an hour. An agent drafts a
+change nobody approved, or a returning agent acts on a lease it no longer holds.
+The work is fine; the coordination is not.
 
-The expensive part of agent work is no longer generating code. **It is drift you catch late.** Agent Custom Setup (ACS) answers that with one installable surface: the **multi-agent hotloader**. Point it at a working repo and it wires in a set of cheap decision gates placed at the moments drift first appears—your prompt, the agent's claims, the tool call it's about to make, the advice it's about to act on—plus the coordination rules that keep several agents on one repository honest. A gate doesn't stop the world when it sees something; it recommends a recovery route:
-
-- `reconfirm_intent` — go back and re-check what the user actually asked;
-- `rethink_plan` — the plan conflicts with a pinned instruction;
-- `research_more` — the claim needs a source before action;
-- `dispatch_verifier` — check this named claim against its source;
-- `escalate` — a human should decide;
-- `proceed` — covered, consistent, clear to go.
-
-**A real failure built one of these gates.** In a voice-lab session, the brief said hosted API; after compaction the agent planned a self-hosted build, missed the free model, and reached for the wrong key path. That transcript became the Fish fixtures the hotloader installs: the tool gate must answer `deny` on the bad proposal, and the test suite requires zero missed blocks across the fixture set.
+Agent Custom Setup (ACS) answers that with one installable surface: the
+**multi-agent hotloader**. Point it at a working repo and it wires in the rules
+that keep several agents honest on one repository — **join-order roles**, a
+**decision boss**, a **lease** that fails over when a seat goes stale, a FIFO
+**claim queue**, and **proposals** that only become PRs after the boss accepts
+them. It installs those rules on top of the full continuity and writing
+contracts, so a fresh session inherits the same discipline as the last one.
 
 ## What this project is
 
-**The product you install is the multi-agent hotloader.** ACS is the registry and workshop that ships it: a versioned coordination pack that, dropped into any working repo, wires together the full Project Continuity Modules (PCM) delivery discipline, the full Content Generation Modules writing/visual contract, and this repository's Jev decision-gate runtime—without copying any of their source.
+**The product you install is the multi-agent hotloader.** ACS is the registry and
+workshop that ships it: a versioned coordination pack that, dropped into any
+working repo, wires together the full Project Continuity Modules (PCM) delivery
+discipline, the full Content Generation Modules writing/visual contract, and
+this repository's coordination runtime — without copying any of their source.
 
-It is for operators who want **agents that flag their own drift while there's still time**, and for maintainers wiring several agents onto one repository. One command validates that an adopter repo has the whole stack pinned and loaded correctly.
-
-The hotloader carries two supporting capability modules, which you can also run on their own:
-
-- **`jev-omp`** — live runtime defense for the oh-my-pi harness: the `jev-court` advisor adjudicator and `loop-guard` that stop advisory storms and runaway loops in-session.
-- **`jev-benchmark`** — the offline evaluation lab: compaction replay, a local CPU decision lane, transcript harvest datasets, and comparison reports that show what each decision lane actually did.
+It is for operators running **several agents on one repository** who need a
+shared, explicit answer to *who is boss, who is working, and how does work get
+approved*, and for maintainers who want that discipline installed with one
+command that fails closed on a partial install.
 
 **What this project is not:**
-- It is *not* a hosted platform — one decision lane calls a third-party model (TypeSafe Jev 1.13 on OpenRouter), priced and governed by that provider, while the primary local lane runs on CPU.
-- It is *not* an accuracy guarantee — the local benchmark lane reports discovery-only numbers so far; the blind replay that would measure catch rate is open work ([issue #28](https://github.com/Pukujan/agent-custom-setup/issues/28)).
-- It is *not* a secrets vault — keys, tokens, and `.env` values never enter this repository; only environment-variable names are referenced.
+- It is *not* a decision-making or benchmarking layer — that work is parked
+  outside this repository, and ACS makes no decisions on an agent's behalf.
+- It is *not* a hosted platform — it is a set of rules, documents, and a
+  validator you run yourself.
+- It is *not* a secrets vault — keys, tokens, and `.env` values never enter this
+  repository; only environment-variable names are referenced.
 
 ## What you can make or use
 
 ### The main feature: the multi-agent hotloader
 
-[`modules/coordination/multi-agent-hotload/v0.1.0/`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) is the user-facing entry point. An adopter repo loads `HOTLOAD.md` and gets a complete, pinned install:
+[`modules/coordination/multi-agent-hotload/v0.1.0/`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md)
+is the user-facing entry point. An adopter repo loads `HOTLOAD.md` and gets a
+complete, pinned install:
 
-- **Full-stack wiring** — PCM CLI 0.6.0 (@ `4e23854…`: PR-only delivery, required CI gates, protection/auto-merge preference, leaf/parent receipts) plus the full Content Generation Modules contract 0.5.12 (@ `6831f91e…`: all eight modules including human-output-naming), joined to the Jev gate runtime. A slim subset fails the install on purpose.
-- **Coordination rules** — join-order roles, a boss **lease** with FIFO failover, a **claim queue**, and a **watchdog** that flags stale seats without making decisions ([`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md)).
-- **Boot-time prompt injection** — [`PROMPT_INJECT.md`](modules/coordination/multi-agent-hotload/v0.1.0/PROMPT_INJECT.md) is generated from the pinned writing router and pasted into the agent system prompt at session start, so every fresh session inherits the same rules.
-- **A one-command installer check** — [`hotload_check.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py) fails closed unless the assignment pins, the helper checkout revision, and the adapter validation all pass.
-
-### What the hotloader carries: the supporting modules
-
-![One large glowing central card with three agent figures reviewing a shared checklist - the multi-agent hotloader - connected by neon lines to two smaller satellite cards: a judge gavel with a red loop arrow (jev-omp) and a blue CPU chip with a yellow spark (jev-benchmark)](assets/acs-three-modules.png)
-
-Once installed, the hotloader brings the Jev decision gates and these two capability modules into the working repo:
-
-- **`jev-omp` — live loop defense.** `jev-court.ts` scores incoming advisories against turn budgets and turns noisy background pings into structured `act` / `rethink` / `suppress` verdicts; `loop-guard.ts` breaks runaway cycles. On the real 94-note advisory-storm fixture ([issue #35](https://github.com/Pukujan/agent-custom-setup/issues/35)), v2 turned 83 unwanted injections into 0 while passing 38/38 assertions. Key paths: [`oh-my-pi/extensions/jev-court.ts`](oh-my-pi/extensions/jev-court.ts), [`oh-my-pi/extensions/loop-guard.ts`](oh-my-pi/extensions/loop-guard.ts), [`oh-my-pi/config/WATCHDOG.yml`](oh-my-pi/config/WATCHDOG.yml).
-- **`jev-benchmark` — offline replay and receipts.** Replays real transcripts through compaction boundaries and scores typed recovery decisions on CPU, then writes pinned JSON receipts and comparison HTML. The capped local pilot completed 805/805 planned jobs over 7 of 80 streams. Key paths: [`modules/coordination/jev-oss-compare/v0.1.0/`](modules/coordination/jev-oss-compare/v0.1.0/README.md), [`laya_typed_decisions/v1/runner.py`](modules/coordination/jev-oss-compare/v0.1.0/scripts/laya_typed_decisions/v1/runner.py), [`reports/runs/laya-pilot-20260929.json`](modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-pilot-20260929.json).
+- **Full-stack wiring** — PCM CLI 0.6.0 (@ `4e23854…`: PR-only delivery, required
+  CI gates, protection/auto-merge preference, leaf/parent receipts) plus the full
+  Content Generation Modules contract 0.5.12 (@ `6831f91e…`: all eight modules
+  including human-output-naming), joined to the coordination runtime. A slim
+  subset fails the install on purpose.
+- **Coordination rules** — join-order roles, a boss **lease** with FIFO failover,
+  a **claim queue**, and a **watchdog** that flags stale seats without making
+  decisions ([`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md)).
+- **Proposals to PRs** — propose → boss ACCEPT/REJECT → claim a branch → PR
+  ([`PROPOSALS.md`](modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md)).
+- **Boot-time prompt injection** —
+  [`PROMPT_INJECT.md`](modules/coordination/multi-agent-hotload/v0.1.0/PROMPT_INJECT.md)
+  is generated from the pinned writing router and pasted into the agent system
+  prompt at session start, so every fresh session inherits the same rules.
+- **A one-command installer check** —
+  [`hotload_check.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py)
+  fails closed unless the assignment pins, the helper checkout revision, and the
+  adapter validation all pass.
 
 | Surface | What it is for | How you reach it | Status |
 | --- | --- | --- | --- |
-| **multi-agent-hotload** | Install the whole stack into a working repo | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) + `hotload_check.py` | Shipped (PR #12) |
-| **jev-omp** | Live advisory/loop defense in-session | [`oh-my-pi/extensions/`](oh-my-pi/extensions/) | Shipped (v2 court) |
-| **jev-benchmark** | Offline decision scoring + receipts | [`modules/coordination/jev-oss-compare/`](modules/coordination/jev-oss-compare/v0.1.0/) | Active pilot (#28 open) |
+| **multi-agent-hotload** | Install the coordination stack into a working repo | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) + `hotload_check.py` | Shipped (PR #12) |
+| **registry.json** | Declare which modules ACS ships | [`registry.json`](registry.json) | Shipped |
+| **POLICY.md** | Authority, PR-only rule, path layout | [`POLICY.md`](POLICY.md) | Shipped |
 
 ## How it works
 
 ### Step 1: Install the hotloader into a repo
 
-An adopter adds the pack, declares its pins in an assignment document, and runs `hotload_check.py`. The check resolves the pinned PCM and Content Generation Modules checkouts, runs the adapter validator, and only on success writes `PROMPT_INJECT.md` and prints the boot-time system block. Missing or stale pins fail closed — a partial install never looks complete.
+An adopter adds the pack, declares its pins in an assignment document, and runs
+`hotload_check.py`. The check resolves the pinned PCM and Content Generation
+Modules checkouts, runs the adapter validator, and only on success writes
+`PROMPT_INJECT.md` and prints the boot-time system block. Missing or stale pins
+fail closed — a partial install never looks complete.
 
-### Step 2: The gates intercept agent actions
+### Step 2: Roles fill by join order
 
-Inside the working repo, each gate packages a tiny constrained payload—the pinned constraints, recent tool outputs, and the proposed next action—and asks a cheap judge (local Laya CPU, a mock in CI, or the hosted lane) for a typed decision. A deterministic route policy then emits `reconfirm_intent` / `rethink_plan` / `research_more` / `dispatch_verifier` / `escalate` / `proceed`; incomplete or contradictory coverage can never silently proceed.
+Whoever continues first becomes the **decision boss**; the next is `coder1`, then
+`coder2`. A seed list in the assignment is a hint only — live join order wins, and
+tool identity is irrelevant
+([`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md)).
 
-- **PreToolUse Gate (`jev-gate-pin`)**: checks tool calls against pinned brief boundaries — a self-host proposal under a hosted-only brief triggers `deny` + `rethink_plan`.
-- **Prompt Ambiguity Gate (`jev-ambiguity-gate`)**: requests intent clarification on ambiguous prompts and resumptions.
-- **Research Needed Gate (`jev-research-gate`)**: forces `research_more` on high-consequence claims made without a source.
+### Step 3: The boss holds a lease, and it fails over
 
-### Step 3: Runtime defense keeps sessions from looping
+The decision boss checks in on a **lease** measured in minutes (default **30**,
+range **15–120**). Miss check-ins past the TTL and the seat goes vacant;
+claimants form a **FIFO claim queue** and the front takes boss. A returning old
+boss rejoins at the **end** of the queue — no automatic reclaim. A zombie boss
+that still thinks it holds the seat must reject boss-only actions and re-queue.
+A separate **watchdog** runs every ~10 minutes, agent-less, and only *flags* a
+stale seat — it never appoints a boss or makes decisions. **Watchdog ≠ failover.**
 
-Background advisories arrive constantly in multi-agent work. `jev-court.ts` checks the remaining advisory budget and turn counter; if an advisor tries to steer a settled decision, `loop-guard.ts` suppresses the interrupt so context can't run away. When real drift is detected, the court issues a typed verdict telling the agent to re-check the brief.
+### Step 4: Work becomes a PR through a proposal
 
-### Step 4: Offline replay proves the gates catch drift
-
-To keep the gates honest without human babysitting, `jev-benchmark` replays recorded transcripts through the decision model: transcripts are stripped of secrets and ingested, the compaction lab recreates the exact moment of failure, and the Laya runner scores whether the gate would have caught the drift, writing typed receipts to `reports/runs/`.
+An agent proposes; the boss ACCEPTs or REJECTs; an accepted proposal claims a
+branch and lands as a PR. Nothing goes straight to the protected default branch,
+and required CI gates must pass on the exact candidate before merge.
 
 ## Evidence and boundaries
 
-ACS grounds every public claim in versioned repository artifacts, committed evaluation receipts, or direct external records:
+ACS grounds every public claim in versioned repository artifacts:
 
 | Claim | Source | Status | What this supports | What this leaves unproven |
 | --- | --- | --- | --- | --- |
-| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; pins PCM CLI 0.6.0 and Content Generation Modules 0.5.12; `hotload_check.py` fails closed on missing/stale pins. | Does not guarantee adopter agents honor every prompt rule; dependent gates remain opt-in. |
-| **jev-court v2 stops advisory storms** | [`oh-my-pi/README.md`](oh-my-pi/README.md) | Shipped | Replay of the 94-note `#35` fixture passes 38/38 assertions; reduces 83 injections to 0. | Disabled by default; the async-result wake is harness-owned; live multi-day confirmation pending (#37). |
-| **Local Laya CPU lane runs end-to-end** | [`laya-pilot-20260929.json`](modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-pilot-20260929.json) | Experimentally supported | Completed 805/805 planned pilot jobs over 7 of 80 streams on local CPU. | Discovery-only on a truncated export; uncalibrated confidence (ECE 0.213); catch rate needs the 81-file blind replay ([#28](https://github.com/Pukujan/agent-custom-setup/issues/28)). |
-| **Tool gate denies unpermitted self-hosting** | [`jev-gate-pin README`](modules/coordination/jev-gate-pin/v0.1.0/README.md) | Shipped | Fish fixtures require `deny` on the self-host proposal; zero false negatives required on the block set. | Registered as draft/optional; binding load-order across third-party harnesses is outside v0.1.0 scope. |
-| **Hosted comparison decision endpoint exists** | [OpenRouter endpoint](https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints) | Shipped | Provider lists `typesafe/jev-1.13` text-to-decisions at $0.042/M prompt tokens, no completion fee. | Third-party pricing/availability can change; not exercised in CI; provider claims traceable, not verified by ACS. |
-| **Three-module separation across codebase** | [Issue #44](https://github.com/Pukujan/agent-custom-setup/issues/44) | Planned | Proposal to decouple `jev-omp`, `jev-benchmark`, and the hotloader into distinct trees and CI. | Under active design; paths stay at current locations until the migration PR merges. |
+| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; pins PCM CLI 0.6.0 and Content Generation Modules 0.5.12; `hotload_check.py` fails closed on missing/stale pins. | Does not guarantee adopter agents honor every rule; enforcement depends on the adopter's own CI and branch protection. |
+| **Pin drift is caught, not assumed** | [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) + [`check_pins.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py) | Shipped | The checker scans every declared projection for the pinned PCM/CGM commits, version families, and the "eight modules" count; CI runs it on every candidate. | It verifies that declared projections agree; it cannot see a surface nobody declared. |
+| **Roles, lease, and queue are specified** | [`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md) | Shipped | Join-order fill, boss lease (default 30m, range 15–120m), FIFO claim queue, watchdog-as-liveness-only, and the zombie rule are written down as binding. | A specification is not an enforcement mechanism; adherence is a process commitment. |
+| **Proposals gate the path to PR** | [`PROPOSALS.md`](modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md) | Shipped | Propose → boss ACCEPT/REJECT → claim → PR; no direct commits to the protected default branch. | Relies on the adopter enabling branch protection and required checks. |
 
 ### Operational Boundaries
 
-- **No upstream replacement:** ACS does not replace Project Continuity Modules (PCM) or Content Generation Modules; it pins them as external authorities and never vendors their source.
-- **Advisory safety net:** The gates and `jev-court` are advisory seatbelts. Final authority always belongs to the human operator.
-- **Pilot vs. catch rate:** Benchmark pilot numbers are discovery-only sanity checks, not statistical guarantees of live detection.
-- **Zero secrets in repository:** No API keys, credentials, session tokens, or `.env` files enter this repository. External model/provider keys are referenced only by environment-variable name.
-- **Visual assets:** Two narrative rasters ship with the README — the hotloader install hero ("One pack. Any repo.") and the hub-and-spoke module map — both rendered with the current image model; full provenance (role, exact text, dimensions, prompt record, hash, review) lives in `.content-system/asset-manifest.json`. The compact blue SVG mark (`assets/registry-icon.svg`) remains the small registry seal.
+- **No upstream replacement:** ACS does not replace Project Continuity Modules
+  (PCM) or Content Generation Modules; it pins them as external authorities and
+  never vendors their source.
+- **Coordination, not decision-making:** the boss ACCEPT/REJECT gate is a
+  governance rule, not an automated judge; final authority always belongs to the
+  human operator.
+- **No decisions on the agent's behalf:** ACS ships no model, no judge, and no
+  benchmark; decision-making is out of scope here.
+- **Zero secrets in repository:** No API keys, credentials, session tokens, or
+  `.env` files enter this repository. Any external keys are referenced only by
+  environment-variable name.
+- **Visual assets:** One narrative raster ships with the README — the hotloader
+  install hero ("One pack. Any repo.") — rendered with the current image model;
+  full provenance (role, exact text, dimensions, prompt record, hash, review)
+  lives in `.content-system/asset-manifest.json`. The compact blue SVG mark
+  (`assets/registry-icon.svg`) remains the small registry seal.
 
 ## Try it
 
@@ -116,21 +149,9 @@ python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py
   --assignment modules/coordination/multi-agent-hotload/v0.1.0/examples/assignment.example.json \
   --skip-cgm-validate
 
-# 2. Fish fixture gate: hosted-only brief denies the self-host proposal
-#    (expect "decision": "deny" with reason_code fish_hosted_brief_selfhost_tool)
-python3 modules/coordination/jev-gate-pin/v0.1.0/scripts/gate.py \
-  --fixture modules/coordination/jev-gate-pin/v0.1.0/fixtures/fish_hosted_vs_selfhost/block_selfhost_despite_hosted_brief.json \
-  --judge mock --json
+# 2. Fail-closed pin drift check across every declared projection
+python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py
 
-# 3. Full gate test suite (requires pytest):
-python3 -m pytest modules/coordination/jev-gate-pin/v0.1.0/tests/ -q
-
-# 4. Verify oh-my-pi watchdog and court extension configurations (needs pyyaml)
-python3 -c '
-import yaml, json, glob
-files = sorted(glob.glob("oh-my-pi/config/*.yml")) + sorted(glob.glob("oh-my-pi/config/*.json"))
-for f in files:
-    (json.load if f.endswith(".json") else yaml.safe_load)(open(f))
-print(f"OK: {len(files)} config template(s) parsed successfully")
-'
+# 3. Coordination pack test suite (requires pytest)
+python3 -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```

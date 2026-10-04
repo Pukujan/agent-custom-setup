@@ -106,10 +106,10 @@ Claims, branches, PRs, and boss actions (ACCEPT/REJECT) are **only** on the hot-
 
 | Join order | Agent id (example) | Role filled |
 | --- | --- | --- |
-| 1st to continue | `claude-code-main` | Decision boss (lease starts) |
-| 2nd | `jev-classifier@teresa` | coder1 |
-| 3rd | `omp@macbookpro` | coder2 |
+| 1st to continue | `agent-a@primary` | Decision boss (lease starts) |
+| 2nd | `agent-b@workstation` | coder1 |
+| 3rd | `agent-c@laptop` | coder2 |
 
-If boss lease expires (**minutes**) and the seat is vacant, `jev-classifier@teresa` and `omp@macbookpro` enqueue; the **front** of `claim_queue` takes boss. If `claude-code-main` wakes later as a zombie, they **re-read GitHub claim**, reject boss actions, and join the **end** of the queue (or work as a worker). A 10-minute stale watchdog flag alone does **not** hand the seat over.
+If boss lease expires (**minutes**) and the seat is vacant, `agent-b@workstation` and `agent-c@laptop` enqueue; the **front** of `claim_queue` takes boss. If `agent-a@primary` wakes later as a zombie, they **re-read GitHub claim**, reject boss actions, and join the **end** of the queue (or work as a worker). A 10-minute stale watchdog flag alone does **not** hand the seat over.
 
 See `examples/assignment.example.json` for `boss_failover` and `watchdog` shape.

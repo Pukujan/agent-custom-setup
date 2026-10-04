@@ -1,39 +1,42 @@
 # Agent Custom Setup — Policy
 
-Standalone policy for this repository. Prefer this file over expanding PROJECT.md / AGENTS.md for ACS-specific registry rules.
+Standalone policy for this repository. Prefer this file over expanding PROJECT.md / AGENTS.md for ACS-specific coordination rules.
+
+## What ACS owns
+
+ACS owns **execution coordination** for multi-agent work on one repository: turning logged tickets into workable tasks, decomposing them, and keeping several agents on one repo honest. The product it ships is the **multi-agent hotload pack** (`modules/coordination/multi-agent-hotload/`). ACS does **not** log tickets (OIO), write prose (CGM), own continuity (PCM), own versions (train), or decide between agents (JEV, parked in `jev-dump`). See PROJECT.md for the full layer table.
 
 ## Authority
 
 - **GitHub owns** accepted code, normative documents, issues (scope/lifecycle), and PR/merge delivery facts.
-- **This repository (ACS) is source of truth** for registered agent setups. Desktop paths are **deploy mirrors**, not SoT.
-- Sync direction: after an accepted merge, deploy **from ACS → Desktop** (and other listed mirrors). Do not treat Desktop edits as canonical until they are PR'd back into ACS.
-- **Never commit secrets**: no API keys, tokens, cookies, `.env` contents, bak files, or credential dumps. Launchers may *read* secret files by absolute path at runtime; they must not embed values.
+- **This repository (ACS) is source of truth** for the multi-agent hotload pack. Desktop paths are **deploy mirrors**, not SoT.
+- Sync direction: after an accepted merge, deploy **from ACS → mirrors**. Do not treat mirror edits as canonical until they are PR'd back into ACS.
+- **Never commit secrets**: no API keys, tokens, cookies, `.env` contents, bak files, or credential dumps.
 - **PR-only to `main`**: never commit directly to `main`. Branch per issue, push often, open a PR that links the owning issue. Do not force-push shared branches; do not merge your own work unless the user explicitly asks.
 
-## Multi-setup registry
+## Module registry
 
-Every setup is a named, versioned module under:
+Every module is a named, versioned directory under:
 
 ```text
-modules/<harness>/<setup-id>/v<semver>/
+modules/<area>/<module-id>/v<semver>/
 ```
 
-Examples:
+ACS ships exactly one module today:
 
-- `modules/claude-code/inferhub-litellm/v0.2.0/`
-- `modules/oh-my-pi/<setup-id>/v0.1.0/` (when contributed)
+- `modules/coordination/multi-agent-hotload/v0.1.0/` — the multi-agent hotload pack.
 
 ### Required identity fields (module + registry entry)
 
 | Field | Meaning |
 | --- | --- |
-| `name` | Human-readable setup name |
+| `name` | Human-readable module name |
 | `purpose` | One-line purpose |
-| `harness` | Runtime harness id (e.g. `claude-code`, `oh-my-pi`) |
-| `created` | ISO date or date-time when the setup was first recorded |
+| `harness` | Runtime harness id (e.g. `coordination`) |
+| `created` | ISO date or date-time when the module was first recorded |
 | `updated` | ISO date or date-time of last accepted content change |
-| `owning_issue` | GitHub issue URL or `#N` that owns this setup |
-| `owning_agent` | Agent/writer note (e.g. `agent-custom-setup` / litellm bot) |
+| `owning_issue` | GitHub issue URL or `#N` that owns this module |
+| `owning_agent` | Agent/writer note |
 | `deploy_mirrors` | Absolute paths (or labeled targets) that receive deployed copies |
 | `version` | Semver for this module directory (`v<semver>` folder name must match) |
 | `status` | `draft` \| `active` \| `deprecated` \| `unknown` |

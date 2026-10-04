@@ -111,7 +111,6 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 | --- | --- |
 | PCM @ `4e23854…` (CLI 0.6.0) | **Full** continuity + PR-only + required CI + protection/auto-merge preference — not proposals ; [adopter-enforcement](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md) |
 | CGM @ `6831f91e…` (**0.5.12**) | **Full** eight modules + human_output_contract — not HSW+WD only |
-| Project pattern docs (e.g. Jev proposals/authority/naming) | Read via GitHub; do not copy wholesale |
 
 ## Related ACS docs
 

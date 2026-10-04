@@ -12,68 +12,16 @@
       "status_note": "Replace with narrative raster under IMAGE_GUIDE when ACS root README gets art."
     },
     {
-      "id": "jev-routing-hero",
-      "path": "modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero.png",
-      "role": "hero",
-      "feature": "jev-routing-demo",
-      "orientation": "wide",
-      "dimensions": "1822x1024",
-      "text_policy": "exact title and subtitle only, in a quiet right-side panel; no other copy",
-      "prompt_recipe": "Anime-inspired editorial hero: a focused young content designer at a warm desk holds a paper card of written constraints while a small friendly rounded companion robot points at a highlighted branch of a floating route diagram; cozy evening workspace, blue-violet night light with warm desk lamp, soft neon connector lines; exact text - title 'Catch mistakes earlier', subtitle 'Jev routing turns your constraints into checkpoints'; 16:9 wide hero; no fake metrics, no dense UI chrome, no cyberpunk darkness.",
-      "exact_title": "Catch mistakes earlier",
-      "exact_subtitle": "Jev routing turns your constraints into checkpoints",
-      "alt_text": "Illustration: a designer holding a checklist of constraints sits at a warm evening desk beside a small robot companion who highlights one branch of a glowing route diagram; a quiet panel reads 'Catch mistakes earlier - Jev routing turns your constraints into checkpoints'.",
-      "usage": "top of reports/jev-routing-product.html hero section",
-      "crop_behavior": "center crop on narrow screens; keep both characters and the title panel visible",
-      "rejection_conditions": [
-        "garbled or extra text in the panel",
-        "characters obscured or competing focal points",
-        "secrets or private paths visible"
-      ],
-      "review_decision": "accepted",
-      "review": "accepted",
-      "provider": "built-in image_gen",
-      "prompt_record": "modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero-prompt.md",
-      "hash": "43773a8b6b65ac22dd307c91f8221938985cae11053cb1e6085d9f2f600b0641",
-      "status_note": "Narrative art for the Jev routing product pages (Refs #28); the root README now uses the regenerated acs-readme-hero."
-    },
-    {
-      "id": "acs-three-modules",
-      "path": "assets/acs-three-modules.png",
-      "role": "supporting",
-      "feature": "module-separation",
-      "orientation": "wide",
-      "dimensions": "2816x1584",
-      "text_policy": "no baked-in lettering; the exact title and subtitle below are carried by adjacent README prose, not rendered in the image (attempt 1 with in-image labels was rejected for garbled lettering)",
-      "prompt_recipe": "Anime-inspired editorial diagram, blank surfaces with no typography: one LARGE dominant glowing central card holding three friendly helmeted agent figures around a shared checklist board with red X and circle marks (the multi-agent hotloader), radiating thin neon blue connector lines to TWO SMALLER dimmer satellite cards - left holds only a wooden judge gavel with a red circular loop arrow (jev-omp), right holds only a blue CPU chip with a yellow spark (jev-benchmark); calm dark evening desk backdrop, warm lamp glow, blue-violet palette; caption intent - title 'Three modules, one registry', subtitle 'the hotloader ships live defense and offline receipts into any repo' stays in adjacent prose; 16:9 wide; no fake metrics, no dense UI chrome.",
-      "exact_title": "Three modules, one registry",
-      "exact_subtitle": "the hotloader ships live defense and offline receipts into any repo",
-      "alt_text": "Illustration: one large glowing central card with three agent figures reviewing a shared checklist - the multi-agent hotloader - connected by neon lines to two smaller satellite cards, a judge gavel with a red loop arrow (jev-omp) and a blue CPU chip with a yellow spark (jev-benchmark).",
-      "usage": "root README 'What you can make or use' module overview (Refs #44)",
-      "crop_behavior": "center crop on narrow screens; keep the central hotloader card dominant and both satellites visible",
-      "rejection_conditions": [
-        "garbled or extra text rendered inside the image",
-        "a card or figure cropped out at common widths",
-        "secrets or private paths visible"
-      ],
-      "review_decision": "accepted",
-      "review": "accepted; regenerated with the updated image model (role xai grok-imagine) as a hub-and-spoke composition so the hotloader reads as the primary module and jev-omp / jev-benchmark as secondary satellites; text-free by design",
-      "provider": "built-in image_gen",
-      "prompt_record": "assets/acs-three-modules-prompt.md",
-      "hash": "9606df3c13bc8b5245e2372f232768d70e881879370095567032108b924b3044",
-      "status_note": "Narrative supporting visual: hotloader-centered module map (Refs #19 #44)."
-    },
-    {
       "id": "acs-readme-hero",
       "path": "assets/acs-readme-hero.png",
       "role": "hero",
       "orientation": "wide",
-      "dimensions": "2816x1584",
+      "dimensions": "1280x720",
       "text_policy": "exact title and subtitle only, in a quiet right-side panel; no other copy",
-      "prompt_recipe": "Anime-inspired editorial hero: a focused developer at a warm evening desk slides a single glowing rounded module pack into an open laptop showing a repository tree; around the laptop, three friendly helmeted agent figures light up checkpoint nodes along a branching route diagram, and a small companion robot holds a checklist with green checks and one red X; cozy workspace, blue-violet night light with warm desk lamp, soft neon connector lines; a quiet right-side panel carries the exact text - title 'One pack. Any repo.', subtitle 'The multi-agent hotloader installs decision gates into your coding agents'; no fake metrics, no dense UI chrome, no cyberpunk darkness",
+      "prompt_recipe": "Anime-inspired editorial hero illustration, wide cinematic composition. A focused developer at a warm evening desk slides a single glowing rounded module pack into an open laptop whose screen shows a repository tree of folders and files as clean abstract shapes. Around the laptop, three friendly helmeted agent figures light up checkpoint nodes along a branching route diagram of soft neon connector lines. A small companion robot holds a checklist with green check marks and one red X. Cozy workspace in blue-violet night light with a warm desk lamp. A quiet right-side panel is the only lettering in the image, set in crisp readable type: title 'One pack. Any repo.' and subtitle 'The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs'. Every other surface in the scene stays free of words, labels, numbers, and logos.",
       "exact_title": "One pack. Any repo.",
-      "exact_subtitle": "The multi-agent hotloader installs decision gates into your coding agents",
-      "alt_text": "Illustration: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram and a companion robot holds a checklist; a quiet panel reads 'One pack. Any repo. - The multi-agent hotloader installs decision gates into your coding agents'.",
+      "exact_subtitle": "The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs",
+      "alt_text": "Illustration: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram and a companion robot holds a checklist; a quiet panel reads 'One pack. Any repo. - The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs'.",
       "usage": "root README hero (Refs #19)",
       "crop_behavior": "center crop on narrow screens; keep both characters and the title panel visible",
       "rejection_conditions": [
@@ -82,11 +30,11 @@
         "secrets or private paths visible"
       ],
       "review_decision": "accepted",
-      "review": "accepted; re-branded to the hotloader install story per owner direction (previous pass said 'Jev routing', which read as the wrong primary module); panel lettering legible",
+      "review": "accepted; re-rendered to the coordination-only story after the narrowing (the previous pass carried stale 'decision gates' framing); panel lettering legible and correctly spelled; native 1280x720 render",
       "provider": "built-in image_gen",
       "prompt_record": "assets/acs-readme-hero-prompt.md",
-      "hash": "6b03b93ad7f5b34bffc3309a8a68ea7f371e5372cf0c4270a710ec5372a4036f",
-      "status_note": "Root README hero: the multi-agent hotloader as the install surface (Refs #19)."
+      "hash": "65e43d5b162b4b244f9061e389e7eed043f8e4756ef026333c329f419be4a08f",
+      "status_note": "Root README hero: the multi-agent hotloader as the install surface (Refs #19 #44); subtitle states the coordination story only."
     }
   ]
 }

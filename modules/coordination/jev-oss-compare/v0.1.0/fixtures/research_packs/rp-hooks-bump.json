@@ -1,6 +1,0 @@
-{
-  "id": "rp-hooks-bump",
-  "claim_text": "Bump Claude Code hooks to new PreToolUse JSON API",
-  "known_docs": [],
-  "gold_decision": "yes"
-}

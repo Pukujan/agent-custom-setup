@@ -2,56 +2,30 @@
   "system": "agent-custom-setup",
   "version": "0.2.0",
   "created": "2026-09-25",
-  "updated": "2026-09-28",
-  "recorded_at": "2026-09-28T04:35:00Z",
+  "updated": "2026-10-04",
+  "recorded_at": "2026-10-04T00:00:00Z",
   "valid_time": {
     "start": "2026-09-25T00:00:00-04:00",
     "end": null
   },
   "status": "active",
   "policy": "POLICY.md",
-  "description": "Modular registry of custom agent setups. Path layout: modules/<harness>/<setup-id>/v<semver>/. ACS is source of truth; Desktop paths are deploy mirrors.",
+  "description": "Coordination registry for agent-custom-setup. ACS owns execution coordination for multi-agent work on one repository, shipped as the multi-agent hotload pack (join-order roles, boss lease, claim queue, agent-less watchdog, proposals). Path layout: modules/<area>/<setup-id>/v<semver>/. ACS is source of truth; Desktop paths are deploy mirrors.",
   "modules": [
-    {
-      "id": "inferhub-litellm",
-      "name": "InferHub Claude Code (LiteLLM)",
-      "purpose": "Claude Code via local LiteLLM \u2192 InferHub seats; CKFF-cleared launcher",
-      "harness": "claude-code",
-      "created": "2026-09-25",
-      "updated": "2026-09-25",
-      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/9",
-      "owning_agent": "agent-custom-setup / litellm bot",
-      "deploy_mirrors": [
-        {
-          "label": "Desktop claude-code launchers",
-          "path": "C:\\Users\\pujan\\OneDrive\\Desktop\\configs\\claude-code\\",
-          "notes": "Deploy FROM ACS after accepted merge. Desktop is mirror, not SoT."
-        }
-      ],
-      "version": "0.2.0",
-      "path": "modules/claude-code/inferhub-litellm/v0.2.0/",
-      "recorded_at": "2026-09-26T03:30:00Z",
-      "valid_time": {
-        "start": "2026-09-25T00:00:00-04:00",
-        "end": null
-      },
-      "status": "active",
-      "summary": "Sanitized InferHub-only Claude Code launcher (v0.2.0 seal). Seats main/advisor through unified local LiteLLM at 127.0.0.1:4000; loads LITELLM_MASTER_KEY from Desktop configs\\.env at runtime."
-    },
     {
       "id": "multi-agent-hotload",
       "name": "Multi-agent hotload coordination",
       "purpose": "Install surface: hot-load FULL PCM + FULL CGM 0.5.12 + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
       "harness": "coordination",
       "created": "2026-09-27",
-      "updated": "2026-10-01",
+      "updated": "2026-10-04",
       "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/11",
       "owning_agent": "agent-custom-setup",
       "deploy_mirrors": [
         {
           "label": "ACS module tree (SoT; agents load from checkout)",
-          "path": "D:\\\\claude\\\\agent-custom-setup\\\\modules\\\\coordination\\\\multi-agent-hotload\\\\v0.1.0\\\\",
-          "notes": "ACS is SoT. No Desktop launcher mirror required for this docs/runtime pack."
+          "path": "modules/coordination/multi-agent-hotload/v0.1.0/",
+          "notes": "ACS is SoT. Agents load from the checkout; no Desktop mirror required for this docs/runtime pack."
         }
       ],
       "version": "0.1.0",
@@ -67,139 +41,6 @@
         "PCM @ 4e2385474b4af9249ca009cbdcb38c4498932475 (CLI 0.6.0) full stack",
         "CGM @ 6831f91e165b62d719c05eb492f7375fa932b560 (0.5.12) full eight modules incl. human-output-naming"
       ]
-    },
-    {
-      "id": "ops-db",
-      "name": "ACS shared ops SQLite (bi-temporal)",
-      "purpose": "ONE shared ops.sqlite: transcript/gate/claim/embed namespaces; bi-temporal as-of backward queries.",
-      "harness": "coordination",
-      "created": "2026-09-28",
-      "updated": "2026-09-28",
-      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
-      "owning_agent": "agent-custom-setup",
-      "version": "0.1.0",
-      "path": "modules/coordination/ops-db/v0.1.0/",
-      "recorded_at": "2026-09-28T04:20:00Z",
-      "valid_time": {
-        "start": "2026-09-28T00:00:00-04:00",
-        "end": null
-      },
-      "status": "draft",
-      "summary": "Shared bi-temporal ops.sqlite module. HOTLOAD full. Embeds offline only."
-    },
-    {
-      "id": "jev-ambiguity-gate",
-      "name": "JEV ambiguity gate (prompt/resume)",
-      "purpose": "Optional JEV on prompt/resume: clear|ambiguous|insufficient.",
-      "harness": "coordination",
-      "created": "2026-09-28",
-      "updated": "2026-09-28",
-      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
-      "owning_agent": "agent-custom-setup",
-      "version": "0.1.0",
-      "path": "modules/coordination/jev-ambiguity-gate/v0.1.0/",
-      "recorded_at": "2026-09-28T04:20:00Z",
-      "valid_time": {
-        "start": "2026-09-28T00:00:00-04:00",
-        "end": null
-      },
-      "status": "draft",
-      "summary": "Ambiguity JEV. Separate from research. HOTLOAD full optional."
-    },
-    {
-      "id": "jev-research-gate",
-      "name": "JEV research-needed gate",
-      "purpose": "Optional JEV on claim snapshots: yes|no|insufficient; #14 checklist fallback.",
-      "harness": "coordination",
-      "created": "2026-09-28",
-      "updated": "2026-09-28",
-      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/24",
-      "owning_agent": "agent-custom-setup",
-      "version": "0.1.0",
-      "path": "modules/coordination/jev-research-gate/v0.1.0/",
-      "recorded_at": "2026-09-28T04:20:00Z",
-      "valid_time": {
-        "start": "2026-09-28T00:00:00-04:00",
-        "end": null
-      },
-      "status": "draft",
-      "summary": "Research-needed JEV. #14 fallback. HOTLOAD full optional."
-    },
-    {
-      "id": "jev-gate-pin",
-      "name": "JEV gate + constraint pin",
-      "purpose": "Optional PreToolUse-style gate with constraint pin/gather; Fish FN=0 on block.",
-      "harness": "coordination",
-      "created": "2026-09-27",
-      "updated": "2026-09-28",
-      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/17",
-      "owning_agent": "agent-custom-setup",
-      "version": "0.1.0",
-      "path": "modules/coordination/jev-gate-pin/v0.1.0/",
-      "recorded_at": "2026-09-28T04:20:00Z",
-      "valid_time": {
-        "start": "2026-09-27T00:00:00-04:00",
-        "end": null
-      },
-      "status": "draft",
-      "summary": "Tool pin gate + Claude PreToolUse live hook; Kilo stub. HOTLOAD full optional."
-    },
-    {
-      "id": "jev-shared",
-      "name": "ACS JEV shared helpers",
-      "purpose": "OpenRouter typesafe/jev-1.13 client shared by three gates.",
-      "harness": "coordination",
-      "created": "2026-09-28",
-      "updated": "2026-09-28",
-      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
-      "owning_agent": "agent-custom-setup",
-      "version": "0.1.0",
-      "path": "modules/coordination/jev-shared/v0.1.0/",
-      "recorded_at": "2026-09-28T04:20:00Z",
-      "valid_time": {
-        "start": "2026-09-28T00:00:00-04:00",
-        "end": null
-      },
-      "status": "draft",
-      "summary": "OpenRouter decisions helper; ops_db shim \u2192 ops-db module."
-    },
-    {
-      "id": "session-ops-capture",
-      "name": "Session ops capture (transcript + OTLP + Pass2)",
-      "purpose": "Claude+Kilo transcript adapters, OTLP to Langfuse, Pass2 classify/embed offline into shared ops.",
-      "harness": "coordination",
-      "created": "2026-09-27",
-      "updated": "2026-09-28",
-      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/22",
-      "owning_agent": "agent-custom-setup",
-      "version": "0.1.0",
-      "path": "modules/coordination/session-ops-capture/v0.1.0/",
-      "recorded_at": "2026-09-28T04:20:00Z",
-      "valid_time": {
-        "start": "2026-09-27T00:00:00-04:00",
-        "end": null
-      },
-      "status": "draft",
-      "summary": "Transcript+OTLP+Pass2. HOTLOAD full. Shared DB ownership: ops-db module."
-    },
-    {
-      "id": "jev-oss-compare",
-      "name": "JEV OSS comparison lane",
-      "purpose": "Optional ACS vs auto-mode/jev-gate compare + appendable HTML report",
-      "harness": "coordination",
-      "created": "2026-09-28",
-      "updated": "2026-09-28",
-      "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/25",
-      "owning_agent": "agent-custom-setup",
-      "version": "0.1.0",
-      "path": "modules/coordination/jev-oss-compare/v0.1.0/",
-      "recorded_at": "2026-09-28T04:35:00Z",
-      "valid_time": {
-        "start": "2026-09-28T00:00:00-04:00",
-        "end": null
-      },
-      "status": "draft",
-      "summary": "Comparison lane only; ACS remains HOTLOAD default for Claude+Kilo."
     }
   ]
 }
