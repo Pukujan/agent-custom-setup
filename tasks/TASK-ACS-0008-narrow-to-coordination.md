@@ -93,3 +93,30 @@ Blocked/uncertain:
   pre-narrowing tree; they are kept as as-of history, not rewritten.
 
 Next: commit, push, open the PR (Refs #44 #52 #63).
+
+### 2026-10-04 — hero re-render (as-of; live issues own progression)
+
+Completed:
+- Re-rendered `assets/acs-readme-hero.png` to the coordination-only story: the
+  previous raster's baked-in subtitle still read "installs decision gates"
+  (stale JEV framing). New panel subtitle: "The multi-agent hotloader gives your
+  coding agents roles, a decision boss, and proposals that become PRs".
+- Synced `README.md` alt text, `.content-system/asset-manifest.json`
+  (dimensions 1280x720, new SHA-256 `65e43d5b…`, subtitle, prompt recipe,
+  review), `assets/acs-readme-hero-prompt.md`, and `assets/IMAGE_NOTES.md`.
+
+Evidence:
+- Native output is 1280x720; stored as PNG (lossless re-encode of native pixels,
+  no upscaling) to satisfy the adopter PNG-hero contract.
+- `check_pins.py` OK; hotloader pack tests pass (21 passed, 2 skipped); CI
+  `gates` pass on PR #68 head `9842f81`.
+
+Decisions:
+- Swapped at native 1280x720 (owner choice) rather than upscaling to the old
+  2816x1584; the asset is stored as PNG because the adopter contract requires a
+  PNG hero, and the JPEG->PNG step is lossless.
+
+Blocked/uncertain:
+- None for this increment.
+
+Next: await owner go/no-go to merge PR #68.
