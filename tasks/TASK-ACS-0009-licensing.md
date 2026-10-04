@@ -75,3 +75,26 @@ Blocked/uncertain:
   outside this branch.
 
 Next: commit, push, open the PR (Refs #69).
+
+### 2026-10-04 23:45:27 UTC — owner/Pukujan ([CL] session)
+
+<!-- continuity:checkpoint {"agent":"owner/Pukujan ([CL] session)","blocked":[],"changed":["none"],"completed":["Added LICENSE (FSL-1.1-ALv2), NOTICE, TRADEMARK.md, and a README license section; created the ACS-0009 task record and pointed CURRENT at it."],"decisions":["ACS = FSL-1.1-ALv2 (owner choice); module repos = Apache-2.0; jev-dump private. Licensor line names Pukujan."],"evidence":["check_pins.py OK (15 projections agree); hotloader pack tests 21 passed/2 skipped; continuity validate VALID; preflight TARGET_VALID."],"next_action":"Push the branch and open the PR (Refs #69); then stamp the module repos and make jev-dump private.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0009","timestamp":"2026-10-04T23:45:27Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"c0aa189c6b28e391f96ef2703a8351b2e237cbfc2ce973c947fd6cea9de12c28","request_id":"0c8332e8134f4757a82b2dcf0f296824","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0009"} -->
+
+Completed:
+- Added LICENSE (FSL-1.1-ALv2), NOTICE, TRADEMARK.md, and a README license section; created the ACS-0009 task record and pointed CURRENT at it.
+
+Evidence:
+- check_pins.py OK (15 projections agree); hotloader pack tests 21 passed/2 skipped; continuity validate VALID; preflight TARGET_VALID.
+
+Decisions:
+- ACS = FSL-1.1-ALv2 (owner choice); module repos = Apache-2.0; jev-dump private. Licensor line names Pukujan.
+
+Changed:
+- none
+
+Blocked/uncertain:
+- none
+
+Next:
+- Push the branch and open the PR (Refs #69); then stamp the module repos and make jev-dump private.
