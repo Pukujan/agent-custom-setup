@@ -16,12 +16,12 @@
       "path": "assets/acs-readme-hero.png",
       "role": "hero",
       "orientation": "wide",
-      "dimensions": "2816x1584",
+      "dimensions": "1280x720",
       "text_policy": "exact title and subtitle only, in a quiet right-side panel; no other copy",
-      "prompt_recipe": "Anime-inspired editorial hero: a focused developer at a warm evening desk slides a single glowing rounded module pack into an open laptop showing a repository tree; around the laptop, three friendly helmeted agent figures light up checkpoint nodes along a branching route diagram, and a small companion robot holds a checklist with green checks and one red X; cozy workspace, blue-violet night light with warm desk lamp, soft neon connector lines; a quiet right-side panel carries the exact text - title 'One pack. Any repo.', subtitle 'The multi-agent hotloader installs decision gates into your coding agents'; no fake metrics, no dense UI chrome, no cyberpunk darkness",
+      "prompt_recipe": "Anime-inspired editorial hero illustration, wide cinematic composition. A focused developer at a warm evening desk slides a single glowing rounded module pack into an open laptop whose screen shows a repository tree of folders and files as clean abstract shapes. Around the laptop, three friendly helmeted agent figures light up checkpoint nodes along a branching route diagram of soft neon connector lines. A small companion robot holds a checklist with green check marks and one red X. Cozy workspace in blue-violet night light with a warm desk lamp. A quiet right-side panel is the only lettering in the image, set in crisp readable type: title 'One pack. Any repo.' and subtitle 'The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs'. Every other surface in the scene stays free of words, labels, numbers, and logos.",
       "exact_title": "One pack. Any repo.",
-      "exact_subtitle": "The multi-agent hotloader installs decision gates into your coding agents",
-      "alt_text": "Illustration: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram and a companion robot holds a checklist; a quiet panel reads 'One pack. Any repo. - The multi-agent hotloader installs decision gates into your coding agents'.",
+      "exact_subtitle": "The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs",
+      "alt_text": "Illustration: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram and a companion robot holds a checklist; a quiet panel reads 'One pack. Any repo. - The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs'.",
       "usage": "root README hero (Refs #19)",
       "crop_behavior": "center crop on narrow screens; keep both characters and the title panel visible",
       "rejection_conditions": [
@@ -30,11 +30,11 @@
         "secrets or private paths visible"
       ],
       "review_decision": "accepted",
-      "review": "accepted; re-branded to the hotloader install story per owner direction (the previous pass read as the wrong primary module); panel lettering legible",
+      "review": "accepted; re-rendered to the coordination-only story after the narrowing (the previous pass carried stale 'decision gates' framing); panel lettering legible and correctly spelled; native 1280x720 render",
       "provider": "built-in image_gen",
       "prompt_record": "assets/acs-readme-hero-prompt.md",
-      "hash": "6b03b93ad7f5b34bffc3309a8a68ea7f371e5372cf0c4270a710ec5372a4036f",
-      "status_note": "Root README hero: the multi-agent hotloader as the install surface (Refs #19)."
+      "hash": "65e43d5b162b4b244f9061e389e7eed043f8e4756ef026333c329f419be4a08f",
+      "status_note": "Root README hero: the multi-agent hotloader as the install surface (Refs #19 #44); subtitle states the coordination story only."
     }
   ]
 }

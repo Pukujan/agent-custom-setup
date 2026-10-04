@@ -1,6 +1,6 @@
 # Agent Custom Setup
 
-![One pack. Any repo. - The multi-agent hotloader installs decision gates into your coding agents: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram](assets/acs-readme-hero.png)
+![One pack. Any repo. - The multi-agent hotloader gives your coding agents roles, a decision boss, and proposals that become PRs: a developer slides a glowing install pack into a laptop showing a repository tree while three small agent figures light up checkpoint nodes on a route diagram](assets/acs-readme-hero.png)
 
 > **One hotload pack that gives several coding agents a shared way to work one repository — roles, a decision boss, lease failover, and proposals that become PRs — installed into any repo without vendoring anything.**
 
