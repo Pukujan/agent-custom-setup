@@ -1,0 +1,23 @@
+# NOTICE
+
+Agent Custom Setup (ACS)
+
+Copyright 2026 Pukujan
+
+This product is licensed under the Functional Source License, Version 1.1, ALv2
+Future License (FSL-1.1-ALv2). See `LICENSE`. On the second anniversary of the
+date each version is made available, that version becomes available under the
+Apache License, Version 2.0.
+
+## Third-party components
+
+ACS does not vendor third-party source. It references the following as pinned
+external dependencies at fixed commit revisions; their source is fetched by the
+adopter and is not distributed in this repository:
+
+- **Project Continuity Modules (PCM)** — pinned at
+  `4e2385474b4af9249ca009cbdcb38c4498932475` (CLI 0.6.0).
+- **Content Generation Modules (CGM)** — pinned at
+  `6831f91e165b62d719c05eb492f7375fa932b560` (0.5.12).
+
+Those projects carry their own licenses. Nothing in this NOTICE changes them.
