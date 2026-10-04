@@ -20,7 +20,7 @@ modules/<harness>/<setup-id>/v<semver>/
 
 Examples:
 
-- `modules/claude-code/inferhub-litellm/v0.2.0/`
+- `modules/coordination/multi-agent-hotload/v0.1.0/`
 - `modules/oh-my-pi/<setup-id>/v0.1.0/` (when contributed)
 
 ### Required identity fields (module + registry entry)
@@ -39,6 +39,8 @@ Examples:
 | `status` | `draft` \| `active` \| `deprecated` \| `unknown` |
 
 Schemas: `schemas/module.schema.json`, `schemas/registry.schema.json`. Index: `registry.json`.
+
+The Claude Code + InferHub launcher is not an ACS module any more; it lives in [Pukujan/claude-code-launcher](https://github.com/Pukujan/claude-code-launcher) (#66).
 
 ## CI and branch protection
 
