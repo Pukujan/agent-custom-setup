@@ -15,20 +15,18 @@
     "ACS registry blue accent"
   ],
   "subjects": [
-    "developer installing the hotloader pack into a laptop repo tree while agent figures light checkpoint nodes (hero)",
-    "hotloader hub card dominant, jev-omp gavel and jev-benchmark CPU as smaller satellites (supporting)"
+    "developer installing the hotloader pack into a laptop repo tree while agent figures light checkpoint nodes (hero)"
   ],
-  "composition": "wide 16:9; primary module drawn dominant and central, secondary modules smaller and dimmer; exact title/subtitle only in a quiet panel; no fake metrics or dense UI chrome",
+  "composition": "wide 16:9; the multi-agent hotloader drawn dominant and central; exact title/subtitle only in a quiet panel; no fake metrics or dense UI chrome",
   "text_policy": "exact title and subtitle only, correctly spelled and legible; reject garbled or extra lettering; text-free diagrams carry names in adjacent prose",
   "roles": {
     "documentation": "non-narrative helper records and placeholders",
-    "hero": "root README hero (acs-readme-hero.png); product-page hero stays jev-routing-hero.png",
-    "supporting": "hotloader-centered module map (acs-three-modules.png)"
+    "hero": "root README hero (acs-readme-hero.png)"
   },
   "reject_when": [
     "secrets in images",
     "Desktop path treated as SoT",
     "SVG substituted for required narrative raster"
   ],
-  "status_note": "Two narrative rasters ship with the root README (Refs #19 #44), both regenerated with the updated image model: legible hero panel + hub-and-spoke module map where the multi-agent hotloader is visually primary; placeholder remains documentation-role only."
+  "status_note": "One narrative raster ships with the root README (Refs #19 #44), regenerated with the updated image model; the multi-agent hotloader is visually primary. Placeholder remains documentation-role only."
 }

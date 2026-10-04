@@ -618,7 +618,7 @@ def run(
     print(
         "  hsw_verify: before publishing compare/Pages HTML run "
         "python <cgm>/scripts/verify_hsw_applied.py --root <cgm> --mode acs-html "
-        "--html <path-to-jev-oss-compare.html>"
+        "--html <path-to-published-report.html>"
     )
     if inject_text:
         print("  --- acs_prompt_inject.system_block (BOOT PASTE) ---")

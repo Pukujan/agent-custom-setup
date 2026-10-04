@@ -1,7 +1,0 @@
-{
-  "id": "res-yes-001",
-  "issue_ref": "#24",
-  "claim_text": "Bump Claude Code hooks to the new PreToolUse JSON permissionDecision API and document official matcher semantics.",
-  "known_docs": [],
-  "gold_decision": "yes"
-}

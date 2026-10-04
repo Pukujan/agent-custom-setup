@@ -26,11 +26,9 @@ metrics, no dense UI chrome, no cyberpunk darkness.
 ## Review
 
 - review_decision: accepted
-- Re-branded to the hotloader install story per owner direction: the previous
-  pass rendered "Jev routing turns your constraints into checkpoints", which
-  read as the wrong primary module next to a hotloader-first README.
+- Re-branded to the hotloader install story per owner direction: an earlier
+  pass rendered decision-routing copy, which read as the wrong primary module
+  next to a hotloader-first README.
 - Panel lettering correct and legible at 1200/720 px; the laptop-tree, install
   pack, checkpoint nodes, and checklist carry the "one pack installs gates into
   any repo" message.
-- Replaces `modules/coordination/jev-oss-compare/v0.1.0/reports/assets/jev-routing-hero.png`
-  as the root README hero; that raster stays for the product HTML page.

@@ -1,7 +1,0 @@
-{
-  "id": "amb-clear-001",
-  "event": "UserPromptSubmit",
-  "prompt": "Add pytest for pin_extract.extract_pins covering MUST hosted lines. Do not touch main.",
-  "resume_context": "",
-  "gold_decision": "clear"
-}

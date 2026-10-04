@@ -1,6 +1,0 @@
-{
-  "n": 123,
-  "gold": false,
-  "source": "machine-parse Temp ps-script-*.ps1 ACS markers",
-  "path": "D:\\claude\\agent-custom-setup\\modules\\coordination\\jev-oss-compare\\v0.1.0\\fixtures\\acs_tx\\tools.jsonl"
-}

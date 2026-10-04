@@ -20,20 +20,60 @@ Required CI and GitHub auto-merge are mandatory. Verify protection, required rev
 
 ## Main goal
 
-Describe the durable project goal.
+Run multi-agent work on one repository honestly. ACS owns **execution coordination**:
+turning logged tickets into workable tasks, decomposing them, and keeping several
+agents on one repo from colliding — join-order roles, a boss lease with FIFO
+failover, a GitHub-canonical claim queue, an agent-less watchdog, and proposals.
+The product it ships is the **multi-agent hotload pack**; ACS pins PCM and CGM as
+external authorities and vendors neither.
 
 ## Why
 
-Explain why the project exists.
+Agents are cheap to run and expensive to coordinate. Without a shared, versioned
+install surface, two agents on one repository duplicate work, act on stale state,
+or disagree with no tie-breaker. ACS answers the *coordination* half of that
+problem and nothing else — it does not log tickets, write prose, own versions, or
+make decisions on the agents' behalf.
 
 ## Scope
 
-Describe what is in scope.
+- The multi-agent hotload pack: roles, boss lease + failover, claim queue,
+  agent-less watchdog, proposals, and the install/verify surface
+  (`hotload_check.py`, `check_pins.py`, the pinned FULL PCM + FULL CGM stack).
+- Execution coordination: making tickets workable, breaking them down, and
+  sequencing the agents that run them.
+- A future **DAG++** execution layer is ACS-owned.
 
 ## Non-goals
 
-Describe what is explicitly out of scope.
+- **Not ticket logging.** The issue form, filer stamp, triage and prioritization
+  belong to OIO (Observational Issue Ops). ACS *runs* tickets; it does not file them.
+- **Not decision-making.** Adjudication / tie-breaking between agents is JEV's
+  intended job; JEV is not strong enough for it yet and is parked (see `jev-dump`).
+- **Not continuity, narrative, or versions.** Those belong to PCM, CGM, and the
+  release train respectively. ACS pins them; it does not replace or vendor them.
+- **Not a runtime-safety or benchmarking home.** The JEV gates, `jev-omp`, and
+  `jev-benchmark` moved out to `jev-dump`; the `[CC]` launcher moved to
+  `claude-code-launcher`. ACS no longer carries either.
 
 ## Definition of success
 
-Describe durable success criteria.
+An agent told to load the hot-loader into a working repo finishes with the FULL
+PCM + FULL CGM stack pinned and validated, the coordination runtime wired, and
+`hotload_check.py` green — and the coordination rules (roles, lease, claim queue,
+watchdog) hold under concurrent agents without a human arbitrating every step.
+Drift in the advertised pins fails closed.
+
+## Layer ownership (the stack, one line each)
+
+| Layer | Repo | Owns |
+| --- | --- | --- |
+| Ticket logging | OIO | Writing issue tickets **only** — the form, the filer stamp, the triage, and how to handle/prioritize them. **Not coordination.** |
+| Execution coordination | **ACS (this repo)** | **Running** the tickets: making them workable, breaking them down, coordinating the agents. The multi-agent hotload pack. Future DAG++ layer. |
+| Continuity | PCM | Tasks, checkpoints, push receipts, PR gates, the `continuity` CLI. |
+| Narrative | CGM | Writing routing, prose, naming, visual direction, image gen, HTML demos. |
+| Versions | train | The certified version set. |
+| Decision-making | JEV | Aspirational arbiter / tie-breaker — **parked** in `jev-dump`; not strong enough yet. |
+
+This table supersedes the earlier filed proposals that placed coordination in OIO
+(ACS #52) or kept JEV parked inside ACS (#44, #63).

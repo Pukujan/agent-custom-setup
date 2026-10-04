@@ -2,7 +2,7 @@ name: ci
 
 # Required status check for PCM-governed merges into main (ACS-0002).
 # Reproducible machine gates: pinned PCM continuity validate+preflight,
-# no committed secrets, config templates parse, extensions syntax-check.
+# hotloader pin drift check, hotloader pack tests, no committed secrets.
 
 on:
   pull_request:
@@ -23,10 +23,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
 
       - name: Install pinned continuity CLI
         run: |
@@ -56,34 +52,3 @@ jobs:
             exit 1
           fi
           echo "OK: no committed secrets"
-
-      - name: Config templates parse (YAML/JSON)
-        run: |
-          python - <<'PY'
-          import glob, json, sys, yaml
-          files = sorted(glob.glob("oh-my-pi/config/*.yml")) + sorted(glob.glob("oh-my-pi/config/*.json"))
-          for f in files:
-              with open(f, encoding="utf-8") as fh:
-                  (json.load if f.endswith(".json") else yaml.safe_load)(fh)
-              print("OK", f)
-          print(f"OK: {len(files)} template(s) parse")
-          PY
-
-      - name: Extension TypeScript syntax check
-        run: |
-          # Extensions are Bun/TypeScript (import type, satisfies, bun:*).
-          # Plain `node --check` cannot parse them under Node 24.
-          # esbuild parses syntax with all packages marked external (no install of Bun/@oh-my-pi).
-          shopt -s nullglob
-          files=(oh-my-pi/extensions/*.ts)
-          if (( ${#files[@]} == 0 )); then
-            echo "OK: no extension .ts files"
-            exit 0
-          fi
-          npm install --no-save esbuild@0.25
-          npx esbuild "${files[@]}" \
-            --outdir=/tmp/acs-ext-syntax \
-            --format=esm \
-            --platform=neutral \
-            --packages=external
-          echo "OK: esbuild parsed ${#files[@]} extension(s)"

@@ -2,116 +2,117 @@
   "schema_version": "content-generation.project-brief.v2",
   "project": "Agent Custom Setup",
   "audience": [
-    "operators running coding agents (Claude Code, Kilo, oh-my-pi) on real briefs who need drift caught before it ships",
-    "maintainers hot-loading multi-agent coordination into a working repo",
-    "authors benchmarking cheap local vs hosted decision lanes on real transcripts"
+    "operators running several coding agents on one repository who need a shared answer to who decides, who is working, and how work gets approved",
+    "maintainers hot-loading multi-agent coordination into a working repo with one command that fails closed on a partial install",
+    "teams that want coordination rules pinned as documents and a validator, not an agent that decides on their behalf"
   ],
-  "problem": "Long agent sessions drift from pinned instructions: constraints vanish after compaction, plans contradict what the user asked, unsupported claims turn into risky tool actions, and the human finds out late. Multi-agent work needs a shared install surface for roles, leases, and proposals, and quality of human-facing output (titles, README) drifts too when no writing contract is pinned.",
-  "solution": "ACS registers versioned Jev-routing modules: three cheap decision gates (ambiguity, research-needed, tool pin), the jev-court advisor adjudicator, a local Laya benchmark lane with receipts, shared ops capture, and the multi-agent-hotload install surface that wires FULL PCM + FULL CGM 0.5.12 + the coordination runtime without vendoring those helpers.",
+  "problem": "Put more than one agent on a single repository and the hard problem stops being the code. Two agents claim the same task, a seat goes quiet and nobody notices for an hour, an agent drafts a change nobody approved, or a returning agent acts on a lease it no longer holds. The work itself is fine; the coordination is not. There is no shared, written answer to who is boss, how a seat fails over, or how a proposed change earns a PR.",
+  "solution": "ACS ships the multi-agent hotloader: a versioned coordination pack that, dropped into any working repo, wires join-order roles, a decision boss on a minute-scale lease with FIFO failover, a claim queue, an agent-less watchdog, and a propose -> boss ACCEPT/REJECT -> claim -> PR path, on top of the full Project Continuity Modules (PCM) and full Content Generation Modules (CGM 0.5.12) contracts, without vendoring either helper's source.",
   "mechanism": [
-    "gates pack a tiny constrained package (pins + corrections + proposed action) and ask a cheap judge (local Laya CPU, mock in CI, or third-party hosted lane) for a typed decision",
-    "deterministic route policy emits reconfirm_intent / rethink_plan / research_more / dispatch_verifier / escalate / proceed; incomplete or contradictory coverage can never silently proceed",
-    "registry.json + POLICY.md define harness/setup/version layout; multi-agent-hotload load order is ACS policy -> FULL PCM -> FULL CGM -> runtime; hotload_check validates pins",
-    "decisions append to one shared ops.sqlite and pinned JSON receipts in git; GitHub issues/PRs own progression"
+    "join/continue order fills roles (first continuer = decision boss, next = coder1, ...); the assignment seed is a hint only and tool identity is irrelevant",
+    "the decision boss holds a lease measured in minutes (default 30, range 15-120); after the TTL the seat is vacant, claimants form a FIFO claim queue, and the front takes boss; a returning old boss rejoins at the end with no automatic reclaim",
+    "an agent-less watchdog runs every ~10 minutes and only flags a stale seat - it never appoints a boss or makes a product decision (watchdog != failover)",
+    "work moves proposal -> boss ACCEPT/REJECT -> claim branch -> PR; nothing commits straight to the protected default branch and required CI gates must pass on the exact candidate",
+    "hotload_check resolves the pinned PCM and CGM checkouts, runs the adapter validator, and only on success writes PROMPT_INJECT.md; missing or stale pins fail closed",
+    "pins.json is the single source of truth and check_pins.py fails closed when any declared projection disagrees on a PCM/CGM commit, version family, or the eight-module count"
   ],
   "evidence": [
     {
-      "claim": "jev-court v2 + loop-guard stop the advisory storm: replay of the real 94-note #35 fixture passes 38/38 assertions and turns v1's 83 injections into 0.",
-      "source": "oh-my-pi/README.md",
+      "claim": "The multi-agent hotloader is the install surface and fails closed on a partial install: FULL PCM + FULL CGM 0.5.12 + this runtime, with a thin subset rejected on purpose.",
+      "source": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
       "status": "shipped",
-      "supports": "The module README records the measured root cause, the v2 delivery contract (fail-quiet, budgets, no steer/wake), and the fixture-replay verification dated 2026-09-29.",
-      "limits": "Opt-in and disabled by default; the async-result wake itself remains harness-owned; a fresh-live-session confirmation receipt is still pending on issue #37.",
-      "recorded_at": "2026-09-29T15:00:00Z",
+      "supports": "The pack's entry document states the three full-stack install requirements, the load order, and that hotload_check.py fails the install unless the assignment pins, the helper checkout revision, and the adapter validation all pass.",
+      "limits": "A specification and a validator do not guarantee adopter agents honor every rule; enforcement depends on the adopter enabling branch protection and required checks.",
+      "recorded_at": "2026-10-04T00:00:00Z",
       "cite_in_readme": false,
       "source_revision": {
         "kind": "repository_artifact",
-        "reference": "oh-my-pi module README, Loop hardening section, on origin/main",
+        "reference": "HOTLOAD.md on main",
         "repository": "Pukujan/agent-custom-setup",
-        "commit": "8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4",
-        "path": "oh-my-pi/README.md",
-        "locator": "heading 'Loop hardening (2026-09-29 — issues #35/#37)'",
-        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4/oh-my-pi/README.md"
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
+        "path": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
+        "locator": "sections 'Done when' and 'The coordination install'",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
       }
     },
     {
-      "claim": "The local Laya lane scores typed recovery decisions end-to-end on CPU: capped local pilot completed 805/805 planned jobs over 7 of 80 streams.",
-      "source": "modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-pilot-20260929.json",
-      "status": "experimentally_supported",
-      "supports": "Content-free pilot receipt with pinned model/sdk revisions and job accounting; adapter suite 13/13 and a 24-case mutation-proven metamorphic suite exist alongside.",
-      "limits": "Discovery-only, non-blind, on a truncated export; checkpoint confidence is uncalibrated (reported ECE 0.213); escalates on truncated tool text are model uncertainty, not detected drift; no catch-rate claim until the full 81-file blind replay (issue #28 open).",
-      "recorded_at": "2026-09-29T15:00:00Z",
+      "claim": "Pin drift is caught, not assumed: pins.json is the single source of truth and check_pins.py fails closed on any declared projection that disagrees.",
+      "source": "modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py",
+      "status": "shipped",
+      "supports": "The checker reads pins.json, scans every declared projection, and exits non-zero on a foreign commit token, a wrong version family, a missing module-count word, or a superseded value - even when the canonical value is also present. CI runs it on every candidate.",
+      "limits": "It verifies that declared projections agree with the manifest; it cannot see a surface that was never declared as a projection.",
+      "recorded_at": "2026-10-04T00:00:00Z",
       "cite_in_readme": false,
       "source_revision": {
         "kind": "repository_artifact",
-        "reference": "laya-pilot-20260929 receipt merged via PR #36",
+        "reference": "check_pins.py on main",
         "repository": "Pukujan/agent-custom-setup",
-        "commit": "9999d870dd6e2b7b36b4066c5aee3cf0e67ff21c",
-        "path": "modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-pilot-20260929.json",
-        "locator": "fields job_accounting, label, annotations.confidence",
-        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/9999d870dd6e2b7b36b4066c5aee3cf0e67ff21c/modules/coordination/jev-oss-compare/v0.1.0/reports/runs/laya-pilot-20260929.json"
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
+        "path": "modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py",
+        "locator": "module docstring; run() over manifest['projections']",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py"
       }
     },
     {
-      "claim": "The tool gate must deny a self-host proposal that contradicts a hosted-only brief (Fish fixture), with zero missed blocks required on the block set.",
-      "source": "modules/coordination/jev-gate-pin/v0.1.0/README.md",
+      "claim": "Roles fill by live join order, the boss holds a minute-scale lease with FIFO failover, and the watchdog is liveness-only - all written down as binding.",
+      "source": "modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md",
       "status": "shipped",
-      "supports": "Module tree on main ships pin/gather/gate scripts, labeled Fish fixtures (block_selfhost_despite_hosted_brief.json expects deny), and tests requiring FN=0 on block.",
-      "limits": "Registered as a draft, optional and advisory; live production wiring and binding hotload load-order are explicitly out of v0.1.0 scope.",
-      "recorded_at": "2026-09-29T15:00:00Z",
+      "supports": "ROLES.md specifies join-order role fill, the lease TTL (default 30 minutes, range 15-120), the GitHub-canonical FIFO claim queue, the returning-boss-rejoins-at-end rule, the zombie-boss rule, and that the ~10-minute watchdog flags a stale seat without appointing a boss.",
+      "limits": "A written process is a commitment, not an enforcement mechanism; it relies on agents and operators reading the same document.",
+      "recorded_at": "2026-10-04T00:00:00Z",
       "cite_in_readme": false,
       "source_revision": {
         "kind": "repository_artifact",
-        "reference": "jev-gate-pin README five-part architecture + Fish fixtures",
+        "reference": "ROLES.md on main",
         "repository": "Pukujan/agent-custom-setup",
-        "commit": "8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4",
-        "path": "modules/coordination/jev-gate-pin/v0.1.0/README.md",
-        "locator": "section 'Five-part architecture' item 4",
-        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/8c62ba1d3af2c13eaebcdc8e801444b1ae4a0be4/modules/coordination/jev-gate-pin/v0.1.0/README.md"
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
+        "path": "modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md",
+        "locator": "role-fill, boss-lease, and watchdog sections",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md"
       }
     },
     {
-      "claim": "A hosted comparison lane exists: provider lists typesafe/jev-1.13 as a text-to-decisions model at $0.042 per million prompt tokens with no completion charge.",
-      "source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints",
+      "claim": "Proposals gate the path to a PR: propose -> boss ACCEPT/REJECT -> claim branch -> PR, with no direct commits to the protected default branch.",
+      "source": "modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md",
       "status": "shipped",
-      "supports": "The third-party endpoint record shows the decisions modality and pricing that jev-shared's live client targets; ACS code only references the model id and an env-var key name.",
-      "limits": "Third-party availability and pricing can change without notice; not exercised in CI; provider claims are traceable here, not independently verified by ACS.",
-      "recorded_at": "2026-09-29T15:00:00Z",
-      "cite_in_readme": false,
-      "source_revision": {
-        "kind": "external_source",
-        "reference": "OpenRouter model endpoint record for typesafe/jev-1.13",
-        "uri": "https://openrouter.ai/api/v1/models/typesafe/jev-1.13/endpoints",
-        "accessed_at": "2026-09-29"
-      }
-    },
-    {
-      "claim": "Root README and this adapter pin the full content-generation helper contract at 0.5.12 (eight modules including human-output-naming), product-only for the adopter README, with two regenerated narrative rasters shipped.",
-      "source": ".content-system/system-version.json on task/ACS-0052-cgm-0512-pin (Refs #55; release-train re-cert of CGM 0.5.12, parent #52)",
-      "status": "shipped",
-      "supports": "system-version.json pins helper 0.5.12 @ 6831f91e165b62d719c05eb492f7375fa932b560 with the eight-module list; validate_content_system.py reports helper+adapter VALID and writing mode OK; README carries the regenerated hero (legible exact title/subtitle) plus a hotloader-centered module map, both with full manifest provenance.",
-      "limits": "Pin refresh lands with this branch's merge; the multi-agent-hotload module docs pin 0.5.12 independently (pins.json is their source of truth).",
-      "recorded_at": "2026-10-02T12:00:00Z",
-      "valid_time": {
-        "start": "2026-10-02T12:00:00Z",
-        "end": null
-      },
+      "supports": "PROPOSALS.md defines the proposal lifecycle and the boss ACCEPT/REJECT gate that turns an accepted proposal into a claim on a branch and then a PR, keeping the proposal/ACCEPT layer out of PCM's scope.",
+      "limits": "Relies on the adopter enabling branch protection and required checks; the ACCEPT/REJECT gate is a governance rule, not an automated judge.",
+      "recorded_at": "2026-10-04T00:00:00Z",
       "cite_in_readme": false,
       "source_revision": {
         "kind": "repository_artifact",
-        "reference": "adapter pin refresh on task/ACS-0052-cgm-0512-pin",
+        "reference": "PROPOSALS.md on main",
         "repository": "Pukujan/agent-custom-setup",
-        "commit": "8ff7e6b7e8c4aefa70b2f3d62fac970b3f14d7fd",
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
+        "path": "modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md",
+        "locator": "flow: propose -> ACCEPT/REJECT -> claim -> PR",
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md"
+      }
+    },
+    {
+      "claim": "The adapter pins the full content-generation contract at 0.5.12 (eight modules including human-output-naming) and the pack pins PCM CLI 0.6.0, both fail-closed.",
+      "source": ".content-system/system-version.json",
+      "status": "shipped",
+      "supports": "system-version.json pins helper 0.5.12 @ 6831f91e165b62d719c05eb492f7375fa932b560 with the eight-module list; the pack's pins.json independently pins PCM CLI 0.6.0 @ 4e2385474b4af9249ca009cbdcb38c4498932475, and check_pins.py holds both.",
+      "limits": "The pins are exact and fail-closed; they do not claim the adopter's prose meets the writing contract, only that the correct modules are loaded.",
+      "recorded_at": "2026-10-04T00:00:00Z",
+      "cite_in_readme": false,
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "adapter pin on main",
+        "repository": "Pukujan/agent-custom-setup",
+        "commit": "3a381eba11c6262c702f5d696878c371342e859a",
         "path": ".content-system/system-version.json",
         "locator": "fields helper_version, helper_commit, modules",
-        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/8ff7e6b7e8c4aefa70b2f3d62fac970b3f14d7fd/.content-system/system-version.json"
+        "uri": "https://github.com/Pukujan/agent-custom-setup/blob/3a381eba11c6262c702f5d696878c371342e859a/.content-system/system-version.json"
       }
     }
   ],
   "boundaries": [
+    "ACS owns execution coordination only; it ships no decision-making, adjudication, or benchmarking layer, and makes no decisions on an agent's behalf",
     "ACS does not replace PCM or CGM and does not vendor helper source trees",
-    "Gates and the court are advisory seatbelts; the boss/human keeps authority",
-    "Pilot receipts are discovery-only scope, not accuracy or catch-rate evidence",
-    "No API keys, tokens, cookies, or .env contents enter the repository; provider keys are referenced by env-var name only",
-    "Live status as of 2026-10-01 (main @ 6b02503, PRs #16/#18/#20/#23 merged): the blind replay leaf #28 and module-separation #44 remain open; root README carries two narrative rasters with manifest provenance"
+    "The boss ACCEPT/REJECT gate is a governance rule, not an automated judge; final authority belongs to the human operator",
+    "No API keys, tokens, cookies, or .env contents enter the repository; external keys are referenced by environment-variable name only",
+    "Live status as of 2026-10-04: the registry ships exactly one module (multi-agent-hotload @ 0.1.0); decision-making and benchmarking work is parked outside this repository"
   ]
 }

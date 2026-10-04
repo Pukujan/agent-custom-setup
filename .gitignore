@@ -2,15 +2,7 @@
 *.local.json
 .DS_Store
 __pycache__/
-modules/coordination/jev-oss-compare/v0.1.0/fast-jev-compaction-lab/node_modules/
-
-**/tests/_tmp_ops.sqlite
 **/.acs/
 
-.venv-laya/
-.laya-tmp/
-.laya-pilot/
-
-# local-only task worktrees (PCM: never tracked) + pre-existing local artifact
+# local-only task worktrees (PCM: never tracked)
 pcm/
-JEV-COURT-EXPLAINER.html
