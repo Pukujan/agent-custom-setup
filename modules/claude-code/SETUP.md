@@ -1,15 +1,10 @@
 # Claude Code — ACS setup
 
-Source of truth: this repository (`modules/claude-code/`). Desktop `configs/claude-code/` is a **deploy mirror**.
+This folder holds the ACS-side Claude Code docs: the optional JEV hook gates and how transcripts feed the shared ops database.
 
 ## Launcher (InferHub / LiteLLM)
 
-1. Module: `modules/claude-code/inferhub-litellm/v0.2.0/`
-2. Ensure local LiteLLM can start (`D:\claude\litellm\start-litellm.ps1`).
-3. Run `launch-claude-inferhub.cmd` or `.ps1` from the module (or Desktop mirror after deploy).
-4. Secrets: runtime-only from Desktop `configs\.env` (`LITELLM_MASTER_KEY` / `LITELLM_PROXY_KEY`). **Never commit `.env`.**
-
-See `inferhub-litellm/v0.2.0/NOTES.md`.
+The Claude Code + InferHub launcher (Windows and Mac) moved out of ACS. It now lives in the private repo [Pukujan/claude-code-launcher](https://github.com/Pukujan/claude-code-launcher); setup steps, secrets handling and deploy notes are there. The old `inferhub-litellm` module was removed from this repo in #66.
 
 ## Optional JEV seatbelts (HOTLOAD full)
 

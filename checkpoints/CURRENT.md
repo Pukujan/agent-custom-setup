@@ -24,7 +24,7 @@ Phase: registry + modules + hotloader-first docs on main; CI enforcement live (r
 
 ## Queued
 
-- #9/#10 (other agent) policy + multi-setup registry schema + InferHub Claude module v0.2.0 — #10 head 7dee099 base 1c44c8d (+7 behind main), diff disjoint from CURRENT/AGENTS today; owner/#9-agent syncs before merge, then re-verify README registry/status lines against #10's registry.json + modules/.
+- ACS-0010 (#66) remove the Claude Code launcher from ACS — the `inferhub-litellm` module (originally from #9/#10) and the proposed Mac module (#64 / PR #65) moved to Pukujan/claude-code-launcher. Draft PR on `task/ACS-0010-remove-claude-code-launcher` waits on Alex's OK and the new repo's launcher PRs. Task record `tasks/TASK-ACS-0010-remove-claude-code-launcher.md`.
 - #1/#2 scaffold branch refresh (currently CONFLICTING vs rewritten README).
 - After #9/#2 merge: re-verify README claims against main reality (status-at-a-glance line, evidence table).
 

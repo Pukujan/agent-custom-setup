@@ -7,7 +7,7 @@
 | `~/.claude/settings.json` | User settings: permissions allow-list, `model` / `modelPicker` InferHub seats (`sonnet`, `opus`, `ih/...`) |
 | `~/.claude/projects/` | Per-project session dirs (encoded cwd), JSONL transcripts |
 | `~/.claude/history.jsonl` | History index |
-| Launchers in ACS `inferhub-litellm/v0.2.0` | Set `ANTHROPIC_BASE_URL=http://127.0.0.1:4000`, clear CKFF for child, seat alias `sonnet` |
+| Claude Code + InferHub launcher | Lives in [Pukujan/claude-code-launcher](https://github.com/Pukujan/claude-code-launcher), no longer in ACS (#66) |
 
 ## Official docs (hooks) — summary checked against public Claude Code hooks guides (2026)
 
