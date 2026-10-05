@@ -7,6 +7,7 @@ checkers stubbed, so the suite needs no network and no pinned checkouts.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -20,6 +21,7 @@ MODULE_REL = "modules/coordination/multi-agent-hotload/v0.1.0"
 PCM_SHA = "a" * 40
 CGM_SHA = "b" * 40
 ACS_SHA = "c" * 40
+OIO_SHA = "d" * 40
 
 CGM_MODULES = [
     "brand-foundation",
@@ -93,6 +95,13 @@ def _fake_checkouts(tmp_path: Path) -> tuple[Path, Path]:
     return pcm, cgm
 
 
+def _fake_oio_checkout(tmp_path: Path) -> Path:
+    oio = tmp_path / "oio-ck"
+    (oio / ".github" / "scripts").mkdir(parents=True)
+    (oio / ".github" / "scripts" / "oio_installer.py").write_text("# stub\n", encoding="utf-8")
+    return oio
+
+
 def _stub_externals(monkeypatch, mod) -> None:
     """Make check_pins/hotload_check succeed and report pinned HEADs."""
 
@@ -102,10 +111,13 @@ def _stub_externals(monkeypatch, mod) -> None:
             return PCM_SHA
         if name == "cgm-ck":
             return CGM_SHA
+        if name == "oio-ck":
+            return OIO_SHA
         return ACS_SHA
 
     monkeypatch.setattr(mod, "git_head", fake_git_head)
     monkeypatch.setattr(mod, "run_script", lambda argv: 0)
+    monkeypatch.setattr(mod, "oio_platform_supported", lambda: (True, ""))
 
 
 def _adopter(tmp_path: Path, *, with_adapter: bool = True) -> Path:
@@ -258,13 +270,15 @@ def test_write_json_atomic_refuses_to_escape_root(tmp_path: Path):
 # --- end-to-end run() -----------------------------------------------------
 
 
-def _run_args(mod, acs_root, adopter, pcm, cgm, **over):
+def _run_args(mod, acs_root, adopter, pcm, cgm, oio=None, **over):
     base = dict(
         adopter_root=adopter,
         acs_root=acs_root,
         pcm_root=pcm,
         cgm_root=cgm,
+        oio_root=oio,
         project_name=None,
+        project_id=None,
         dry_run=False,
         force=False,
     )
@@ -277,15 +291,94 @@ def test_run_success_writes_surface(tmp_path: Path, monkeypatch):
     _stub_externals(monkeypatch, mod)
     acs_root = _fake_acs_root(tmp_path)
     pcm, cgm = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
     adopter = _adopter(tmp_path)
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm))
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
     assert rc == 0
     assignment = json.loads((adopter / ".coord" / "assignment.json").read_text(encoding="utf-8"))
     lock = json.loads((adopter / ".coord" / "hotload.lock.json").read_text(encoding="utf-8"))
     assert assignment["pins"]["cgm"]["revision"] == CGM_SHA
     assert lock["hotload_check"] == "OK"
+    assert lock["state"] == "READY"
+    assert lock["oio_install"] == "OK"
     assert lock["checkouts"]["pcm"]["verified"] is True
+    assert lock["checkouts"]["oio"]["verified"] is True
+
+
+def test_run_writes_empty_pin_manifest(tmp_path: Path, monkeypatch):
+    """Train routing: every component pinned, every pin empty (follow the train)."""
+    mod = _load_mod()
+    _stub_externals(monkeypatch, mod)
+    acs_root = _fake_acs_root(tmp_path)
+    pcm, cgm = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
+    adopter = _adopter(tmp_path)
+
+    assert mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio)) == 0
+    manifest = json.loads((adopter / "stack-manifest.json").read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == "agent-stack-train.stack-manifest.v1"
+    assert manifest["release_train"] == "current"
+    assert set(manifest["pins"]) == {
+        "project-continuity-modules",
+        "content-generation-modules",
+        "agent-custom-setup",
+        "observational-issue-ops",
+    }
+    assert all(pin == {} for pin in manifest["pins"].values())
+    # No install-day version leaked into the manifest.
+    assert PCM_SHA not in json.dumps(manifest)
+
+
+def test_run_refuses_foreign_manifest(tmp_path: Path, monkeypatch):
+    mod = _load_mod()
+    _stub_externals(monkeypatch, mod)
+    acs_root = _fake_acs_root(tmp_path)
+    pcm, cgm = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
+    adopter = _adopter(tmp_path)
+    foreign = {"schema_version": "someone-else.v1", "pins": {"pcm": "0.6.0"}}
+    (adopter / "stack-manifest.json").write_text(json.dumps(foreign), encoding="utf-8")
+
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
+    assert rc == 1
+    assert json.loads((adopter / "stack-manifest.json").read_text(encoding="utf-8")) == foreign
+    assert not (adopter / ".coord").exists()
+
+
+def test_run_partial_without_oio_root(tmp_path: Path, monkeypatch):
+    mod = _load_mod()
+    _stub_externals(monkeypatch, mod)
+    acs_root = _fake_acs_root(tmp_path)
+    pcm, cgm = _fake_checkouts(tmp_path)
+    adopter = _adopter(tmp_path)
+
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, None))
+    assert rc == 1
+    lock = json.loads((adopter / ".coord" / "hotload.lock.json").read_text(encoding="utf-8"))
+    assert lock["state"] == "PARTIAL"
+    assert lock["oio_install"] == "not_run"
+    # The coordination surface is still written and valid.
+    assert (adopter / ".coord" / "assignment.json").is_file()
+    assert (adopter / "stack-manifest.json").is_file()
+
+
+def test_run_partial_when_oio_unsupported(tmp_path: Path, monkeypatch):
+    """A platform OIO cannot run on reports PARTIAL, never a fake OK."""
+    mod = _load_mod()
+    _stub_externals(monkeypatch, mod)
+    monkeypatch.setattr(
+        mod, "oio_platform_supported", lambda: (False, "os.O_NOFOLLOW is unavailable")
+    )
+    acs_root = _fake_acs_root(tmp_path)
+    pcm, cgm = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
+    adopter = _adopter(tmp_path)
+
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
+    assert rc == 1
+    lock = json.loads((adopter / ".coord" / "hotload.lock.json").read_text(encoding="utf-8"))
+    assert lock["state"] == "PARTIAL"
 
 
 def test_run_dry_run_writes_nothing(tmp_path: Path, monkeypatch):
@@ -293,11 +386,13 @@ def test_run_dry_run_writes_nothing(tmp_path: Path, monkeypatch):
     _stub_externals(monkeypatch, mod)
     acs_root = _fake_acs_root(tmp_path)
     pcm, cgm = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
     adopter = _adopter(tmp_path)
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, dry_run=True))
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio, dry_run=True))
     assert rc == 0
     assert not (adopter / ".coord").exists()
+    assert not (adopter / "stack-manifest.json").exists()
 
 
 def test_run_missing_adapter_fails_closed(tmp_path: Path, monkeypatch):
@@ -305,9 +400,10 @@ def test_run_missing_adapter_fails_closed(tmp_path: Path, monkeypatch):
     _stub_externals(monkeypatch, mod)
     acs_root = _fake_acs_root(tmp_path)
     pcm, cgm = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
     adopter = _adopter(tmp_path, with_adapter=False)
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm))
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
     assert rc == 1
     assert not (adopter / ".coord").exists()
 
@@ -317,9 +413,10 @@ def test_run_missing_checkout_fails_closed(tmp_path: Path, monkeypatch):
     _stub_externals(monkeypatch, mod)
     acs_root = _fake_acs_root(tmp_path)
     pcm, _ = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
     adopter = _adopter(tmp_path)
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, None))
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, None, oio))
     assert rc == 1
     assert not (adopter / ".coord").exists()
 
@@ -329,13 +426,14 @@ def test_run_keeps_existing_files_without_force(tmp_path: Path, monkeypatch):
     _stub_externals(monkeypatch, mod)
     acs_root = _fake_acs_root(tmp_path)
     pcm, cgm = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
     adopter = _adopter(tmp_path)
     coord = adopter / ".coord"
     coord.mkdir()
     sentinel = {"project": "hand-edited"}
     (coord / "assignment.json").write_text(json.dumps(sentinel), encoding="utf-8")
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm))
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
     assert rc == 0
     kept = json.loads((coord / "assignment.json").read_text(encoding="utf-8"))
     assert kept == sentinel  # untouched without --force
@@ -347,12 +445,13 @@ def test_run_force_overwrites(tmp_path: Path, monkeypatch):
     _stub_externals(monkeypatch, mod)
     acs_root = _fake_acs_root(tmp_path)
     pcm, cgm = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
     adopter = _adopter(tmp_path)
     coord = adopter / ".coord"
     coord.mkdir()
     (coord / "assignment.json").write_text('{"project": "hand-edited"}', encoding="utf-8")
 
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, force=True))
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio, force=True))
     assert rc == 0
     data = json.loads((coord / "assignment.json").read_text(encoding="utf-8"))
     assert data["project"] == "adopter"
@@ -362,10 +461,12 @@ def test_run_fails_closed_when_hotload_check_fails(tmp_path: Path, monkeypatch):
     mod = _load_mod()
     acs_root = _fake_acs_root(tmp_path)
     pcm, cgm = _fake_checkouts(tmp_path)
+    oio = _fake_oio_checkout(tmp_path)
     adopter = _adopter(tmp_path)
 
     monkeypatch.setattr(mod, "git_head", lambda root: {
-        "pcm-ck": PCM_SHA, "cgm-ck": CGM_SHA}.get(Path(root).name, ACS_SHA))
+        "pcm-ck": PCM_SHA, "cgm-ck": CGM_SHA, "oio-ck": OIO_SHA}.get(Path(root).name, ACS_SHA))
+    monkeypatch.setattr(mod, "oio_platform_supported", lambda: (True, ""))
     calls = {"n": 0}
 
     def run_script(argv):
@@ -373,11 +474,38 @@ def test_run_fails_closed_when_hotload_check_fails(tmp_path: Path, monkeypatch):
         return 0 if calls["n"] == 1 else 1  # check_pins OK, hotload_check FAIL
 
     monkeypatch.setattr(mod, "run_script", run_script)
-    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm))
+    rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm, oio))
     assert rc == 1
     # A failed final check must not leave a partial install behind.
     assert not (adopter / ".coord" / "assignment.json").exists()
     assert not (adopter / ".coord" / "hotload.lock.json").exists()
+    assert not (adopter / "stack-manifest.json").exists()
+
+
+def test_build_stack_manifest_empty_pins():
+    mod = _load_mod()
+    manifest = mod.build_stack_manifest(_mesh_doc(), "adopter-x")
+    assert manifest["adopter"] == "adopter-x"
+    assert manifest["source"] == "fixture"
+    assert manifest["pins"] == {
+        "agent-custom-setup": {},
+        "content-generation-modules": {},
+        "observational-issue-ops": {},
+        "project-continuity-modules": {},
+    }
+
+
+def test_oio_platform_probe_matches_capabilities():
+    mod = _load_mod()
+    supported, why = mod.oio_platform_supported()
+    expected = (
+        {os.open, os.mkdir, os.stat, os.unlink, os.rename}.issubset(os.supports_dir_fd)
+        and hasattr(os, "O_NOFOLLOW")
+        and hasattr(os, "O_DIRECTORY")
+    )
+    assert supported is expected
+    if not supported:
+        assert why
 
 
 def test_module_has_no_hardcoded_pins():

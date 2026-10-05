@@ -15,10 +15,10 @@
     {
       "id": "multi-agent-hotload",
       "name": "Multi-agent hotload coordination",
-      "purpose": "Install surface: hot-load FULL PCM + FULL CGM 0.5.12 + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
+      "purpose": "Install surface: hot-load the FULL stack (PCM + CGM 0.5.12 + OIO) + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR). Versions come from the release train via stack-mesh.json.",
       "harness": "coordination",
       "created": "2026-09-27",
-      "updated": "2026-10-04",
+      "updated": "2026-10-05",
       "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/11",
       "owning_agent": "agent-custom-setup",
       "deploy_mirrors": [
@@ -36,10 +36,12 @@
         "end": null
       },
       "status": "active",
-      "summary": "FULL PCM + FULL CGM 0.5.12 + coordination runtime (join-order, 30m lease, claim_queue, agent-less watchdog). Slim subsets are incomplete installs.",
+      "summary": "FULL PCM + FULL CGM 0.5.12 + OIO + coordination runtime (join-order, 30m lease, claim_queue, agent-less watchdog). The adopter follows the release train via stack-manifest.json (empty pins). Slim subsets are incomplete installs; an uninstallable component (e.g. OIO) is reported PARTIAL, never as success.",
       "dependencies": [
         "PCM version and commit from stack-mesh.json (full stack)",
-        "CGM version and commit from stack-mesh.json (full eight modules incl. human-output-naming)"
+        "CGM version and commit from stack-mesh.json (full eight modules incl. human-output-naming)",
+        "OIO version and commit from stack-mesh.json (observational issue-log surface; installer invoked by acs_install.py)",
+        "agent-stack-train stack-releases.json (certified version set the adopter manifest follows)"
       ]
     }
   ]

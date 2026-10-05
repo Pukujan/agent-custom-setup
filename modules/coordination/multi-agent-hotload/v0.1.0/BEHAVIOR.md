@@ -4,15 +4,16 @@ Normative operating rules for agents hot-loading this ACS pack. This is **behavi
 
 Owning issue: [#11](https://github.com/Pukujan/agent-custom-setup/issues/11).
 
-## Triple wire (required — full stacks)
+## Quad wire (required — full stacks)
 
-When told to load the agent hot-loader into a working repo, wire **all three** as **complete** stacks (slim subsets fail closed):
+When told to load the agent hot-loader into a working repo, wire **all four** as **complete** stacks (slim subsets fail closed). Versions come from the release train through `stack-mesh.json`; the adopter's `stack-manifest.json` follows the train with empty pins ([SPEC.md](SPEC.md) §1) — do not copy commits into this file.
 
-1. **FULL PCM** @ `4e2385474b4af9249ca009cbdcb38c4498932475` (CLI **0.6.0**, protocol `0.1.0-draft`) — continuity/checkpoints **and** PR-only + required CI + branch-protection/auto-merge preference + fail-closed gates + receipts. Still not proposals/ACCEPT. See [adopter-enforcement](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md).
-2. **FULL CGM 0.5.12** @ `6831f91e165b62d719c05eb492f7375fa932b560` — all eight modules + `human_output_contract` (not HSW + writing-direction only). README → writing-direction; posts/papers → hsw.
-3. **This runtime** — join-order roles, boss lease (minutes), GitHub-canonical claim queue, agent-less watchdog, proposals → claim → PR
+1. **FULL PCM** — continuity/checkpoints **and** PR-only + required CI + branch-protection/auto-merge preference + fail-closed gates + receipts. Still not proposals/ACCEPT. See [adopter-enforcement](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md).
+2. **FULL CGM 0.5.12** — all eight modules + `human_output_contract` (not HSW + writing-direction only). README → writing-direction; posts/papers → hsw.
+3. **OIO** — the observational issue-log surface (ontology, issue form, triage workflow, `AGENTS.md` guidance block). A component that cannot be installed is reported **PARTIAL**, never OK.
+4. **This runtime** — join-order roles, boss lease (minutes), GitHub-canonical claim queue, agent-less watchdog, proposals → claim → PR
 
-ACS installs them together; it does **not** replace or vendor PCM/CGM source. ACS and **all** hotloader adopters must use the full stacks.
+ACS installs them together; it does **not** replace or vendor PCM/CGM/OIO source. ACS and **all** hotloader adopters must use the full stacks.
 
 `hotload_check` must run `scripts/validate_content_system.py` against the adopter `.content-system` and require stdout starting with `VALID`. After VALID, agents **MUST load** modules per CGM `docs/writing-routing.json` / `docs/ACS_VERIFY.md` (README→writing-direction; PR/issue/docs/commits/HTML reports/compare/appendable→hsw (default ON); basenames→hon) and paste `acs_prompt_inject.system_block` into system prompt at **boot** (see `PROMPT_INJECT.md`; always_on, not per-report). Soft = no NLP CI; language is MUST/APPLY.
 
