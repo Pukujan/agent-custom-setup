@@ -55,33 +55,28 @@ def test_check_pins_passes_on_aligned_tree(tmp_path: Path):
     assert "check_pins: OK" in proc.stdout
 
 
-def test_check_pins_fails_on_drifted_sha(tmp_path: Path):
+def test_check_pins_fails_on_drifted_module_count(tmp_path: Path):
     root = _seed_repo(tmp_path)
-    # HOTLOAD.md projects cgm.commit; swap the pinned SHA for a foreign one.
+    # HOTLOAD.md projects cgm.module_count. Version commits are not projected.
     target = root / "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
     text = target.read_text(encoding="utf-8")
-    target.write_text(
-        text.replace(
-            "6831f91e165b62d719c05eb492f7375fa932b560",
-            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
-        ),
-        encoding="utf-8",
-    )
+    assert "eight module" in text
+    target.write_text(text.replace("eight module", "six module"), encoding="utf-8")
     proc = _run(root)
     assert proc.returncode == 1
     assert "check_pins: FAIL" in proc.stdout
-    assert "HOTLOAD.md" in proc.stdout and "deadbeef" in proc.stdout
+    assert "HOTLOAD.md" in proc.stdout and "six" in proc.stdout
 
 
 def test_check_pins_fails_on_drifted_version(tmp_path: Path):
     root = _seed_repo(tmp_path)
-    target = root / "modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md"
+    target = root / "registry.json"
     text = target.read_text(encoding="utf-8")
-    target.write_text(text.replace("0.5.12", "0.5.1"), encoding="utf-8")
+    target.write_text(text.replace('"version": "0.1.0"', '"version": "0.1.9"', 1), encoding="utf-8")
     proc = _run(root)
     assert proc.returncode == 1
     assert "check_pins: FAIL" in proc.stdout
-    assert "ROLES.md" in proc.stdout
+    assert "registry.json" in proc.stdout
 
 
 def test_check_pins_fails_on_superseded_value_even_when_canonical_present(tmp_path: Path):
