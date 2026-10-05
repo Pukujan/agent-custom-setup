@@ -10,25 +10,36 @@ Prerequisites (the installer fails closed without all of them):
 
 * the adopter already carries a CGM ``.content-system/`` adapter -- authoring
   that adapter is CGM's job, not ACS's;
-* a PCM checkout at the pinned commit;
-* a CGM checkout at the pinned commit;
+* a PCM checkout at the mesh commit;
+* a CGM checkout at the mesh commit;
 * Python deps the validators need (``jsonschema``).
+
+``--oio-root`` points at an observational-issue-ops checkout at the mesh commit.
+Without it (or where OIO's no-follow installer cannot run, i.e. Windows today)
+the install is **PARTIAL**: the coordination surface is written and valid, OIO is
+reported as the one remaining step, and the exit code is non-zero -- never a
+fake success.
 
 What it does, in order:
 
 1. Checks the pack's own pins agree (runs ``check_pins.py`` on the ACS checkout).
-2. Verifies the PCM/CGM checkouts sit at the commits in ``stack-mesh.json``.
+2. Verifies the PCM/CGM/OIO checkouts sit at the commits in ``stack-mesh.json``.
    An older commit is refused.
 3. Builds the adopter's coordination surface:
 
        .coord/assignment.json     pins declared from this pack's ``pins.json``
-       .coord/hotload.lock.json   installed pack version + verified checkouts
+       .coord/hotload.lock.json   installed pack version + verified checkouts + state
+       stack-manifest.json        empty pins -- the adopter follows the train
 
-4. Writes both files atomically, keeping existing files unless ``--force``, and
-   refusing to write outside the adopter root. ``--dry-run`` writes nothing.
+4. Writes them atomically, keeping existing files unless ``--force``, refusing to
+   write outside the adopter root, and refusing to overwrite a hand-written
+   ``stack-manifest.json``. ``--dry-run`` writes nothing.
 5. Runs the pack's ``hotload_check.py`` (which validates the adopter's adapter);
    on failure the writes are rolled back.
-6. Prints the GitHub governance steps a human must still take.
+6. Invokes the pinned OIO installer to add the issue-log surface, then its
+   ``--check``. OIO is transactional on its own; a failure leaves the PARTIAL
+   state above rather than rolling back the validated coordination surface.
+7. Prints the GitHub governance steps a human must still take.
 
 Only each checkout's HEAD commit is verified; a dirty working tree is not
 detected (this matches ``hotload_check.py``).
@@ -36,6 +47,7 @@ detected (this matches ``hotload_check.py``).
 Out of scope by design (fails closed; never faked):
 
 * Generating a CGM ``.content-system/`` adapter.
+* Porting OIO's installer to Windows (tracked in the OIO issue log).
 * Branch protection, required checks, auto-merge (human GitHub actions).
 
 Usage:
@@ -43,7 +55,8 @@ Usage:
     python scripts/acs_install.py \\
       --adopter-root /path/to/working-repo \\
       --pcm-root /path/to/project-continuity-modules \\
-      --cgm-root /path/to/content-generation-modules
+      --cgm-root /path/to/content-generation-modules \\
+      --oio-root /path/to/observational-issue-ops
 """
 
 from __future__ import annotations
@@ -71,6 +84,16 @@ COORD_REL = Path(".coord")
 ASSIGNMENT_REL = COORD_REL / "assignment.json"
 LOCK_REL = COORD_REL / "hotload.lock.json"
 LOCK_SCHEMA = "acs.hotload.lock.v1"
+
+MANIFEST_REL = Path("stack-manifest.json")
+MANIFEST_SCHEMA = "agent-stack-train.stack-manifest.v1"
+# The train's stable name (stack-releases.json "release_train"). A name, not a
+# version pin; tests/test_train_parity.py checks it against the live train.
+TRAIN_RELEASE = "current"
+OIO_COMPONENT = "observational-issue-ops"
+OIO_INSTALLER_REL = Path(".github") / "scripts" / "oio_installer.py"
+OIO_MANIFEST_REL = Path(".oio") / "install-manifest.json"
+OIO_JOURNAL_REL = Path(".oio") / ".installer-transaction.json"
 
 # The claim file the generated assignment points at (self-contained; no foreign
 # issue URL is baked into an adopter's assignment).
@@ -232,30 +255,143 @@ def build_assignment(example: dict, pins: dict, project_name: str) -> dict:
     return data
 
 
-def build_lock(pins: dict, acs_root: Path, checkouts: dict, validated: bool) -> dict:
+def build_lock(
+    pins: dict,
+    acs_root: Path,
+    checkouts: dict,
+    validated: bool,
+    *,
+    state: str = "ABSENT",
+    oio_install: str = "not_run",
+) -> dict:
     """Portable install record: no absolute local paths, safe to commit."""
     module_pin = pins.get("acs_hotload_module", {})
+    recorded = {
+        label: {
+            "commit": (checkouts.get(label) or {}).get("commit"),
+            "verified": bool((checkouts.get(label) or {}).get("verified")),
+        }
+        for label in ("pcm", "cgm", "oio")
+    }
     return {
         "schema": LOCK_SCHEMA,
         "installed_at": now_iso(),
+        "state": state,
         "acs": {
             "module_id": module_pin.get("id"),
             "module_version": module_pin.get("version"),
             "commit": git_head(acs_root),
         },
         "pins": copy.deepcopy(pins),
-        "checkouts": {
-            "pcm": {
-                "commit": checkouts.get("pcm", {}).get("commit"),
-                "verified": bool(checkouts.get("pcm", {}).get("verified")),
-            },
-            "cgm": {
-                "commit": checkouts.get("cgm", {}).get("commit"),
-                "verified": bool(checkouts.get("cgm", {}).get("verified")),
-            },
-        },
+        "stack_manifest": MANIFEST_REL.as_posix(),
+        "checkouts": recorded,
+        "oio_install": oio_install,
         "hotload_check": "OK" if validated else "not_run",
     }
+
+
+def build_stack_manifest(mesh_doc: dict, project_name: str) -> dict:
+    """The adopter's ``stack-manifest.json``: pin every mesh component, but empty.
+
+    An empty pin follows the train (agent-stack-train ``check_manifest.py``), so
+    the adopter is never frozen to install-day versions.
+    """
+    requires = mesh_doc.get("requires") if isinstance(mesh_doc, dict) else None
+    if not isinstance(requires, dict) or not requires:
+        raise ValueError("stack-mesh.json has no 'requires' object")
+    return {
+        "schema_version": MANIFEST_SCHEMA,
+        "adopter": project_name,
+        "release_train": TRAIN_RELEASE,
+        "source": mesh_doc.get("source", ""),
+        "pins": {name: {} for name in sorted(requires)},
+    }
+
+
+def oio_platform_supported() -> tuple[bool, str]:
+    """Whether OIO's no-follow, descriptor-relative installer can run here.
+
+    OIO refuses symlink/reparse-point redirection with ``dir_fd`` + ``O_NOFOLLOW``
+    operations. Windows lacks them, so OIO cannot install there yet; the install
+    is reported PARTIAL rather than faked (SPEC.md section 6).
+    """
+    required = {os.open, os.mkdir, os.stat, os.unlink, os.rename}
+    missing = sorted(f.__name__ for f in required - set(os.supports_dir_fd))
+    if missing:
+        return False, "os.supports_dir_fd lacks " + ", ".join(missing)
+    for flag in ("O_NOFOLLOW", "O_DIRECTORY"):
+        if not hasattr(os, flag):
+            return False, f"os.{flag} is unavailable"
+    return True, ""
+
+
+def adopter_state(adopter: Path) -> str:
+    """Resolve the install state from the adopter's own records (SPEC.md section 3)."""
+    if (adopter / OIO_JOURNAL_REL).is_file():
+        return "RECOVERING"
+    # The CGM adapter is a precondition the adopter must already carry, not a
+    # component this installer writes, so it does not make a repo PARTIAL: a
+    # repo with an adapter and no coordination surface is still a first install.
+    present = [
+        (adopter / ASSIGNMENT_REL).is_file(),
+        (adopter / MANIFEST_REL).is_file(),
+        (adopter / OIO_MANIFEST_REL).is_file(),
+    ]
+    if not any(present):
+        return "ABSENT"
+    if all(present):
+        return "READY"
+    return "PARTIAL"
+
+
+def lock_drift(adopter: Path, requires: dict) -> list[str]:
+    """Installed-vs-train drift: a lock that records older commits than the mesh."""
+    try:
+        lock = load_json(adopter / LOCK_REL)
+    except (OSError, json.JSONDecodeError):
+        return []
+    checkouts = lock.get("checkouts", {}) if isinstance(lock, dict) else {}
+    drift: list[str] = []
+    for label, component in (
+        ("pcm", "project-continuity-modules"),
+        ("cgm", "content-generation-modules"),
+        ("oio", OIO_COMPONENT),
+    ):
+        recorded = (checkouts.get(label) or {}).get("commit")
+        wanted = (requires.get(component) or {}).get("commit")
+        if recorded and wanted and not commits_agree(str(recorded), str(wanted)):
+            drift.append(f"{label}: lock {short(str(recorded))} is behind mesh {short(str(wanted))}")
+    return drift
+
+
+def assignment_drift(adopter: Path, requires: dict) -> list[str]:
+    """Installed-vs-train drift for the assignment's recorded revisions.
+
+    ``assignment.json`` is managed but editable, so a re-run keeps it (SPEC.md
+    section 4). When the train moves, the kept assignment still names the old
+    revisions; without this check a re-run would install a mixed stack and never
+    say so. Report it so the operator can re-run with ``--force``.
+    """
+    try:
+        assignment = load_json(adopter / ASSIGNMENT_REL)
+    except (OSError, json.JSONDecodeError):
+        return []
+    pins = assignment.get("pins", {}) if isinstance(assignment, dict) else {}
+    if not isinstance(pins, dict):
+        return []
+    drift: list[str] = []
+    for label, component in (
+        ("pcm", "project-continuity-modules"),
+        ("cgm", "content-generation-modules"),
+    ):
+        recorded = (pins.get(label) or {}).get("revision")
+        wanted = (requires.get(component) or {}).get("commit")
+        if recorded and wanted and not commits_agree(str(recorded), str(wanted)):
+            drift.append(
+                f"{label}: assignment records {short(str(recorded))} but the train is at "
+                f"{short(str(wanted))}; re-run with --force to refresh it"
+            )
+    return drift
 
 
 def write_json_atomic(path: Path, data: object, *, root: Path) -> None:
@@ -317,6 +453,73 @@ def run_script(argv: list[str]) -> int:
         return 1
 
 
+def render_json_bytes(data: object) -> bytes:
+    """Exactly the bytes ``write_json_atomic`` would produce, for equality checks."""
+    return (json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+
+
+def classify_owned(path: Path, adopter: Path) -> bool:
+    """Whether a managed file is ours (SPEC.md section 5).
+
+    Files in a component-owned directory (``.coord/``) are ours. A managed file
+    outside one is ours only when it carries this pack's schema -- otherwise it
+    is a hand-written foreign file we must not clobber.
+    """
+    try:
+        rel = path.relative_to(adopter)
+    except ValueError:
+        return False
+    if rel.parent == COORD_REL:
+        return True
+    try:
+        data = load_json(path)
+    except (OSError, json.JSONDecodeError):
+        return False
+    return isinstance(data, dict) and data.get("schema_version") == MANIFEST_SCHEMA
+
+
+def gate_plan(
+    targets: list[tuple[Path, object]], adopter: Path, *, force: bool
+) -> tuple[list[tuple[Path, object]], list[tuple[Path, object]], list[str]]:
+    """Classify every target path before any write (SPEC.md section 4).
+
+    Returns ``(to_write, kept, refusals)``. A refusal means zero writes: the
+    caller fails closed and reports it.
+    """
+    to_write: list[tuple[Path, object]] = []
+    kept: list[tuple[Path, object]] = []
+    refusals: list[str] = []
+    for path, data in targets:
+        rel = path.relative_to(adopter).as_posix()
+        # Check the link itself, not what it points at: ``is_file()`` follows a
+        # symlink, so a link to a regular file would otherwise pass as "ours" or
+        # as foreign content instead of being refused (SPEC.md section 4).
+        if path.is_symlink():
+            refusals.append(f"{rel}: not a regular file (symlink or directory); refusing")
+            continue
+        if not path.exists():
+            to_write.append((path, data))
+            continue
+        if not path.is_file():
+            refusals.append(f"{rel}: not a regular file (symlink or directory); refusing")
+            continue
+        if classify_owned(path, adopter):
+            (to_write if force else kept).append((path, data))
+            continue
+        try:
+            identical = path.read_bytes() == render_json_bytes(data)
+        except OSError:
+            identical = False
+        if identical:
+            kept.append((path, data))  # adopt: foreign but byte-identical to ours
+        else:
+            refusals.append(
+                f"{rel}: exists with foreign content; refusing to overwrite "
+                "(move it aside or reconcile it, then re-run)"
+            )
+    return to_write, kept, refusals
+
+
 def run(args: argparse.Namespace) -> int:
     acs_root = resolve_acs_root(args.acs_root)
     manifest_path = acs_root / DEFAULT_MANIFEST.relative_to(REPO_ROOT)
@@ -334,18 +537,20 @@ def run(args: argparse.Namespace) -> int:
     except (OSError, json.JSONDecodeError) as exc:
         say(f"acs_install: FAIL\n  - stack-mesh.json unreadable: {exc}")
         return 2
-    requires = mesh_doc.get("requires") if isinstance(mesh_doc, dict) else None
-    if not isinstance(requires, dict):
+    if not isinstance(mesh_doc, dict) or not isinstance(mesh_doc.get("requires"), dict):
         say("acs_install: FAIL\n  - stack-mesh.json has no requires object")
         return 2
+    requires = mesh_doc["requires"]
     pcm_req = requires.get("project-continuity-modules") or {}
     cgm_req = requires.get("content-generation-modules") or {}
+    oio_req = requires.get(OIO_COMPONENT) or {}
     pins.setdefault("pcm", {})["commit"] = pcm_req.get("commit", "")
     pins["pcm"]["cli_version"] = pcm_req.get("version", "")
     pins.setdefault("cgm", {})["commit"] = cgm_req.get("commit", "")
     pins["cgm"]["version"] = cgm_req.get("version", "")
 
     problems: list[str] = []
+    partials: list[str] = []
 
     # 1. The pack's own projections must agree before we touch anything.
     if run_script([sys.executable, str(CHECK_PINS), "--root", str(acs_root)]) != 0:
@@ -360,6 +565,10 @@ def run(args: argparse.Namespace) -> int:
         say(f"acs_install: FAIL\n  - adopter root is not a directory: {adopter}")
         return 2
 
+    state = adopter_state(adopter)
+    drift = lock_drift(adopter, requires) + assignment_drift(adopter, requires)
+    reported_state = "DRIFTED" if (state == "READY" and drift) else state
+
     # 3. A CGM adapter must already exist -- ACS does not author one.
     adapter = adopter / ADAPTER_REL
     if not adapter.is_dir():
@@ -369,12 +578,16 @@ def run(args: argparse.Namespace) -> int:
             "never looks complete"
         )
 
-    # 4. Verify the pinned external checkouts.
+    # 4. Verify the pinned external checkouts (PCM, CGM, OIO).
     checkouts: dict[str, dict] = {}
     for label, root_arg, expected in (
         ("pcm", args.pcm_root, pins.get("pcm", {}).get("commit", "")),
         ("cgm", args.cgm_root, pins.get("cgm", {}).get("commit", "")),
+        ("oio", args.oio_root, oio_req.get("commit", "")),
     ):
+        if label == "oio" and root_arg is None:
+            checkouts[label] = {"commit": None, "verified": False}
+            continue
         errs = verify_checkout(root_arg, expected, label)
         problems.extend(errs)
         checkouts[label] = {
@@ -382,41 +595,73 @@ def run(args: argparse.Namespace) -> int:
             "verified": not errs,
         }
 
-    # 5. Build the coordination surface; keep existing files unless --force.
+    # 5. OIO is a required component. Decide up front whether it can be installed;
+    #    a component that cannot run makes the install PARTIAL, never a fake OK.
+    oio_install = "not_run"
+    oio_root = args.oio_root.expanduser().resolve() if args.oio_root else None
+    if oio_root is None:
+        partials.append(
+            "OIO not installed: no --oio-root checkout provided; bring "
+            f"{OIO_COMPONENT} at {short(oio_req.get('commit', ''))} and re-run"
+        )
+    else:
+        supported, why = oio_platform_supported()
+        installer = oio_root / OIO_INSTALLER_REL
+        if not supported:
+            partials.append(f"OIO not installed: {why} (Windows port pending; see OIO issues)")
+        elif not installer.is_file():
+            problems.append(f"OIO checkout at {oio_root} has no {OIO_INSTALLER_REL.as_posix()}")
+        else:
+            oio_install = "pending"
+
+    # 6. Build the coordination surface; keep existing files unless --force.
     try:
         example = load_json(EXAMPLE_ASSIGNMENT)
     except (OSError, json.JSONDecodeError) as exc:
         say(f"acs_install: FAIL\n  - assignment example unreadable: {exc}")
         return 2
+    if not isinstance(example, dict):
+        say("acs_install: FAIL\n  - assignment example is not a JSON object")
+        return 2
     project_name = args.project_name or adopter.name
+    project_id = args.project_id or None
     assignment = build_assignment(example, pins, project_name)
+    try:
+        stack_manifest = build_stack_manifest(mesh_doc, project_name)
+    except ValueError as exc:
+        say(f"acs_install: FAIL\n  - {exc}")
+        return 2
+
     targets: list[tuple[Path, object]] = [
         (adopter / ASSIGNMENT_REL, assignment),
-        (adopter / LOCK_REL, build_lock(pins, acs_root, checkouts, validated=False)),
+        (adopter / LOCK_REL, build_lock(pins, acs_root, checkouts, validated=False, state=reported_state)),
+        (adopter / MANIFEST_REL, stack_manifest),
     ]
-    to_write: list[tuple[Path, object]] = []
-    kept: list[Path] = []
-    for path, data in targets:
-        if path.exists() and not args.force:
-            kept.append(path)
-        else:
-            to_write.append((path, data))
+    to_write, kept, refusals = gate_plan(targets, adopter, force=args.force)
+    problems.extend(refusals)
 
-    # 6. Report the plan.
+    # 7. Report the plan.
     say("acs_install: plan")
+    say(f"  state={reported_state}")
+    for item in drift:
+        say(f"  drift {item}")
     say(f"  acs_root={acs_root}")
     say(f"  adopter_root={adopter}")
     say(
         f"  pcm_pin={short(pins.get('pcm', {}).get('commit'))}  "
-        f"cgm_pin={short(pins.get('cgm', {}).get('commit'))}"
+        f"cgm_pin={short(pins.get('cgm', {}).get('commit'))}  "
+        f"oio_pin={short(oio_req.get('commit', ''))}"
     )
     for path, _ in to_write:
         say(f"  write {path.relative_to(adopter)}")
-    for path in kept:
+    for path, _ in kept:
         say(f"  keep  {path.relative_to(adopter)} (exists; --force to overwrite)")
+    if oio_install == "pending":
+        say("  oio   install the OIO issue-log surface (invoke the pinned installer)")
 
     if problems:
-        say("acs_install: FAIL (preconditions unmet; nothing written)")
+        fail_state = "CONFLICTED" if refusals else reported_state
+        say(f"acs_install: FAIL (state={fail_state}; nothing written)")
         for item in problems:
             for line in str(item).splitlines() or [str(item)]:
                 say(f"  - {line}")
@@ -426,7 +671,7 @@ def run(args: argparse.Namespace) -> int:
         say("acs_install: dry-run OK (no files written)")
         return 0
 
-    # 7. Write, then validate the whole stack with the pack's own checker.
+    # 8. Write, then validate the whole stack with the pack's own checker.
     saved = snapshot([path for path, _ in to_write])
     for path, data in to_write:
         try:
@@ -453,16 +698,47 @@ def run(args: argparse.Namespace) -> int:
         say("acs_install: FAIL (hotload_check did not pass; writes rolled back)")
         return 1
 
-    # 8. Refresh the lock now that validation passed.
+    # 9. Install OIO last. Its installer is transactional on its own, so a failure
+    #    here leaves a PARTIAL install (reported, never faked) rather than rolling
+    #    back the coordination surface we just validated.
+    if oio_install == "pending" and oio_root is not None:
+        oio_argv = [sys.executable, str(oio_root / OIO_INSTALLER_REL), "--target", str(adopter)]
+        if project_id:
+            oio_argv += ["--project-id", project_id]
+        rc = run_script(oio_argv)
+        if rc == 0 and run_script(oio_argv + ["--check"]) == 0:
+            oio_install = "OK"
+        else:
+            oio_install = "FAILED"
+            partials.append(
+                f"OIO install did not complete (exit {rc}); run: python "
+                f"{OIO_INSTALLER_REL.as_posix()} --target <adopter>"
+            )
+
+    final_state = "PARTIAL" if partials else "READY"
+
+    # 10. Refresh the lock now that validation passed.
     write_json_atomic(
         adopter / LOCK_REL,
-        build_lock(pins, acs_root, checkouts, validated=True),
+        build_lock(
+            pins, acs_root, checkouts, validated=True, state=final_state, oio_install=oio_install
+        ),
         root=adopter,
     )
 
-    say("acs_install: OK")
-    say(f"  wrote {ASSIGNMENT_REL.as_posix()} and {LOCK_REL.as_posix()}")
+    if partials:
+        say(f"acs_install: PARTIAL (state={final_state})")
+        for item in partials:
+            for line in str(item).splitlines() or [str(item)]:
+                say(f"  - {line}")
+        say("  the coordination surface is installed and valid; OIO is the remaining step")
+        return 1
+
+    say(f"acs_install: OK (state={final_state})")
+    say(f"  wrote {ASSIGNMENT_REL.as_posix()}, {LOCK_REL.as_posix()} and {MANIFEST_REL.as_posix()}")
     say("  next: EDIT the assignment's agents list + check_in to match your seats/issue.")
+    say("  next: add the train check to CI:")
+    say("        uses: Pukujan/agent-stack-train/.github/workflows/check-adopter.yml@main")
     say("  next (human GitHub steps, NOT automated): enable branch protection on the")
     say("  default branch with the required CI checks, and turn on auto-merge so green")
     say("  required checks can merge without skipping gates.")
@@ -470,12 +746,25 @@ def run(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    description = (__doc__ or "Install the ACS coordination surface into an adopter repo.").splitlines()[0]
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--adopter-root", type=Path, required=True)
     parser.add_argument("--acs-root", type=Path, default=None)
     parser.add_argument("--pcm-root", type=Path, default=None)
     parser.add_argument("--cgm-root", type=Path, default=None)
+    parser.add_argument(
+        "--oio-root",
+        type=Path,
+        default=None,
+        help="observational-issue-ops checkout at the mesh commit; without it OIO is PARTIAL",
+    )
     parser.add_argument("--project-name", type=str, default=None)
+    parser.add_argument(
+        "--project-id",
+        type=str,
+        default=None,
+        help="OWNER/REPOSITORY for the OIO project ontology (else OIO infers from origin)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Show the plan; write nothing.")
     parser.add_argument("--force", action="store_true", help="Overwrite existing generated files.")
     args = parser.parse_args(argv)
