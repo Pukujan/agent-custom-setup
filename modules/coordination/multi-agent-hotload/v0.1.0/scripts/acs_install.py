@@ -17,8 +17,8 @@ Prerequisites (the installer fails closed without all of them):
 What it does, in order:
 
 1. Checks the pack's own pins agree (runs ``check_pins.py`` on the ACS checkout).
-2. Verifies the pinned PCM/CGM checkouts sit at the exact commits from
-   ``pins.json``.
+2. Verifies the PCM/CGM checkouts sit at the commits in ``stack-mesh.json``.
+   An older commit is refused.
 3. Builds the adopter's coordination surface:
 
        .coord/assignment.json     pins declared from this pack's ``pins.json``
@@ -150,8 +150,8 @@ def verify_checkout(root: Path | None, expected_commit: str, label: str) -> list
         return [f"{label}: {resolved} is not a git checkout (rev-parse HEAD failed)"]
     if not commits_agree(head, expected_commit):
         return [
-            f"{label}: HEAD {short(head)} must be pinned at {short(expected_commit)} "
-            f"(wrong revision; do not follow moving main)"
+            f"{label}: HEAD {short(head)} must be {short(expected_commit)} "
+            f"(an older version is refused)"
         ]
     return []
 
@@ -185,8 +185,8 @@ def build_assignment(example: dict, pins: dict, project_name: str) -> dict:
     pcm_block["notes"] = (
         "Full PCM for adopters: continuity/checkpoints plus PR-only, required CI "
         "gates, protection/auto-merge preference, fail-closed gates, leaf/parent "
-        "receipts. Pin the commit; do not follow moving main. Do not vendor PCM "
-        "source. Values come from this pack's pins.json."
+        "receipts. The commit comes from stack-mesh.json. An older checkout is "
+        "refused. Do not vendor PCM source."
     )
     cgm_block = pin_block.setdefault("cgm", {})
     cgm_block["revision"] = cgm_pin["commit"]
@@ -194,9 +194,10 @@ def build_assignment(example: dict, pins: dict, project_name: str) -> dict:
     cgm_block["modules"] = list(cgm_pin["modules"])
     cgm_block["notes"] = (
         "FULL CGM required for ACS and every hotloader adopter: all eight modules "
-        "including human-output-naming. Pin the commit; validate with CGM's "
+        "including human-output-naming. The commit comes from stack-mesh.json. "
+        "An older checkout is refused. Validate with CGM's "
         "validate_content_system.py; then apply acs_prompt_inject. Do not vendor "
-        "CGM source. Values come from this pack's pins.json."
+        "CGM source."
     )
 
     # Self-contained check-in: never bake a foreign repo's issue URL into the adopter.
@@ -327,7 +328,22 @@ def run(args: argparse.Namespace) -> int:
     if not isinstance(manifest, dict) or not isinstance(manifest.get("pins"), dict):
         say(f"acs_install: FAIL\n  - {manifest_path} has no 'pins' object")
         return 2
-    pins = manifest["pins"]
+    pins = copy.deepcopy(manifest["pins"])
+    try:
+        mesh_doc = load_json(acs_root / "stack-mesh.json")
+    except (OSError, json.JSONDecodeError) as exc:
+        say(f"acs_install: FAIL\n  - stack-mesh.json unreadable: {exc}")
+        return 2
+    requires = mesh_doc.get("requires") if isinstance(mesh_doc, dict) else None
+    if not isinstance(requires, dict):
+        say("acs_install: FAIL\n  - stack-mesh.json has no requires object")
+        return 2
+    pcm_req = requires.get("project-continuity-modules") or {}
+    cgm_req = requires.get("content-generation-modules") or {}
+    pins.setdefault("pcm", {})["commit"] = pcm_req.get("commit", "")
+    pins["pcm"]["cli_version"] = pcm_req.get("version", "")
+    pins.setdefault("cgm", {})["commit"] = cgm_req.get("commit", "")
+    pins["cgm"]["version"] = cgm_req.get("version", "")
 
     problems: list[str] = []
 

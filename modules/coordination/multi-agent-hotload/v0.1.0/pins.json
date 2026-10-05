@@ -1,6 +1,6 @@
 {
   "schema": "acs.hotload.pins.v1",
-  "note": "Single source of truth for the pins the multi-agent hotload pack advertises to adopters. Every file listed under 'projections' records one or more of these pins and MUST agree; scripts/check_pins.py fails closed on any disagreement, naming the file and the two values (found vs expected). Bumps are reviewed edits to this file (HOTLOAD.md forbids silently following moving upstream main); a sync_pins.py generator is a planned follow-up (#46).",
+  "note": "Module shape for the hotloader. Version commits are not pinned here. stack-mesh.json, written from agent-stack-train stack-releases.json, is the version requirement. An older checkout is refused.",
   "pins": {
     "cgm": {
       "version": "0.5.12",
@@ -29,71 +29,73 @@
   },
   "superseded": {
     "note": "Stale values that MUST NOT reappear as a pin. Presence of the canonical value alone is not enough: a projection that also still carries one of these has drifted.",
-    "cgm.version": ["0.5.1", "0.5.7"],
-    "cgm.commit": ["9874b26", "c069613"],
-    "cgm.module_count": ["seven"],
-    "pcm.commit": ["743d50e"]
+    "cgm.version": [
+      "0.5.1",
+      "0.5.7"
+    ],
+    "cgm.commit": [
+      "9874b26",
+      "c069613"
+    ],
+    "cgm.module_count": [
+      "seven"
+    ],
+    "pcm.commit": [
+      "743d50e"
+    ]
   },
   "projections": [
     {
       "file": "AGENTS.md",
-      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
+      "pins": [
+        "cgm.module_count"
+      ]
     },
     {
       "file": "registry.json",
-      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version", "acs.id", "acs.version"]
-    },
-    {
-      "file": ".github/workflows/ci.yml",
-      "pins": ["pcm.commit"]
+      "pins": [
+        "cgm.module_count",
+        "acs.id",
+        "acs.version"
+      ]
     },
     {
       "file": ".content-system/system-version.json",
-      "pins": ["cgm.version", "cgm.commit", "cgm.module_count"]
-    },
-    {
-      "file": ".content-system/review-rubric.json",
-      "pins": ["cgm.version"]
+      "pins": [
+        "cgm.module_count"
+      ]
     },
     {
       "file": "modules/coordination/multi-agent-hotload/v0.1.0/BEHAVIOR.md",
-      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
+      "pins": [
+        "cgm.module_count"
+      ]
     },
     {
       "file": "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md",
-      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
+      "pins": [
+        "cgm.module_count"
+      ]
     },
     {
       "file": "modules/coordination/multi-agent-hotload/v0.1.0/NOTES.md",
-      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
-    },
-    {
-      "file": "modules/coordination/multi-agent-hotload/v0.1.0/PROMPT_INJECT.md",
-      "pins": ["cgm.version", "cgm.commit"]
+      "pins": [
+        "cgm.module_count"
+      ]
     },
     {
       "file": "modules/coordination/multi-agent-hotload/v0.1.0/README.md",
-      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version"]
-    },
-    {
-      "file": "modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md",
-      "pins": ["cgm.version"]
+      "pins": [
+        "cgm.module_count"
+      ]
     },
     {
       "file": "modules/coordination/multi-agent-hotload/v0.1.0/module.json",
-      "pins": ["cgm.version", "cgm.commit", "cgm.module_count", "pcm.commit", "pcm.cli_version", "acs.id", "acs.version"]
-    },
-    {
-      "file": "modules/coordination/multi-agent-hotload/v0.1.0/examples/assignment.example.json",
-      "pins": ["cgm.version", "cgm.commit", "pcm.commit"]
-    },
-    {
-      "file": "modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py",
-      "pins": ["cgm.version", "cgm.commit", "pcm.commit"]
-    },
-    {
-      "file": "modules/coordination/multi-agent-hotload/v0.1.0/tests/test_hotload_check.py",
-      "pins": ["cgm.version", "cgm.commit", "pcm.commit"]
+      "pins": [
+        "cgm.module_count",
+        "acs.id",
+        "acs.version"
+      ]
     }
   ]
 }

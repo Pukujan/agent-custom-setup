@@ -63,11 +63,25 @@ def _git_repo(path: Path) -> str:
     return out.stdout.strip()
 
 
+def _mesh_doc() -> dict:
+    """Fixture mesh. The installer reads commits from this file, not from pins.json."""
+    return {
+        "source": "fixture",
+        "requires": {
+            "project-continuity-modules": {"version": "0.6.0", "commit": PCM_SHA},
+            "content-generation-modules": {"version": "0.5.12", "commit": CGM_SHA},
+            "agent-custom-setup": {"version": "0.2.0", "commit": ACS_SHA},
+            "observational-issue-ops": {"version": "0.1.0", "commit": "d" * 40},
+        },
+    }
+
+
 def _fake_acs_root(tmp_path: Path) -> Path:
     root = tmp_path / "acs"
     pack = root / MODULE_REL
     pack.mkdir(parents=True)
     (pack / "pins.json").write_text(json.dumps({"pins": PINS}), encoding="utf-8")
+    (root / "stack-mesh.json").write_text(json.dumps(_mesh_doc()), encoding="utf-8")
     return root
 
 
@@ -132,7 +146,7 @@ def test_verify_checkout_rejects_wrong_revision(tmp_path: Path):
     repo = tmp_path / "repo"
     _git_repo(repo)
     errors = mod.verify_checkout(repo, "0" * 40, "cgm")
-    assert errors and "must be pinned" in errors[0]
+    assert errors and "an older version is refused" in errors[0]
 
 
 def test_verify_checkout_accepts_pinned_revision(tmp_path: Path):
@@ -187,8 +201,13 @@ def test_generated_assignment_passes_pack_validator(tmp_path: Path):
     example = json.loads(
         (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
     )
-    # hotload_check hardcodes the real pin prefixes, so validate real pins here.
+    # The installer overlays stack-mesh.json onto pins.json before it writes.
     real_pins = mod.load_json(MODULE_ROOT / "pins.json")["pins"]
+    mesh = mod.load_json(MODULE_ROOT.parents[3] / "stack-mesh.json")["requires"]
+    real_pins["pcm"]["commit"] = mesh["project-continuity-modules"]["commit"]
+    real_pins["pcm"]["cli_version"] = mesh["project-continuity-modules"]["version"]
+    real_pins["cgm"]["commit"] = mesh["content-generation-modules"]["commit"]
+    real_pins["cgm"]["version"] = mesh["content-generation-modules"]["version"]
     generated = mod.build_assignment(example, real_pins, "adopter-x")
     out = tmp_path / "assignment.json"
     out.write_text(json.dumps(generated), encoding="utf-8")

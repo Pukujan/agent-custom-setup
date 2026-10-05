@@ -1,0 +1,21 @@
+{
+  "source": "https://raw.githubusercontent.com/Pukujan/agent-stack-train/main/stack-releases.json",
+  "requires": {
+    "project-continuity-modules": {
+      "version": "0.7.0",
+      "commit": "197f7ba8dab34e9738f85a510a673bc2522b1899"
+    },
+    "content-generation-modules": {
+      "version": "0.5.12",
+      "commit": "b487b48c12c375ad8a82016f8bb50fb3c109b443"
+    },
+    "agent-custom-setup": {
+      "version": "0.2.0",
+      "commit": "c15e53fc17e8158e9182709d5d3b6f255bcc11f2"
+    },
+    "observational-issue-ops": {
+      "version": "0.1.0",
+      "commit": "469adf1e9cb12b004424118c77270e3ca0e71217"
+    }
+  }
+}

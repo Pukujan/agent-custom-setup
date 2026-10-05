@@ -15,8 +15,6 @@ permissions:
 jobs:
   gates:
     runs-on: ubuntu-latest
-    env:
-      PCM_PIN: 4e2385474b4af9249ca009cbdcb38c4498932475
     steps:
       - uses: actions/checkout@v4
 
@@ -24,11 +22,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install pinned continuity CLI
+      - name: Install the mesh continuity CLI
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "git+https://github.com/Pukujan/project-continuity-modules.git@${PCM_PIN}"
           python -m pip install pyyaml
+          PCM=$(python -c "import json; print(json.load(open('stack-mesh.json',encoding='utf-8'))['requires']['project-continuity-modules']['commit'])")
+          python -m pip install "git+https://github.com/Pukujan/project-continuity-modules.git@${PCM}"
           continuity --version
 
       - name: Continuity validate
