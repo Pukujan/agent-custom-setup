@@ -356,6 +356,9 @@ def test_run_fails_closed_when_hotload_check_fails(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(mod, "run_script", run_script)
     rc = mod.run(_run_args(mod, acs_root, adopter, pcm, cgm))
     assert rc == 1
+    # A failed final check must not leave a partial install behind.
+    assert not (adopter / ".coord" / "assignment.json").exists()
+    assert not (adopter / ".coord" / "hotload.lock.json").exists()
 
 
 def test_module_has_no_hardcoded_pins():

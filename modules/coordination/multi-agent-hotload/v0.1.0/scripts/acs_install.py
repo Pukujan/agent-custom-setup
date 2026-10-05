@@ -6,20 +6,32 @@ pinned external checkouts. This is **not** a network installer: it never clones,
 never fetches, and never vendors PCM or CGM source. Bring checkouts at the
 pinned commits (or point at ones you already have).
 
+Prerequisites (the installer fails closed without all of them):
+
+* the adopter already carries a CGM ``.content-system/`` adapter -- authoring
+  that adapter is CGM's job, not ACS's;
+* a PCM checkout at the pinned commit;
+* a CGM checkout at the pinned commit;
+* Python deps the validators need (``jsonschema``).
+
 What it does, in order:
 
 1. Checks the pack's own pins agree (runs ``check_pins.py`` on the ACS checkout).
-2. Requires the adopter to already carry a CGM ``.content-system/`` adapter --
-   authoring that adapter is CGM's job, not ACS's -- and verifies the pinned
-   PCM/CGM checkouts sit at the exact pinned commits.
-3. Writes the adopter's coordination surface, only when every precondition holds:
+2. Verifies the pinned PCM/CGM checkouts sit at the exact commits from
+   ``pins.json``.
+3. Builds the adopter's coordination surface:
 
        .coord/assignment.json     pins declared from this pack's ``pins.json``
        .coord/hotload.lock.json   installed pack version + verified checkouts
 
-   Existing files are kept unless ``--force``. ``--dry-run`` writes nothing.
-4. Runs the pack's ``hotload_check.py`` against the adopter and fails closed.
-5. Prints the GitHub governance steps a human must still take.
+4. Writes both files atomically, keeping existing files unless ``--force``, and
+   refusing to write outside the adopter root. ``--dry-run`` writes nothing.
+5. Runs the pack's ``hotload_check.py`` (which validates the adopter's adapter);
+   on failure the writes are rolled back.
+6. Prints the GitHub governance steps a human must still take.
+
+Only each checkout's HEAD commit is verified; a dirty working tree is not
+detected (this matches ``hotload_check.py``).
 
 Out of scope by design (fails closed; never faked):
 
@@ -76,6 +88,10 @@ def console_safe(text: str) -> str:
         .replace("…", "...")
         .replace(" ", " ")
     )
+
+
+def say(text: object = "") -> None:
+    print(console_safe(str(text)))
 
 
 def load_json(path: Path) -> object:
@@ -141,7 +157,11 @@ def verify_checkout(root: Path | None, expected_commit: str, label: str) -> list
 
 
 def build_assignment(example: dict, pins: dict, project_name: str) -> dict:
-    """Seed the adopter assignment from the pack example, re-pinned from pins.json."""
+    """Seed the adopter assignment from the pack example, re-pinned from pins.json.
+
+    Every pin-bearing field is rebuilt from ``pins.json`` so no stale value from
+    the example can survive a pin bump.
+    """
     data = copy.deepcopy(example)
     data["project"] = project_name
     data["recorded_at"] = now_iso()
@@ -156,16 +176,28 @@ def build_assignment(example: dict, pins: dict, project_name: str) -> dict:
         "required CI checks, and auto-merge stay human steps (see acs_install output)."
     )
 
-    # Re-pin from the single source of truth (pins.json), never from the example.
     pcm_pin = pins["pcm"]
     cgm_pin = pins["cgm"]
-    pcm_block = data.setdefault("pins", {}).setdefault("pcm", {})
+    pin_block = data.setdefault("pins", {})
+    pcm_block = pin_block.setdefault("pcm", {})
     pcm_block["revision"] = pcm_pin["commit"]
     pcm_block["cli_version"] = pcm_pin["cli_version"]
-    cgm_block = data["pins"].setdefault("cgm", {})
+    pcm_block["notes"] = (
+        "Full PCM for adopters: continuity/checkpoints plus PR-only, required CI "
+        "gates, protection/auto-merge preference, fail-closed gates, leaf/parent "
+        "receipts. Pin the commit; do not follow moving main. Do not vendor PCM "
+        "source. Values come from this pack's pins.json."
+    )
+    cgm_block = pin_block.setdefault("cgm", {})
     cgm_block["revision"] = cgm_pin["commit"]
     cgm_block["version"] = cgm_pin["version"]
     cgm_block["modules"] = list(cgm_pin["modules"])
+    cgm_block["notes"] = (
+        "FULL CGM required for ACS and every hotloader adopter: all eight modules "
+        "including human-output-naming. Pin the commit; validate with CGM's "
+        "validate_content_system.py; then apply acs_prompt_inject. Do not vendor "
+        "CGM source. Values come from this pack's pins.json."
+    )
 
     # Self-contained check-in: never bake a foreign repo's issue URL into the adopter.
     bf = data.setdefault("boss_failover", {})
@@ -254,11 +286,33 @@ def write_json_atomic(path: Path, data: object, *, root: Path) -> None:
         raise
 
 
+def snapshot(paths: list[Path]) -> dict[Path, bytes | None]:
+    """Remember each target's bytes (None = did not exist) so writes can be undone."""
+    saved: dict[Path, bytes | None] = {}
+    for path in paths:
+        try:
+            saved[path] = path.read_bytes() if path.exists() else None
+        except OSError:
+            saved[path] = None
+    return saved
+
+
+def rollback(saved: dict[Path, bytes | None]) -> None:
+    for path, original in saved.items():
+        try:
+            if original is None:
+                path.unlink(missing_ok=True)
+            else:
+                path.write_bytes(original)
+        except OSError:
+            pass
+
+
 def run_script(argv: list[str]) -> int:
     try:
         return subprocess.run(argv, check=False).returncode
     except OSError as exc:
-        print(f"acs_install: could not run {argv[0]}: {exc}")
+        say(f"acs_install: could not run {argv[0]}: {exc}")
         return 1
 
 
@@ -268,19 +322,17 @@ def run(args: argparse.Namespace) -> int:
     try:
         manifest = load_json(manifest_path)
     except (OSError, json.JSONDecodeError) as exc:
-        print(f"acs_install: FAIL\n  - pins manifest unreadable: {manifest_path}: {exc}")
+        say(f"acs_install: FAIL\n  - pins manifest unreadable: {manifest_path}: {exc}")
         return 2
     if not isinstance(manifest, dict) or not isinstance(manifest.get("pins"), dict):
-        print(f"acs_install: FAIL\n  - {manifest_path} has no 'pins' object")
+        say(f"acs_install: FAIL\n  - {manifest_path} has no 'pins' object")
         return 2
     pins = manifest["pins"]
 
     problems: list[str] = []
 
     # 1. The pack's own projections must agree before we touch anything.
-    if run_script(
-        [sys.executable, str(CHECK_PINS), "--root", str(acs_root)]
-    ) != 0:
+    if run_script([sys.executable, str(CHECK_PINS), "--root", str(acs_root)]) != 0:
         problems.append(
             "pack pin drift: check_pins.py failed on the ACS checkout "
             f"({acs_root}); fix the pack before installing"
@@ -289,7 +341,7 @@ def run(args: argparse.Namespace) -> int:
     # 2. Adopter root must exist.
     adopter = args.adopter_root.expanduser().resolve()
     if not adopter.is_dir():
-        print(f"acs_install: FAIL\n  - adopter root is not a directory: {adopter}")
+        say(f"acs_install: FAIL\n  - adopter root is not a directory: {adopter}")
         return 2
 
     # 3. A CGM adapter must already exist -- ACS does not author one.
@@ -318,11 +370,12 @@ def run(args: argparse.Namespace) -> int:
     try:
         example = load_json(EXAMPLE_ASSIGNMENT)
     except (OSError, json.JSONDecodeError) as exc:
-        print(f"acs_install: FAIL\n  - assignment example unreadable: {exc}")
+        say(f"acs_install: FAIL\n  - assignment example unreadable: {exc}")
         return 2
     project_name = args.project_name or adopter.name
+    assignment = build_assignment(example, pins, project_name)
     targets: list[tuple[Path, object]] = [
-        (adopter / ASSIGNMENT_REL, build_assignment(example, pins, project_name)),
+        (adopter / ASSIGNMENT_REL, assignment),
         (adopter / LOCK_REL, build_lock(pins, acs_root, checkouts, validated=False)),
     ]
     to_write: list[tuple[Path, object]] = []
@@ -334,32 +387,37 @@ def run(args: argparse.Namespace) -> int:
             to_write.append((path, data))
 
     # 6. Report the plan.
-    print("acs_install: plan")
-    print(f"  acs_root={acs_root}")
-    print(f"  adopter_root={adopter}")
-    print(f"  pcm_pin={short(pins.get('pcm', {}).get('commit'))}  cgm_pin={short(pins.get('cgm', {}).get('commit'))}")
+    say("acs_install: plan")
+    say(f"  acs_root={acs_root}")
+    say(f"  adopter_root={adopter}")
+    say(
+        f"  pcm_pin={short(pins.get('pcm', {}).get('commit'))}  "
+        f"cgm_pin={short(pins.get('cgm', {}).get('commit'))}"
+    )
     for path, _ in to_write:
-        print(f"  write {path.relative_to(adopter)}")
+        say(f"  write {path.relative_to(adopter)}")
     for path in kept:
-        print(f"  keep  {path.relative_to(adopter)} (exists; --force to overwrite)")
+        say(f"  keep  {path.relative_to(adopter)} (exists; --force to overwrite)")
 
     if problems:
-        print("acs_install: FAIL (preconditions unmet; nothing written)")
+        say("acs_install: FAIL (preconditions unmet; nothing written)")
         for item in problems:
             for line in str(item).splitlines() or [str(item)]:
-                print(f"  - {console_safe(line)}")
+                say(f"  - {line}")
         return 1
 
     if args.dry_run:
-        print("acs_install: dry-run OK (no files written)")
+        say("acs_install: dry-run OK (no files written)")
         return 0
 
     # 7. Write, then validate the whole stack with the pack's own checker.
+    saved = snapshot([path for path, _ in to_write])
     for path, data in to_write:
         try:
             write_json_atomic(path, data, root=adopter)
-        except ValueError as exc:
-            print(f"acs_install: FAIL\n  - {console_safe(str(exc))}")
+        except (ValueError, OSError) as exc:
+            rollback(saved)
+            say(f"acs_install: FAIL (rolled back)\n  - {exc}")
             return 1
 
     check_argv = [
@@ -375,7 +433,8 @@ def run(args: argparse.Namespace) -> int:
     if args.cgm_root:
         check_argv += ["--cgm-root", str(args.cgm_root.expanduser().resolve())]
     if run_script(check_argv) != 0:
-        print("acs_install: FAIL (hotload_check did not pass; see above)")
+        rollback(saved)
+        say("acs_install: FAIL (hotload_check did not pass; writes rolled back)")
         return 1
 
     # 8. Refresh the lock now that validation passed.
@@ -385,12 +444,12 @@ def run(args: argparse.Namespace) -> int:
         root=adopter,
     )
 
-    print("acs_install: OK")
-    print(f"  wrote {ASSIGNMENT_REL.as_posix()} and {LOCK_REL.as_posix()}")
-    print("  next: EDIT the assignment's agents list + check_in to match your seats/issue.")
-    print("  next (human GitHub steps, NOT automated): enable branch protection on the")
-    print("  default branch with the required CI checks, and turn on auto-merge so green")
-    print("  required checks can merge without skipping gates.")
+    say("acs_install: OK")
+    say(f"  wrote {ASSIGNMENT_REL.as_posix()} and {LOCK_REL.as_posix()}")
+    say("  next: EDIT the assignment's agents list + check_in to match your seats/issue.")
+    say("  next (human GitHub steps, NOT automated): enable branch protection on the")
+    say("  default branch with the required CI checks, and turn on auto-merge so green")
+    say("  required checks can merge without skipping gates.")
     return 0
 
 
