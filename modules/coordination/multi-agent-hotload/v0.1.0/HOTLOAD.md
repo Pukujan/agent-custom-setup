@@ -23,27 +23,47 @@ See [BEHAVIOR.md](BEHAVIOR.md) — Working-repo scope.
 
 ## Dev root hygiene (binding)
 
-The dev root is where the operator keeps the main checkout of each repo. It defaults to `D:\development` on Windows and `~/development` on macOS and Linux, and can be changed with the `ACS_DEV_ROOT` environment variable or `--dev-root`.
+The dev root is where the operator keeps their repos. It defaults to `D:\development` on Windows and `~/development` on macOS and Linux, and can be changed with the `ACS_DEV_ROOT` environment variable or `--dev-root`.
 
-- **MUST** keep exactly one main checkout per repo directly under the dev root, and nothing else.
-- **MUST NOT** create git worktrees, dependency or sibling clones, pinned copies, scratch folders, or tool caches inside the dev root.
-- **MUST** put them under the ACS cache instead (override with `ACS_CACHE_DIR`):
+- **MUST** give each repo exactly one entry in the dev root. The preferred form is a **project folder**: `<project>/main` holds the primary checkout and `<project>/worktrees/<task>` holds task worktrees of that checkout. A project folder is not itself a git repo and holds nothing besides `main/` and `worktrees/`.
+- **MAY** keep a legacy **flat checkout** (`<dev root>/<repo>` is the checkout itself) for a repo that never uses worktrees. Migrate it to a project folder before adding worktrees.
+- **MUST NOT** put a worktree directly in the dev root (`../<repo>-wt`) or inside a main checkout (`<repo>/pcm/worktree/...`, `<repo>/.worktrees/...`).
+- **MUST NOT** put dependency or sibling clones, pinned copies, scratch folders, or tool caches anywhere in the dev root. They go under the ACS cache (override with `ACS_CACHE_DIR`).
+
+```
+D:\development\
+├── octo-db\                  <- project folder (not a git repo)
+│   ├── main\                 <- primary checkout
+│   └── worktrees\
+│       └── OCTO-0114\        <- linked worktree of octo-db\main
+├── hades-v2\
+│   └── main\                 <- project folder without worktrees
+└── paseo\                    <- legacy flat checkout (accepted)
+
+%LOCALAPPDATA%\acs\
+├── deps\<name>               <- pinned dependency clones (PCM, CGM, ...)
+└── scratch\<name>            <- probes, throwaway copies
+```
 
 | Kind | Windows | macOS / Linux |
 | --- | --- | --- |
+| Task worktrees | `<dev root>\<project>\worktrees\<task>` | `<dev root>/<project>/worktrees/<task>` |
 | Pinned dependency clones (PCM, CGM, ...) | `%LOCALAPPDATA%\acs\deps\<name>` | `~/.cache/acs/deps/<name>` |
 | Scratch, probes, throwaway copies | `%LOCALAPPDATA%\acs\scratch\<name>` | `~/.cache/acs/scratch/<name>` |
-| Linked worktrees (`git worktree add`) | `%LOCALAPPDATA%\acs\worktrees\<repo>-<branch>` | `~/.cache/acs/worktrees/<repo>-<branch>` |
 
-`hotload_check` looks for the pinned CGM checkout in `<cache>/deps/` first and refuses a dependency path that sits inside the dev root unless it is one of the main checkouts there. It also runs `scripts/dev_root_check.py` and prints a `WARN` line for every stray entry (`--strict-dev-root` or `ACS_DEV_ROOT_STRICT=1` turns those into failures).
+`hotload_check` looks for the pinned CGM checkout in `<cache>/deps/` first and refuses a dependency path inside the dev root unless it is one of the main checkouts there (`<repo>` or `<project>/main`). It also runs `scripts/dev_root_check.py` and prints a `WARN` line for every stray entry (`--strict-dev-root` or `ACS_DEV_ROOT_STRICT=1` turns those into failures).
 
 ```bash
 python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --dev-root D:/development
-python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --clean          # dry run
-python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --clean --yes    # act
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --clean              # dry run
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --clean --yes        # act
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --migrate octo-db    # dry run
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --migrate octo-db --yes
 ```
 
-`--clean` never touches a repo, or a folder containing one, that has uncommitted changes, commits that are not on any remote, or stashes. Push or stash-pop that work first. Clean linked worktrees are removed with `git worktree remove` and `git worktree prune`; everything else is moved into the cache rather than deleted.
+`--clean` never touches a repo, or a folder containing one, that has uncommitted changes, commits that are not on any remote, or stashes, and it never moves a project's `main/` or its valid worktrees. A project's worktree in the wrong place is moved into `<project>/worktrees/` with `git worktree move`. Other clean linked worktrees are removed with `git worktree remove` and `git worktree prune`, and everything else is moved into the cache rather than deleted.
+
+`--migrate <repo>` moves the flat checkout to `<repo>/main`, runs `git worktree repair`, and moves each linked worktree to `<repo>/worktrees/<name>`. Without `--yes` it only prints the plan. It refuses when the checkout or any worktree has uncommitted, unpushed or stashed work, or a worktree is locked. Close editors, terminals and servers running from the checkout first, because Windows will not rename a folder that is in use.
 
 See [BEHAVIOR.md](BEHAVIOR.md) — Dev root hygiene.
 
@@ -233,6 +253,6 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 - [ ] I will not treat PCM as the proposal layer
 - [ ] Parent/child ticket notes only (no DAG engine)
 - [ ] Working-repo scope: code/claims/PRs/boss actions only on this hot-loaded repo; foreign repos = proposed issue only
-- [ ] Dev root hygiene: one main checkout per repo in the dev root; worktrees, deps, scratch and caches go under the ACS cache (`dev_root_check.py` is clean)
+- [ ] Dev root hygiene: one project folder per repo (`<project>/main` + `<project>/worktrees/<task>`, or a legacy flat checkout); deps, scratch and caches go under the ACS cache (`dev_root_check.py` is clean)
 - [ ] External research gate: see BEHAVIOR.md (MUST on first use / bump / failure; MUST NOT for trivial known-pattern edits)
 - [ ] No secrets in commits, logs, or comments

@@ -363,3 +363,191 @@ def test_prompt_inject_render_carries_dev_root_rule():
     assert hc.DEV_ROOT_RULE in committed
     for doc in ("HOTLOAD.md", "BEHAVIOR.md"):
         assert "Dev root hygiene (binding)" in (MODULE_ROOT / doc).read_text(encoding="utf-8")
+
+
+# ---------------------------------------------------------------- project-folder layout
+
+
+def project(remote: Path, root: Path, name: str = "widget") -> Path:
+    """<root>/<name>/main as a clone of ``remote``; returns the main checkout."""
+    (root / name).mkdir()
+    return clone(remote, root / name / "main")
+
+
+@pytest.fixture()
+def other_remote(tmp_path: Path) -> Path:
+    bare = tmp_path / "remotes" / "gadget.git"
+    bare.parent.mkdir(parents=True, exist_ok=True)
+    git("init", "--bare", str(bare))
+    seed = tmp_path / "seed-gadget"
+    git("clone", str(bare), str(seed))
+    (seed / "README.md").write_text("gadget\n", encoding="utf-8")
+    git("add", "README.md", cwd=seed)
+    git("commit", "-m", "init", cwd=seed)
+    git("push", "origin", "HEAD:main", cwd=seed)
+    return bare
+
+
+def test_project_folder_with_worktrees_and_flat_checkout_are_clean(tmp_path: Path, remote: Path, other_remote: Path):
+    root = make_dev_root(tmp_path)
+    main = project(remote, root)
+    git("worktree", "add", "-b", "task-1", str(root / "widget" / "worktrees" / "TASK-1"), cwd=main)
+    git("worktree", "add", "-b", "task-2", str(root / "widget" / "worktrees" / "TASK-2"), cwd=main)
+    clone(other_remote, root / "gadget")  # legacy flat checkout
+    project(other_remote, root, "solo")  # a second entry for gadget -> duplicate
+    mod = _load("dev_root_check")
+    report = mod.scan(root)
+    assert kinds(report) == {"solo": "duplicate_clone"}
+    assert report["project_folders"] == ["widget"]
+    assert report["flat_checkouts"] == ["gadget"]
+
+
+def test_project_folder_alone_is_ok_via_cli(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    project(remote, root)
+    code, data = run_cli("--dev-root", str(root))
+    assert code == 0, data
+    assert data["project_folders"] == ["widget"]
+
+
+def test_project_folder_flags_extra_entries_and_bad_worktrees(tmp_path: Path, remote: Path, other_remote: Path):
+    root = make_dev_root(tmp_path)
+    main = project(remote, root)
+    (root / "widget" / "notes").mkdir()
+    (root / "widget" / "todo.txt").write_text("x", encoding="utf-8")
+    wts = root / "widget" / "worktrees"
+    wts.mkdir()
+    (wts / "loose").mkdir()
+    clone(remote, wts / "full-clone")
+    gadget = clone(other_remote, tmp_path / "elsewhere" / "gadget")
+    git("worktree", "add", "-b", "foreign", str(wts / "foreign"), cwd=gadget)
+    git("worktree", "add", "-b", "ok", str(wts / "ok"), cwd=main)
+    mod = _load("dev_root_check")
+    k = kinds(mod.scan(root))
+    assert k == {
+        "notes": "project_extra_entry",
+        "todo.txt": "project_extra_entry",
+        "loose": "worktrees_entry_not_worktree",
+        "full-clone": "worktrees_entry_not_worktree",
+        "foreign": "foreign_worktree",
+    }
+
+
+def test_project_worktree_outside_worktrees_dir_is_flagged(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    main = project(remote, root)
+    git("worktree", "add", "-b", "sib", str(root / "widget-sib"), cwd=main)  # sibling in dev root
+    git("worktree", "add", "-b", "nest", str(main / "pcm" / "worktree" / "T-1"), cwd=main)  # nested
+    git("worktree", "add", "-b", "cache", str(tmp_path / "cache" / "worktrees" / "c"), cwd=main)  # outside: fine
+    mod = _load("dev_root_check")
+    report = mod.scan(root)
+    by_name = {f["name"]: f for f in report["findings"]}
+    assert set(by_name) == {"widget-sib", "T-1"}
+    assert by_name["widget-sib"]["kind"] == "linked_worktree"
+    assert by_name["T-1"]["kind"] == "registered_worktree"
+    assert Path(by_name["T-1"]["target"]) == root / "widget" / "worktrees" / "T-1"
+
+
+def test_project_main_that_is_a_worktree_is_flagged(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    src = clone(remote, tmp_path / "elsewhere" / "widget")
+    (root / "widget").mkdir()
+    git("worktree", "add", "-b", "m", str(root / "widget" / "main"), cwd=src)
+    mod = _load("dev_root_check")
+    assert kinds(mod.scan(root)) == {"widget": "project_main_not_primary"}
+
+
+def test_clean_moves_misplaced_project_worktrees_home(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    main = project(remote, root)
+    git("worktree", "add", "-b", "sib", str(root / "widget-sib"), cwd=main)
+    (root / "widget-sib" / "wip.txt").write_text("uncommitted\n", encoding="utf-8")
+    git("worktree", "add", "-b", "nest", str(main / ".worktrees" / "n1"), cwd=main)
+    code, data = run_cli("--dev-root", str(root), "--clean")
+    assert code == 1
+    actions = {Path(a["path"]).name: a["action"] for a in data["clean"]["actions"]}
+    assert actions == {"widget-sib": "worktree_move", "n1": "worktree_move"}
+    assert (root / "widget-sib").exists()  # dry run
+    code, data = run_cli("--dev-root", str(root), "--clean", "--yes")
+    assert code == 0, json.dumps(data, indent=2)
+    assert sorted(p.name for p in root.iterdir()) == ["widget"]
+    assert (root / "widget" / "worktrees" / "widget-sib" / "wip.txt").is_file()  # work kept
+    listing = git("worktree", "list", cwd=main)
+    assert "worktrees" in listing and "widget-sib" in listing
+
+
+def test_clean_never_moves_project_main_or_valid_worktrees(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    main = project(remote, root)
+    git("worktree", "add", "-b", "ok", str(root / "widget" / "worktrees" / "ok"), cwd=main)
+    (root / "widget" / "stray").mkdir()
+    code, data = run_cli("--dev-root", str(root), "--clean", "--yes")
+    assert code == 0, json.dumps(data, indent=2)
+    assert [Path(a["path"]).name for a in data["clean"]["actions"]] == ["stray"]
+    assert (main / ".git").is_dir()
+    assert (root / "widget" / "worktrees" / "ok" / ".git").is_file()
+    assert not (root / "widget" / "stray").exists()
+
+
+def test_migrate_dry_run_changes_nothing(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    repo = clone(remote, root / "widget")
+    git("worktree", "add", "-b", "f1", str(root / "widget-f1"), cwd=repo)
+    code, plan = run_cli("--dev-root", str(root), "--migrate", "widget")
+    assert code == 0, plan
+    assert plan["mode"] == "dry-run"
+    assert [s["action"] for s in plan["steps"]] == [
+        "rename", "mkdir", "rename", "worktree_repair", "worktree_move", "worktree_prune",
+    ]
+    assert (repo / ".git").is_dir()
+    assert (root / "widget-f1").exists()
+
+
+def test_migrate_yes_moves_checkout_and_worktrees(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    repo = clone(remote, root / "widget")
+    git("worktree", "add", "-b", "f1", str(root / "widget-f1"), cwd=repo)
+    git("push", "origin", "f1", cwd=root / "widget-f1")
+    git("worktree", "add", "-b", "f2", str(repo / "pcm" / "worktree" / "T-2"), cwd=repo)
+    git("push", "origin", "f2", cwd=repo / "pcm" / "worktree" / "T-2")
+    code, plan = run_cli("--dev-root", str(root), "--migrate", "widget", "--yes")
+    assert code == 0, json.dumps(plan, indent=2)
+    main = root / "widget" / "main"
+    assert (main / ".git").is_dir()
+    assert (root / "widget" / "worktrees" / "widget-f1" / ".git").is_file()
+    assert (root / "widget" / "worktrees" / "T-2" / ".git").is_file()
+    assert sorted(p.name for p in root.iterdir()) == ["widget"]
+    assert git("status", "--porcelain", cwd=root / "widget" / "worktrees" / "T-2") == ""
+    listing = git("worktree", "list", "--porcelain", cwd=main)
+    assert "prunable" not in listing
+    mod = _load("dev_root_check")
+    assert mod.scan(root)["ok"] is True
+
+
+def test_migrate_refuses_dirty_or_unpushed_work(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    repo = clone(remote, root / "widget")
+    git("worktree", "add", "-b", "local-only", str(root / "widget-wip"), cwd=repo)
+    (root / "widget-wip" / "a.txt").write_text("a\n", encoding="utf-8")
+    git("add", "a.txt", cwd=root / "widget-wip")
+    git("commit", "-m", "not pushed", cwd=root / "widget-wip")
+    code, plan = run_cli("--dev-root", str(root), "--migrate", "widget", "--yes")
+    assert code == 1
+    assert plan["ok"] is False and "refusing" in plan["error"]
+    assert (repo / ".git").is_dir() and (root / "widget-wip").exists()
+
+
+def test_migrate_rejects_non_flat_entries(tmp_path: Path, remote: Path):
+    root = make_dev_root(tmp_path)
+    project(remote, root)
+    code, plan = run_cli("--dev-root", str(root), "--migrate", "widget")
+    assert code == 1
+    assert "not a flat primary checkout" in plan["error"]
+
+
+def test_hotload_accepts_dependency_at_project_main(tmp_path: Path, remote: Path):
+    hc = _load("hotload_check")
+    root = make_dev_root(tmp_path)
+    main = project(remote, root)
+    assert hc.dependency_location_problem(main, root) is None
+    assert hc.dependency_location_problem(root / "widget" / "worktrees" / "x", root)

@@ -123,7 +123,7 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 | `scripts/acs_install.py` | Prepare + validate an adopter install (no network, no vendoring) |
 | `scripts/hotload_check.py` | Validate pack + assignment |
 | `scripts/watchdog_check.py` | Agent-less watchdog skeleton |
-| `scripts/dev_root_check.py` | Flag (and optionally clean up) anything in the dev root that is not a single main checkout |
+| `scripts/dev_root_check.py` | Check the dev root layout (`<project>/main` + `<project>/worktrees/<task>`, or a legacy flat checkout), clean up strays, and plan flat-to-project migrations |
 | `workflow-stubs/watchdog.yml` | GH Action stub (copy into consuming repos) |
 | `tests/test_hotload_check.py` | Regression tests |
 | `tests/test_dev_root_check.py` | Dev root check tests (fake dev roots under `tmp_path`) |
