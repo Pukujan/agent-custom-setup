@@ -1,16 +1,19 @@
 # HOTLOAD — what to load first on ACS
 
-When an agent starts on Agent Custom Setup (or is told to load the **agent hot-loader** into a working repo), load in this order. This module is the **install surface**: it wires PCM + CGM + this coordination runtime together. ACS does **not** replace PCM or CGM.
+When an agent starts on Agent Custom Setup (or is told to load the **agent hot-loader** into a working repo), load in this order. This module is the **install surface**: it wires PCM + CGM + OIO + this coordination runtime together. ACS does **not** replace PCM, CGM, or OIO.
+
+Component versions are **not** written down in this file. They come from the release train (`agent-stack-train`'s `stack-releases.json`) through the pack's `stack-mesh.json`, and the adopter follows the train through its own `stack-manifest.json`. See [SPEC.md](SPEC.md) §1. Do not restate a commit here — a copied pin is exactly the drift the train exists to remove.
 
 ## Done when
 
-Install is complete only when all three are wired as **full stacks** (slim subsets fail):
+Install is complete only when all four are wired as **full stacks** (slim subsets fail):
 
 1. **FULL PCM** — continuity/checkpoints **and** GitHub-owned progression: PR-only to default branch, required CI gates, adopter branch-protection + auto-merge preference, fail-closed on missing/failed/skipped gates, leaf/parent receipts (see SPEC §8 / TARGET_ADOPTION). Still **not** the proposal/ACCEPT layer.
 2. **FULL CGM 0.5.12** — all eight modules + `human_output_contract` docs (not HSW + writing-direction only). Route README/product entry via `writing-direction`; posts/papers/HTML reports/compare/appendable via `human-sounding-writing` (hsw, default ON); basenames via `human-output-naming` (hon).
-3. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR
+3. **OIO** — the observational issue-log surface: ontology, issue form, triage workflow, and the `AGENTS.md` guidance block merged into a delimited region. The ACS installer invokes OIO's own installer; a component that cannot run makes the install **PARTIAL**, never a fake OK.
+4. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR
 
-Missing any of the three, or substituting a thin PCM/CGM subset, is an **incomplete install**.
+Missing any of the four, or substituting a thin PCM/CGM subset, is an **incomplete install** reported as such with a non-zero exit. [SPEC.md](SPEC.md) is the normative install contract — the state machine, the per-artifact gate, and the platform matrix.
 
 ## Working-repo scope (binding)
 
@@ -61,11 +64,9 @@ Binding MUST/MUST NOT + paste-ready provenance checklist: [BEHAVIOR.md](BEHAVIOR
 
 ### 2. FULL PCM (continuity + GitHub governance)
 
-Pin [Pukujan/project-continuity-modules](https://github.com/Pukujan/project-continuity-modules) at:
+Check out [Pukujan/project-continuity-modules](https://github.com/Pukujan/project-continuity-modules) at the commit `stack-mesh.json` requires for `project-continuity-modules` (the train's certified revision — read it from the mesh, do not copy it here). The installer verifies the checkout with `--pcm-root`.
 
-- **Commit:** `4e2385474b4af9249ca009cbdcb38c4498932475`
-- **CLI:** `0.6.0` · **Protocol:** `0.1.0-draft`
-- Do **not** silently follow moving `main`. Do **not** copy PCM source into ACS.
+- Do **not** silently follow moving `main`; use the mesh revision. Do **not** copy PCM source into ACS.
 
 Wire the **complete** adopter surface (see PCM [`docs/adopter-enforcement.md`](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md) (PR-only + required gates; live), `docs/TARGET_ADOPTION.md`, `SPEC.md` §8, `AGENTS.md`):
 
@@ -83,11 +84,9 @@ Wire the **complete** adopter surface (see PCM [`docs/adopter-enforcement.md`](h
 
 ### 3. FULL CGM 0.5.12 (all modules + contracts)
 
-Pin [Pukujan/content-generation-modules](https://github.com/Pukujan/content-generation-modules) at:
+Check out [Pukujan/content-generation-modules](https://github.com/Pukujan/content-generation-modules) at the commit `stack-mesh.json` requires for `content-generation-modules` (the train's certified revision — read it from the mesh, do not copy it here). The installer verifies the checkout with `--cgm-root`.
 
-- **Version:** `0.5.12`
-- **Commit:** `6831f91e165b62d719c05eb492f7375fa932b560`
-- Do **not** silently follow moving `main`. Do **not** copy CGM source into ACS.
+- Do **not** silently follow moving `main`; use the mesh revision. Do **not** copy CGM source into ACS.
 - Adapter shape: target `.content-system/system-version.json` lists all eight module ids; validate with `python scripts/validate_content_system.py --root <cgm> --adapter <target>/.content-system --project-root <target>`.
 
 **Required modules** (complete stack — a two-module pin is incomplete):
@@ -113,7 +112,15 @@ Pin [Pukujan/content-generation-modules](https://github.com/Pukujan/content-gene
 
 **Routing (binding):** README/product entry → `writing-direction` (keep scan/bold). Posts/papers/general prose → `human-sounding-writing`. Do **not** apply HSW bold restraints to READMEs. Titles for issues/commits/PRs stay human-readable under this stack.
 
-### 4. This runtime (roles + lease + queue + watchdog + proposals + claim)
+### 4. OIO (observational issue-log surface)
+
+Check out [Pukujan/observational-issue-ops](https://github.com/Pukujan/observational-issue-ops) at the commit `stack-mesh.json` requires for `observational-issue-ops`. The installer verifies the checkout with `--oio-root`, then invokes OIO's own installer (`.github/scripts/oio_installer.py --target <adopter>`) — ACS does not vendor or re-implement OIO.
+
+- OIO writes the issue-log surface: the project ontology, the observational issue form, the triage workflow, and a **delimited region** inside `AGENTS.md` (`<!-- oio:issue-log-guidance:start/end -->`). Text outside that region is never touched; an edited region is refused on hash mismatch (see [SPEC.md](SPEC.md) §5).
+- OIO's installer is transactional and fail-closed. Where the platform cannot support its symlink/reparse-point control, it refuses; ACS reports the install **PARTIAL** with the exact remaining command rather than claiming success ([SPEC.md](SPEC.md) §6).
+- Pass `--project-id OWNER/REPO` when the ontology cannot be inferred from `origin`.
+
+### 5. This runtime (roles + lease + queue + watchdog + proposals + claim)
 
 1. [ROLES.md](ROLES.md) — **live join/continue order** fills roles (first = decision boss, next = coder1…). Tool identity does not matter. Assignment may seed; live fill wins.
 2. Assignment document — start from `examples/assignment.example.json`. Must include required **`boss_failover`** (lease TTL in **minutes**, default **30**, range **15–120**) and **`watchdog`** (~**10m** agent-less). **Watchdog ≠ failover.**
@@ -121,7 +128,7 @@ Pin [Pukujan/content-generation-modules](https://github.com/Pukujan/content-gene
 4. [PROPOSALS.md](PROPOSALS.md) — propose → boss ACCEPT/REJECT → claim branch → PR.
 5. Know your current role from join order + whether the boss lease is still valid for **you**.
 
-### 5. Boss lease vs watchdog (read carefully)
+### 6. Boss lease vs watchdog (read carefully)
 
 | Concept | Cadence | What it does | What it must NOT do |
 | --- | --- | --- | --- |
@@ -142,7 +149,7 @@ Do **not** treat the watchdog interval as the boss failover TTL. Short leases (t
 3. **Stale heartbeat + no activity past `idle_window`** → seat **at risk** (flag only).
 4. **After `lease_ttl_minutes` with no valid check-in** → seat **vacant**; claimants **enqueue** on the GitHub-canonical `claim_queue`; **front of queue** takes boss next.
 
-### 6. Boss lease check (every session) + zombie rule
+### 7. Boss lease check (every session) + zombie rule
 
 Before acting as decision boss:
 
@@ -154,11 +161,12 @@ Before acting as decision boss:
 6. **Zombie boss:** if you still think you are boss but the claim says vacant or names someone else → **reject boss-only actions** (ACCEPT/REJECT, lease renew as boss). Drop to worker **or** re-queue at the end. Optionally comment on the owning issue: `lost lease → rejoining queue`. Do **not** DM out-of-band.
 7. Optional path: worker posts a takeover proposal; if old boss is past lease and does not refute within `grace_minutes`, accept and record as-of — still enqueue-aware; no skip-ahead of the FIFO queue without explicit boss ACCEPT of a queue reorder proposal.
 
-### 7. Verify (FULL CGM validate required)
+### 8. Verify (FULL CGM validate required)
 
 ```bash
-# Pin CGM checkout first (example):
-#   git -C "$CGM_ROOT" fetch && git -C "$CGM_ROOT" checkout 6831f91e165b62d719c05eb492f7375fa932b560
+# Check out CGM at the commit stack-mesh.json requires for content-generation-modules:
+#   git -C "$CGM_ROOT" fetch && git -C "$CGM_ROOT" checkout "$(python -c \
+#     "import json;print(json.load(open('stack-mesh.json'))['requires']['content-generation-modules']['commit'])")"
 export CGM_ROOT=/path/to/content-generation-modules   # or pass --cgm-root
 export ADOPTER_ROOT=/path/to/working-repo             # must contain .content-system/
 
@@ -170,14 +178,14 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 
 1. Assignment pins declare **FULL** PCM + **FULL** CGM 0.5.12 (eight modules; slim HSW+WD-only fails).
 2. `boss_failover` / `watchdog` / `claim_queue` rules validate (lease **15–120** minutes, default 30).
-3. `CGM_ROOT` is a git checkout of `Pukujan/content-generation-modules` at `6831f91e165b62d719c05eb492f7375fa932b560` (0.5.12).
+3. `CGM_ROOT` is a git checkout of `Pukujan/content-generation-modules` at the commit `stack-mesh.json` requires (0.5.12).
 4. It runs `python "$CGM_ROOT/scripts/validate_content_system.py" --root "$CGM_ROOT" --adapter "$ADOPTER_ROOT/.content-system" --project-root "$ADOPTER_ROOT"` and the stdout **starts with `VALID`** (exit 0). There is **no** separate HSW-only script. On OK, `hotload_check` writes `PROMPT_INJECT.md` from `acs_prompt_inject` and prints the instruction (primary done-when remains full adapter VALID; `--mode writing` is optional secondary only).
 
-### 8. After validate — MUST load writing modules + acs_prompt_inject
+### 9. After validate — MUST load writing modules + acs_prompt_inject
 
-`validate_content_system.py` (full adapter path) checks helper/adapter **structure** and prints `VALID`. That is the **primary** install done-when. Optional secondary: `--mode writing` (see CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/6831f91e165b62d719c05eb492f7375fa932b560/docs/ACS_VERIFY.md)) — not a substitute for full adapter VALID.
+`validate_content_system.py` (full adapter path) checks helper/adapter **structure** and prints `VALID`. That is the **primary** install done-when. Optional secondary: `--mode writing` (see CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/ACS_VERIFY.md)) — not a substitute for full adapter VALID.
 
-After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/6831f91e165b62d719c05eb492f7375fa932b560/docs/writing-routing.json) / [`docs/WRITING_ROUTING.md`](https://github.com/Pukujan/content-generation-modules/blob/6831f91e165b62d719c05eb492f7375fa932b560/docs/WRITING_ROUTING.md) (`application: must_load`, `required_load: true`):
+After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/writing-routing.json) / [`docs/WRITING_ROUTING.md`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/WRITING_ROUTING.md) (`application: must_load`, `required_load: true`):
 
 | Situation | MUST load |
 | --- | --- |
@@ -195,7 +203,7 @@ After VALID, agents **MUST load** (not prefer) modules per CGM [`docs/writing-ro
 
 **Product-only adopter README (CGM 0.5.12 / #25):** Hotload docs may pin/reference CGM for install. The adopter/ACS **root README** must cover only the target product (audience, problem, features, evidence for their claims). Do **not** defend/cite CGM as methodology theater in the README body; do **not** add an image-generation section (image provenance stays in `.content-system/asset-manifest.json`). See CGM `docs/README_PLAYBOOK.md`.
 
-Cite: [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/6831f91e165b62d719c05eb492f7375fa932b560/docs/ACS_VERIFY.md) · [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/6831f91e165b62d719c05eb492f7375fa932b560/docs/writing-routing.json).
+Cite: [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/ACS_VERIFY.md) · [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/main/docs/writing-routing.json).
 
 
 
@@ -206,8 +214,15 @@ The pack installs one thing: the coordination runtime over the full stack. There
 are no optional seatbelt layers.
 
 1. ACS policy + registry
-2. FULL PCM + FULL CGM (pins in this file)
+2. FULL PCM + FULL CGM + OIO (versions from `stack-mesh.json`)
 3. This coordination runtime (roles, lease, claim queue, watchdog, proposals)
+
+The conductor is `scripts/acs_install.py`: it reads the mesh, verifies the
+checkouts, classifies every path it would touch (refusing to clobber foreign or
+hand-edited content), writes the adopter's `.coord/` surface and its
+`stack-manifest.json`, then runs `hotload_check` and installs OIO. It exits
+non-zero with a precise report on any unmet gate, and reports a **PARTIAL**
+install (never a fake OK) when OIO cannot be installed. See [SPEC.md](SPEC.md).
 
 Authority: You/GitHub issue → Boss ACCEPT/REJECT → coder.
 
@@ -221,8 +236,10 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 
 ## Minimal session checklist
 
-- [ ] FULL PCM pinned (`4e23854…` / CLI 0.6.0) — continuity **and** PR-only + required gates + protection/auto-merge preference
-- [ ] FULL CGM 0.5.12 pinned (`6831f91e…`) — all eight modules + human_output_contract (not HSW+WD only)
+- [ ] FULL PCM checked out at the `stack-mesh.json` commit — continuity **and** PR-only + required gates + protection/auto-merge preference
+- [ ] FULL CGM 0.5.12 checked out at the `stack-mesh.json` commit — all eight modules + human_output_contract (not HSW+WD only)
+- [ ] OIO checked out at the `stack-mesh.json` commit and installed (`--oio-root`); a component that cannot run is reported PARTIAL, not OK
+- [ ] Adopter `stack-manifest.json` written with **empty pins** (follows the train); a `check_manifest.py` CI step added
 - [ ] Join order understood; I know boss / coderN for this session
 - [ ] Re-read GitHub claim / `who_is_boss_now` / `claim_queue` on wake
 - [ ] Boss lease checked or renewed (or enqueued after vacancy) — lease is **minutes** (default 30)
