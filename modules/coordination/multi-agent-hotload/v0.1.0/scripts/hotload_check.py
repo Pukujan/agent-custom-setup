@@ -16,6 +16,9 @@ except ImportError:  # pragma: no cover
     jsonschema = None  # type: ignore
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import dev_root_check  # noqa: E402  (sibling script; stdlib only)
+
 REQUIRED_FILES = (
     "README.md",
     "ROLES.md",
@@ -29,7 +32,18 @@ REQUIRED_FILES = (
     "scripts/acs_install.py",
     "scripts/hotload_check.py",
     "scripts/watchdog_check.py",
+    "scripts/dev_root_check.py",
     "workflow-stubs/watchdog.yml",
+)
+
+# ACS-owned boot rule, appended to PROMPT_INJECT.md next to the CGM system_block.
+DEV_ROOT_RULE = (
+    "Dev root hygiene (ACS): the dev root (ACS_DEV_ROOT; default D:\\development on "
+    "Windows, ~/development elsewhere) holds exactly one main checkout per repo. Never "
+    "create git worktrees, dependency or sibling clones, scratch folders, or caches "
+    "there. Put them under the ACS cache instead: %LOCALAPPDATA%\\acs\\{deps,scratch,"
+    "worktrees} on Windows, ~/.cache/acs/{deps,scratch,worktrees} on macOS/Linux "
+    "(ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py."
 )
 
 
@@ -138,14 +152,43 @@ CGM_PIN_REVISION = "6831f91e165b62d719c05eb492f7375fa932b560"
 CGM_HELPER_REPO = "https://github.com/Pukujan/content-generation-modules"
 
 
-def discover_cgm_root(explicit: Path | None = None) -> Path | None:
-    """Resolve CGM checkout: --cgm-root, CGM_ROOT, then common sibling/local paths."""
+def dependency_location_problem(path: Path, dev_root: Path | None = None) -> str | None:
+    """Refuse a pinned dependency checkout that sits inside the dev root.
+
+    The only things allowed inside the dev root are its top-level main checkouts.
+    A pinned dependency clone (``_deps/cgm``, ``.scratch/cgm``, a nested copy...)
+    must live under the ACS cache instead.
+    """
+    root = dev_root if dev_root is not None else dev_root_check.default_dev_root()
+    if not dev_root_check.is_inside(path, root):
+        return None
+    if dev_root_check.is_primary_checkout_path(path, root):
+        return None
+    return (
+        f"dependency checkout {path} is inside the dev root {root} but is not one of its "
+        f"main checkouts; move it under {dev_root_check.cache_subdir('deps')} "
+        "(see dev_root_check.py)"
+    )
+
+
+def discover_cgm_root(explicit: Path | None = None, *, dev_root: Path | None = None) -> Path | None:
+    """Resolve CGM checkout: --cgm-root, CGM_ROOT, the ACS deps cache, then sibling/local paths.
+
+    Discovered (not explicit) candidates inside the dev root are skipped unless they
+    are a main checkout there; explicit paths are returned as-is and checked by
+    ``dependency_location_problem`` so the operator sees why they were refused.
+    """
     candidates: list[Path] = []
+    explicit_set: set[str] = set()
     if explicit is not None:
         candidates.append(explicit)
+        explicit_set.add(str(explicit))
     env = os.environ.get("CGM_ROOT")
     if env:
         candidates.append(Path(env))
+        explicit_set.add(env)
+    deps = dev_root_check.cache_subdir("deps")
+    candidates.extend([deps / "content-generation-modules", deps / "cgm"])
     here = Path(__file__).resolve()
     # ACS repo root = parents[4] from scripts/ under v0.1.0 pack
     acs_root = MODULE_ROOT.parents[3]  # v0.1.0 -> multi-agent-hotload -> coordination -> modules -> repo
@@ -168,6 +211,8 @@ def discover_cgm_root(explicit: Path | None = None) -> Path | None:
         try:
             root = cand.expanduser().resolve()
         except OSError:
+            continue
+        if str(cand) not in explicit_set and dependency_location_problem(root, dev_root):
             continue
         marker = root / "scripts" / "validate_content_system.py"
         version = root / "system-version.json"
@@ -388,6 +433,11 @@ def render_prompt_inject_md(routing: dict, *, pin_sha: str, pin_version: str) ->
         "```\n"
         f"{system_block or instruction}\n"
         "```\n\n"
+        "## ACS addendum — dev root hygiene (paste with the block above)\n\n"
+        "Owned by ACS, not CGM. Paste it at boot together with the system_block.\n\n"
+        "```\n"
+        f"{DEV_ROOT_RULE}\n"
+        "```\n\n"
         "## Instruction (MUST paste/apply into system or task prompts)\n\n"
         f"{instruction}\n\n"
         "## apply_checklist\n\n"
@@ -556,6 +606,26 @@ def check_external_research_gate(root: Path, *, policy_path: Path | None = None)
     return errors
 
 
+def check_dev_root_layout(dev_root: Path) -> list[str]:
+    """Run dev_root_check.scan and turn findings into one-line messages."""
+    if not dev_root.is_dir():
+        return []
+    try:
+        report = dev_root_check.scan(dev_root)
+    except OSError as exc:
+        return [f"dev_root: could not scan {dev_root}: {exc}"]
+    msgs = [
+        f"dev_root: {f['kind']}: {f['path']} ({f['detail']})" for f in report["findings"]
+    ]
+    if msgs:
+        msgs.append(
+            f"dev_root: {len(report['findings'])} entr{'y' if len(report['findings']) == 1 else 'ies'} "
+            f"in {dev_root} are not single main checkouts; run "
+            "scripts/dev_root_check.py --clean to plan a fix"
+        )
+    return msgs
+
+
 def run(
     root: Path,
     assignment: Path | None = None,
@@ -563,8 +633,13 @@ def run(
     cgm_root: Path | None = None,
     adopter_root: Path | None = None,
     skip_cgm_validate: bool = False,
+    dev_root: Path | None = None,
+    check_dev_root: bool = True,
+    strict_dev_root: bool = False,
 ) -> int:
     problems: list[str] = []
+    warnings: list[str] = []
+    resolved_dev_root = (dev_root or dev_root_check.default_dev_root()).expanduser()
     missing = check_required_files(root)
     if missing:
         problems.extend(f"missing file: {m}" for m in missing)
@@ -577,7 +652,14 @@ def run(
         problems.append(f"assignment not found: {example_path}")
 
     resolved_adopter = discover_adopter_root(adopter_root)
-    resolved_cgm = discover_cgm_root(cgm_root)
+    resolved_cgm = discover_cgm_root(cgm_root, dev_root=resolved_dev_root)
+    if resolved_cgm is not None:
+        where = dependency_location_problem(resolved_cgm, resolved_dev_root)
+        if where:
+            problems.append(where)
+    if check_dev_root:
+        dev_msgs = check_dev_root_layout(resolved_dev_root)
+        (problems if strict_dev_root else warnings).extend(dev_msgs)
     if skip_cgm_validate:
         # Explicit opt-out for isolated schema unit tests only — not a successful install.
         print("hotload_check: WARN skip_cgm_validate=1 (schema-only; install incomplete)")
@@ -586,6 +668,8 @@ def run(
             validate_cgm_live(resolved_cgm, resolved_adopter, require=True)
         )
 
+    for item in warnings:
+        print(f"hotload_check: WARN {item}")
     if problems:
         print("hotload_check: FAIL")
         for item in problems:
@@ -625,6 +709,9 @@ def run(
         print("  --- acs_prompt_inject.system_block (BOOT PASTE) ---")
         print(console_safe(inject_text))
         print("  --- end acs_prompt_inject.system_block ---")
+    print("  --- ACS dev root rule (BOOT PASTE) ---")
+    print(console_safe(DEV_ROOT_RULE))
+    print("  --- end ACS dev root rule ---")
     return 0
 
 
@@ -649,7 +736,24 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Schema-only (tests). A real install must NOT use this flag.",
     )
+    parser.add_argument(
+        "--dev-root",
+        type=Path,
+        default=None,
+        help="Dev root to check for stray worktrees/clones/scratch (else ACS_DEV_ROOT / OS default)",
+    )
+    parser.add_argument(
+        "--strict-dev-root",
+        action="store_true",
+        help="Fail (not just warn) when the dev root holds anything but main checkouts",
+    )
+    parser.add_argument(
+        "--no-dev-root-check",
+        action="store_true",
+        help="Skip the dev root layout check",
+    )
     args = parser.parse_args(argv)
+    strict = bool(args.strict_dev_root) or os.environ.get("ACS_DEV_ROOT_STRICT") == "1"
     skip = bool(args.skip_cgm_validate) or os.environ.get("HOTLOAD_SKIP_CGM_VALIDATE") == "1"
     return run(
         args.root.resolve(),
@@ -657,6 +761,9 @@ def main(argv: list[str] | None = None) -> int:
         cgm_root=args.cgm_root,
         adopter_root=args.adopter_root,
         skip_cgm_validate=skip,
+        dev_root=args.dev_root,
+        check_dev_root=not args.no_dev_root_check,
+        strict_dev_root=strict,
     )
 
 

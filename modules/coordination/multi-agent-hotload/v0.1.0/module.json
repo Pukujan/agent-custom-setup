@@ -73,11 +73,19 @@
       "role": "agentless-watchdog"
     },
     {
+      "path": "scripts/dev_root_check.py",
+      "role": "dev-root-hygiene-check"
+    },
+    {
       "path": "workflow-stubs/watchdog.yml",
       "role": "gh-action-stub"
     },
     {
       "path": "tests/test_hotload_check.py",
+      "role": "tests"
+    },
+    {
+      "path": "tests/test_dev_root_check.py",
       "role": "tests"
     }
   ],

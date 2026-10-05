@@ -21,6 +21,32 @@ Missing any of the three, or substituting a thin PCM/CGM subset, is an **incompl
 See [BEHAVIOR.md](BEHAVIOR.md) — Working-repo scope.
 
 
+## Dev root hygiene (binding)
+
+The dev root is where the operator keeps the main checkout of each repo. It defaults to `D:\development` on Windows and `~/development` on macOS and Linux, and can be changed with the `ACS_DEV_ROOT` environment variable or `--dev-root`.
+
+- **MUST** keep exactly one main checkout per repo directly under the dev root, and nothing else.
+- **MUST NOT** create git worktrees, dependency or sibling clones, pinned copies, scratch folders, or tool caches inside the dev root.
+- **MUST** put them under the ACS cache instead (override with `ACS_CACHE_DIR`):
+
+| Kind | Windows | macOS / Linux |
+| --- | --- | --- |
+| Pinned dependency clones (PCM, CGM, ...) | `%LOCALAPPDATA%\acs\deps\<name>` | `~/.cache/acs/deps/<name>` |
+| Scratch, probes, throwaway copies | `%LOCALAPPDATA%\acs\scratch\<name>` | `~/.cache/acs/scratch/<name>` |
+| Linked worktrees (`git worktree add`) | `%LOCALAPPDATA%\acs\worktrees\<repo>-<branch>` | `~/.cache/acs/worktrees/<repo>-<branch>` |
+
+`hotload_check` looks for the pinned CGM checkout in `<cache>/deps/` first and refuses a dependency path that sits inside the dev root unless it is one of the main checkouts there. It also runs `scripts/dev_root_check.py` and prints a `WARN` line for every stray entry (`--strict-dev-root` or `ACS_DEV_ROOT_STRICT=1` turns those into failures).
+
+```bash
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --dev-root D:/development
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --clean          # dry run
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py --clean --yes    # act
+```
+
+`--clean` never touches a repo, or a folder containing one, that has uncommitted changes, commits that are not on any remote, or stashes. Push or stash-pop that work first. Clean linked worktrees are removed with `git worktree remove` and `git worktree prune`; everything else is moved into the cache rather than deleted.
+
+See [BEHAVIOR.md](BEHAVIOR.md) — Dev root hygiene.
+
 ## External research gate
 
 Binding MUST/MUST NOT + paste-ready provenance checklist: [BEHAVIOR.md](BEHAVIOR.md) — External research gate. Not always-on research.
@@ -188,6 +214,7 @@ Authority: You/GitHub issue → Boss ACCEPT/REJECT → coder.
 **Verify (mock CI):**
 ```bash
 python modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py
 python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```
 
@@ -206,5 +233,6 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 - [ ] I will not treat PCM as the proposal layer
 - [ ] Parent/child ticket notes only (no DAG engine)
 - [ ] Working-repo scope: code/claims/PRs/boss actions only on this hot-loaded repo; foreign repos = proposed issue only
+- [ ] Dev root hygiene: one main checkout per repo in the dev root; worktrees, deps, scratch and caches go under the ACS cache (`dev_root_check.py` is clean)
 - [ ] External research gate: see BEHAVIOR.md (MUST on first use / bump / failure; MUST NOT for trivial known-pattern edits)
 - [ ] No secrets in commits, logs, or comments
