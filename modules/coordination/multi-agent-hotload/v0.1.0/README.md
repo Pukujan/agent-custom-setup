@@ -57,12 +57,32 @@ Details: [HOTLOAD.md](HOTLOAD.md). Skeleton: `scripts/watchdog_check.py`, `workf
 
 ## Install / hotload
 
+**One command prepares and validates the adopter's coordination surface:**
+
+```bash
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/acs_install.py \
+  --adopter-root "$ADOPTER_ROOT" \
+  --pcm-root "$PCM_ROOT" \
+  --cgm-root "$CGM_ROOT"
+```
+
+`acs_install.py` checks the pack's pins agree, requires the adopter to **already**
+carry a CGM `.content-system/` adapter (authoring that adapter is CGM's job, not
+ACS's), verifies the PCM/CGM checkouts sit at the pinned commits, writes
+`.coord/assignment.json` + `.coord/hotload.lock.json` (never overwriting unless
+`--force`), then runs `hotload_check.py` and fails closed. It never clones,
+fetches, or vendors — bring checkouts at the pinned commits. `--dry-run` shows
+the plan and writes nothing. It does **not** enable branch protection or
+auto-merge; those stay human GitHub steps (printed at the end).
+
+Then:
+
 1. Ensure ACS is checked out and current (`git fetch`, re-read `POLICY.md` + `registry.json`).
 2. Point the agent (or session brief) at this module path.
 3. On start, follow **[HOTLOAD.md](HOTLOAD.md)** (PCM → CGM → this pack).
-4. Confirm join order / lease / queue / watchdog config via assignment example or project live assignment.
+4. Confirm join order / lease / queue / watchdog config in `.coord/assignment.json` (edit the `agents` seed list and `check_in` to match your seats and issue).
 5. Point `CGM_ROOT` at content-generation-modules checked out at `6831f91e165b62d719c05eb492f7375fa932b560` (0.5.12). Ensure the adopter has `.content-system/` listing all eight modules.
-6. Run:
+6. Re-run the validator any time:
 
 ```bash
 python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
@@ -100,6 +120,7 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 | `module.json` | ACS multi-setup metadata |
 | `schema/assignment.schema.json` | Assignment + boss_failover + claim_queue + watchdog |
 | `examples/assignment.example.json` | Example with lease/queue/watchdog/standby |
+| `scripts/acs_install.py` | Prepare + validate an adopter install (no network, no vendoring) |
 | `scripts/hotload_check.py` | Validate pack + assignment |
 | `scripts/watchdog_check.py` | Agent-less watchdog skeleton |
 | `scripts/dev_root_check.py` | Flag (and optionally clean up) anything in the dev root that is not a single main checkout |

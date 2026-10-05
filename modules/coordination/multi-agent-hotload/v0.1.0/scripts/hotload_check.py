@@ -29,6 +29,7 @@ REQUIRED_FILES = (
     "module.json",
     "schema/assignment.schema.json",
     "examples/assignment.example.json",
+    "scripts/acs_install.py",
     "scripts/hotload_check.py",
     "scripts/watchdog_check.py",
     "scripts/dev_root_check.py",

@@ -63,14 +63,19 @@ complete, pinned install:
   [`PROMPT_INJECT.md`](modules/coordination/multi-agent-hotload/v0.1.0/PROMPT_INJECT.md)
   is generated from the pinned writing router and pasted into the agent system
   prompt at session start, so every fresh session inherits the same rules.
-- **A one-command installer check** —
+- **A one-command install** —
+  [`acs_install.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/acs_install.py)
+  prepares the adopter's coordination surface against the pinned checkouts and
+  fails closed: it never clones, fetches, or vendors, and it refuses to write
+  until the pins and the adopter's existing `.content-system/` adapter check out.
+- **A one-command check** —
   [`hotload_check.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py)
   fails closed unless the assignment pins, the helper checkout revision, and the
   adapter validation all pass.
 
 | Surface | What it is for | How you reach it | Status |
 | --- | --- | --- | --- |
-| **multi-agent-hotload** | Install the coordination stack into a working repo | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) + `hotload_check.py` | Shipped (PR #12) |
+| **multi-agent-hotload** | Install the coordination stack into a working repo | [`acs_install.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/acs_install.py) + [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped (PR #12) |
 | **registry.json** | Declare which modules ACS ships | [`registry.json`](registry.json) | Shipped |
 | **POLICY.md** | Authority, PR-only rule, path layout | [`POLICY.md`](POLICY.md) | Shipped |
 
@@ -78,11 +83,12 @@ complete, pinned install:
 
 ### Step 1: Install the hotloader into a repo
 
-An adopter adds the pack, declares its pins in an assignment document, and runs
-`hotload_check.py`. The check resolves the pinned PCM and Content Generation
-Modules checkouts, runs the adapter validator, and only on success writes
-`PROMPT_INJECT.md` and prints the boot-time system block. Missing or stale pins
-fail closed — a partial install never looks complete.
+An adopter runs `acs_install.py` with its pinned PCM and Content Generation
+Modules checkouts; the installer declares the pins into `.coord/assignment.json`,
+records the install in `.coord/hotload.lock.json`, and then runs `hotload_check.py`,
+which resolves the checkouts, runs the adapter validator, and only on success
+writes `PROMPT_INJECT.md` and prints the boot-time system block. Missing or stale
+pins fail closed — a partial install never looks complete.
 
 ### Step 2: Roles fill by join order
 
@@ -139,20 +145,27 @@ ACS grounds every public claim in versioned repository artifacts:
 
 ## Try it
 
-The fastest path is the installer check; the rest exercise what it brings in:
+The fastest path is the installer; the rest exercise what it brings in:
 
 ```bash
-# 1. Validate a hotload install (schema-only here; a real install drops
+# 1. Install into a working repo (needs PCM + CGM checkouts at the pinned
+#    commits, and an existing .content-system/ adapter). Fails closed otherwise.
+python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/acs_install.py \
+  --adopter-root /path/to/working-repo \
+  --pcm-root /path/to/project-continuity-modules \
+  --cgm-root /path/to/content-generation-modules
+
+# 2. Validate a hotload install (schema-only here; a real install drops
 #    --skip-cgm-validate and passes --cgm-root <checkout at 6831f91e…>)
 python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
   --adopter-root . \
   --assignment modules/coordination/multi-agent-hotload/v0.1.0/examples/assignment.example.json \
   --skip-cgm-validate
 
-# 2. Fail-closed pin drift check across every declared projection
+# 3. Fail-closed pin drift check across every declared projection
 python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py
 
-# 3. Coordination pack test suite (requires pytest)
+# 4. Coordination pack test suite (requires pytest)
 python3 -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```
 
