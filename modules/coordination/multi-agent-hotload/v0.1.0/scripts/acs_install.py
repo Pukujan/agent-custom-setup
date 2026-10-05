@@ -150,7 +150,10 @@ def build_assignment(example: dict, pins: dict, project_name: str) -> dict:
         "live join/continue order fills roles. Boss lease default 30 minutes (15-120); "
         "watchdog agent-less ~10m. After vacancy the claim_queue is FIFO; an old boss "
         "rejoins at the end. FULL PCM + FULL CGM required -- not a slim subset. "
-        "EDIT the agents list and check_in to match your seats and issue."
+        "EDIT the agents list and check_in to match your seats and issue. "
+        "check_in.mechanism=claim_file writes local coordination state at "
+        f"{CLAIM_FILE_PATH} only; it is NOT GitHub governance -- branch protection, "
+        "required CI checks, and auto-merge stay human steps (see acs_install output)."
     )
 
     # Re-pin from the single source of truth (pins.json), never from the example.
@@ -222,9 +225,21 @@ def build_lock(pins: dict, acs_root: Path, checkouts: dict, validated: bool) -> 
     }
 
 
-def write_json_atomic(path: Path, data: object) -> None:
-    """Write JSON via a temp file in the same dir, then replace (no partial file)."""
+def write_json_atomic(path: Path, data: object, *, root: Path) -> None:
+    """Write JSON via a temp file in the same dir, then replace (no partial file).
+
+    Refuses to write outside ``root`` so a symlinked ``.coord`` (or any other
+    redirect) cannot be used to escape the adopter tree under ``--force``.
+    """
+    root_r = root.resolve()
+    parent_r = path.parent.resolve()
+    if parent_r != root_r and root_r not in parent_r.parents:
+        raise ValueError(f"refusing to write outside adopter root: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        target_r = path.resolve()
+        if target_r != root_r and root_r not in target_r.parents:
+            raise ValueError(f"refusing to write outside adopter root: {path}")
     text = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
     fd, tmp = tempfile.mkstemp(prefix=path.name + ".", dir=str(path.parent))
     try:
@@ -341,7 +356,11 @@ def run(args: argparse.Namespace) -> int:
 
     # 7. Write, then validate the whole stack with the pack's own checker.
     for path, data in to_write:
-        write_json_atomic(path, data)
+        try:
+            write_json_atomic(path, data, root=adopter)
+        except ValueError as exc:
+            print(f"acs_install: FAIL\n  - {console_safe(str(exc))}")
+            return 1
 
     check_argv = [
         sys.executable,
@@ -363,6 +382,7 @@ def run(args: argparse.Namespace) -> int:
     write_json_atomic(
         adopter / LOCK_REL,
         build_lock(pins, acs_root, checkouts, validated=True),
+        root=adopter,
     )
 
     print("acs_install: OK")

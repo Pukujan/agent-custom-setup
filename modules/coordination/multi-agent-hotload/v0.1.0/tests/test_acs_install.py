@@ -11,6 +11,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 MODULE_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = MODULE_ROOT / "scripts" / "acs_install.py"
 MODULE_REL = "modules/coordination/multi-agent-hotload/v0.1.0"
@@ -210,11 +212,28 @@ def test_build_lock_has_no_absolute_paths(tmp_path: Path):
 def test_write_json_atomic_leaves_no_temp_files(tmp_path: Path):
     mod = _load_mod()
     target = tmp_path / "sub" / "out.json"
-    mod.write_json_atomic(target, {"a": 1})
+    mod.write_json_atomic(target, {"a": 1}, root=tmp_path)
     assert json.loads(target.read_text(encoding="utf-8")) == {"a": 1}
-    mod.write_json_atomic(target, {"a": 2})
+    mod.write_json_atomic(target, {"a": 2}, root=tmp_path)
     assert json.loads(target.read_text(encoding="utf-8")) == {"a": 2}
     assert [p.name for p in target.parent.iterdir()] == ["out.json"]
+
+
+def test_write_json_atomic_refuses_to_escape_root(tmp_path: Path):
+    mod = _load_mod()
+    adopter = tmp_path / "adopter"
+    adopter.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    try:
+        (adopter / ".coord").symlink_to(outside, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlinks not permitted on this platform")
+    with pytest.raises(ValueError):
+        mod.write_json_atomic(
+            adopter / ".coord" / "assignment.json", {"x": 1}, root=adopter
+        )
+    assert list(outside.iterdir()) == []
 
 
 # --- end-to-end run() -----------------------------------------------------
