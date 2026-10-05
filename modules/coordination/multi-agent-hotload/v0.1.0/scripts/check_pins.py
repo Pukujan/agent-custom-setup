@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
 """Fail-closed drift check for the multi-agent hotload pins.
 
-``pins.json`` (next to the pack this script lives in) is the single source of
-truth for the CGM / PCM / ACS pins the hotload pack advertises to adopters.
-Every other file that records one of those pins is a *projection* and must
+``pins.json`` (next to the pack this script lives in) records the hotload pack's
+**module shape** -- the CGM module list/count, the advertised CGM version, the
+PCM CLI version, and the ACS module id/version. It is NOT a version-commit pin:
+component commits come from ``stack-mesh.json`` (the release train), and the
+adopter follows the train through its own ``stack-manifest.json``. Every other
+file that records one of the module-shape values is a *projection* and must
 agree with the manifest. This script reads ``pins.json``, scans each declared
 projection, and exits non-zero when a projection disagrees -- naming the
 offending file and the two values (found vs expected).
 
-Both shapes a pin takes are detected:
+Pin shapes detected:
 
-* the literal commit form -- full (``c069613ca8b3...``) or abbreviated
-  (``c069613...``); and
-* the version-string form -- the CGM version (``0.5.7``), the PCM CLI version
-  (``CLI 0.6.0``) and the module-count word (``eight modules``).
+* the version-string form -- the CGM version, the PCM CLI version
+  (``CLI 0.6.0``) and the module-count word (``eight modules``); and
+* the literal form -- the ACS module id.
+
+Commit detection remains in the code for completeness, but no projection
+declares a commit key, because the pack carries no copied component commits.
 
 A value listed under ``superseded`` fails even when the canonical value is
 still present, so a file that carries both is caught. Code projections

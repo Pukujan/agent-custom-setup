@@ -1,23 +1,23 @@
 {
   "id": "multi-agent-hotload",
   "name": "Multi-agent hotload coordination",
-  "purpose": "Install surface: hot-load FULL PCM + FULL CGM 0.5.12 + coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR)",
+  "purpose": "Install surface: hot-load the FULL stack — PCM (continuity + GitHub governance), CGM 0.5.12 (eight modules + human_output_contract), and OIO (observational issue-log surface) — plus the coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR). Component versions come from the release train via stack-mesh.json.",
   "harness": "coordination",
   "created": "2026-09-27",
-  "updated": "2026-09-27",
+  "updated": "2026-10-05",
   "owning_issue": "https://github.com/Pukujan/agent-custom-setup/issues/11",
   "owning_agent": "agent-custom-setup",
   "deploy_mirrors": [
     {
       "label": "ACS module tree (SoT; agents load from checkout)",
-      "path": "D:\\claude\\agent-custom-setup\\modules\\coordination\\multi-agent-hotload\\v0.1.0\\",
-      "notes": "ACS is SoT. No Desktop launcher mirror required for this pack."
+      "path": "modules/coordination/multi-agent-hotload/v0.1.0/",
+      "notes": "ACS is SoT. Repo-relative on purpose: the same pack runs on Windows, macOS, and Linux. No Desktop launcher mirror required."
     }
   ],
   "version": "0.1.0",
   "title": "Multi-agent hotload coordination pack",
   "path": "modules/coordination/multi-agent-hotload/v0.1.0/",
-  "recorded_at": "2026-09-27T05:00:00Z",
+  "recorded_at": "2026-10-05T00:00:00Z",
   "valid_time": {
     "start": "2026-09-27T00:00:00-04:00",
     "end": null
@@ -31,6 +31,10 @@
     {
       "path": "HOTLOAD.md",
       "role": "startup-load-order"
+    },
+    {
+      "path": "SPEC.md",
+      "role": "install-contract-normative"
     },
     {
       "path": "PROMPT_INJECT.md",
@@ -57,6 +61,10 @@
       "role": "module-metadata"
     },
     {
+      "path": "pins.json",
+      "role": "module-shape-only"
+    },
+    {
       "path": "schema/assignment.schema.json",
       "role": "assignment-schema"
     },
@@ -65,8 +73,16 @@
       "role": "assignment-example"
     },
     {
+      "path": "scripts/acs_install.py",
+      "role": "installer-conductor"
+    },
+    {
       "path": "scripts/hotload_check.py",
       "role": "validator"
+    },
+    {
+      "path": "scripts/check_pins.py",
+      "role": "pack-pin-drift-check"
     },
     {
       "path": "scripts/watchdog_check.py",
@@ -81,7 +97,55 @@
       "role": "gh-action-stub"
     },
     {
+      "path": "formal/install.tla",
+      "role": "formal-state-machine"
+    },
+    {
+      "path": "formal/install.cfg",
+      "role": "formal-model-config"
+    },
+    {
+      "path": "formal/README.md",
+      "role": "formal-run-notes"
+    },
+    {
+      "path": "holdouts/HLD-0001-blind-rubric.md",
+      "role": "hidden-holdout-rubric"
+    },
+    {
+      "path": "tests/test_acs_install.py",
+      "role": "tests"
+    },
+    {
+      "path": "tests/test_install_acceptance.py",
+      "role": "tests-pdd"
+    },
+    {
+      "path": "tests/test_install_states.py",
+      "role": "tests-sdd"
+    },
+    {
+      "path": "tests/test_install_gates.py",
+      "role": "tests-tdd"
+    },
+    {
+      "path": "tests/test_install_metamorphic.py",
+      "role": "tests-metamorphic"
+    },
+    {
+      "path": "tests/test_install_manifest.py",
+      "role": "tests-differential-offline"
+    },
+    {
+      "path": "tests/test_train_parity.py",
+      "role": "tests-differential-live"
+    },
+    {
       "path": "tests/test_hotload_check.py",
+      "role": "tests"
+    },
+    {
+      "path": "tests/test_check_pins.py",
       "role": "tests"
     },
     {
@@ -101,9 +165,11 @@
     "repo_rule": "Docs, schemas, and agent-less stubs only. No secrets."
   },
   "dependencies": [
-    "PCM @ 4e2385474b4af9249ca009cbdcb38c4498932475 (CLI 0.6.0, protocol 0.1.0-draft) — FULL stack: continuity + PR-only + required CI + branch protection/auto-merge preference; pin/reference, do not vendor",
-    "CGM @ 6831f91e165b62d719c05eb492f7375fa932b560 (0.5.12) — FULL eight-module stack (incl. human-output-naming) + human_output_contract; not HSW+writing-direction only; pin/reference, do not vendor",
+    "PCM version and commit from stack-mesh.json (the train's certified set) — FULL stack: continuity + PR-only + required CI + branch protection/auto-merge preference; pin/reference, do not vendor",
+    "CGM version and commit from stack-mesh.json — FULL eight-module stack (incl. human-output-naming) + human_output_contract; not HSW+writing-direction only; pin/reference, do not vendor",
+    "OIO version and commit from stack-mesh.json — the observational issue-log surface (ontology, issue form, triage workflow, AGENTS.md guidance block); the ACS installer invokes OIO's own installer; pin/reference, do not vendor",
+    "agent-stack-train stack-releases.json — the certified version set the adopter's stack-manifest.json follows (empty pins)",
     "Python 3 + jsonschema for hotload_check"
   ],
-  "summary": "Hot-load FULL PCM + FULL CGM 0.5.12 + this runtime. Join order fills roles. Boss lease default 30m (15–120). GitHub-canonical claim_queue after vacancy; returning boss joins end; zombie re-reads claim. Agent-less watchdog ~10m. GitHub primary progress. No DAG. Slim subsets are incomplete installs."
+  "summary": "Hot-load the FULL stack (PCM + CGM 0.5.12 + OIO) + this runtime. Versions come from the release train via stack-mesh.json; the adopter's stack-manifest.json carries empty pins and follows the train. The installer is a gated conductor: it classifies every existing path, refuses to clobber foreign/edited content, and reports a PARTIAL install (never a fake OK) when a component such as OIO cannot be installed. Join order fills roles. Boss lease default 30m (15–120). GitHub-canonical claim_queue after vacancy; returning boss joins end. Agent-less watchdog ~10m. Slim subsets are incomplete installs."
 }
