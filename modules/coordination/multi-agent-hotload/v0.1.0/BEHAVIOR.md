@@ -61,6 +61,20 @@ Adopters using ACS / this multi-agent hotloader may only write code on **their o
 
 Cross-repo help stays at the ticket/proposal layer until that foreign project's own agents accept and implement on **their** working repo.
 
+## Dev root hygiene (binding)
+
+The dev root (`ACS_DEV_ROOT`; default `D:\development` on Windows, `~/development` elsewhere) holds one main checkout per repo and nothing else. Same strength as Working-repo scope.
+
+| Rule | Binding |
+| --- | --- |
+| **MUST** | Keep a single main checkout of each repo directly under the dev root |
+| **MUST NOT** | Create git worktrees, dependency or sibling clones, pinned copies, scratch folders, or caches inside the dev root |
+| **MUST** | Put those under the ACS cache: `%LOCALAPPDATA%\acs\{deps,scratch,worktrees}` on Windows, `~/.cache/acs/{deps,scratch,worktrees}` on macOS/Linux (`ACS_CACHE_DIR` overrides) |
+| **MUST** | Before ending a session, remove the worktrees and scratch you created, after pushing any real work to a branch |
+| **MUST NOT** | Delete or move a checkout that has uncommitted, unpushed, or stashed work in order to tidy up |
+
+`scripts/dev_root_check.py` reports every top-level entry that is not a single main checkout and prints JSON; `--clean` plans a fix and only acts with `--yes`. `hotload_check` runs it and warns (or fails with `--strict-dev-root`).
+
 ## External research gate (binding)
 
 Selective + version-pinned official docs — **not** always-on research. Same strength as Working-repo scope.
@@ -91,7 +105,7 @@ This pack defines its own coordination rules; they are not vendored from any oth
 | --- | --- |
 | [ROLES.md](ROLES.md) | Join-order role fill, boss lease, claim queue, watchdog-as-liveness-only |
 | [PROPOSALS.md](PROPOSALS.md) | Propose / ACCEPT-REJECT / claim / PR mechanics |
-| [HOTLOAD.md](HOTLOAD.md) | Load order, full-stack pins, verify |
+| [HOTLOAD.md](HOTLOAD.md) | Load order, full-stack pins, verify, dev root hygiene |
 
 ## Explicit non-goals
 
