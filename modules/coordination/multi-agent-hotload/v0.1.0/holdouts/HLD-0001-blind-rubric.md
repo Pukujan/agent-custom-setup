@@ -85,7 +85,7 @@ problem the hotloader exists to solve.
 
 ## Result
 
-*(unrun)*
+*(blind run unrun)*
 
 | Platform | Run date | Score | Notes |
 | --- | --- | --- | --- |
@@ -93,6 +93,29 @@ problem the hotloader exists to solve.
 | macOS | — | — | — |
 | Linux (container) | — | — | — |
 
-**Verifiability.** As with the sibling repairer's holdout, no run artifact is
-committed, so a score cannot be recomputed from a clone; re-scoring means
-re-running the holdout. Stated rather than left implicit.
+### Seeded verification of the discriminating criteria
+
+The full blind run is pending — it needs a cold agent and a sandbox seeded with
+a valid `.content-system` adapter (a 1500-line CGM artifact, not hand-authorable
+here). What *is* verified, end to end against the real components on Linux, is
+the behaviour the three disqualifying criteria measure:
+
+`HLD-0001-verify.sh` runs the **pinned** OIO installer (mesh commit
+`a4bba77`) and the **real** `acs_install.py` against scratch adopters and
+reports **PASS**:
+
+| Criterion | What was run | Result |
+| --- | --- | --- |
+| **C1** non-destructive merge | foreign `AGENTS.md`, no marker → install | user text byte-identical outside the region; region inserted ✅ |
+| **C2** refuse-on-edit | managed region hand-edited, reinstall | refused (exit 2); region not clobbered ✅ |
+| **C3** honest partial | no `.content-system/` adapter | failed closed (exit 1), named `.content-system`, wrote nothing ✅ |
+
+This is a scripted check, not a blind one: it proves the *installer* honours the
+criteria, not that a *cold agent* will drive it correctly. The agent-facing
+score stays pending.
+
+**Verifiability.** As with the sibling repairer's holdout, no blind-run artifact
+is committed, so that score cannot be recomputed from a clone; re-scoring means
+re-running the holdout. The seeded verification *is* reproducible — re-run
+`HLD-0001-verify.sh` against the pinned checkouts. Stated rather than left
+implicit.

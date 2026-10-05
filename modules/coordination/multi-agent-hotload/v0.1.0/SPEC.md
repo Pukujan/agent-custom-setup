@@ -192,7 +192,7 @@ Each claim above is backed by more than one kind of test:
 | **Metamorphic** | Reordering components, or rerunning install, does not change the final tree; an added foreign file cannot be overwritten. | `tests/test_install_metamorphic.py` |
 | **Differential** | The adopter's `stack-manifest.json` agrees with the **live** train (`check_manifest.py`); the pack's `stack-mesh.json` sits at the certified commits (`mesh.py --check`). | `tests/test_install_manifest.py` (offline shape) + the train's `check-adopter.yml` / `require-mesh.yml` (live) |
 | **Formal** | The state machine's safety (no write outside target, no clobber of foreign/edited content, idempotence, fail-closed) is model-checked. | `formal/install.tla` + `formal/README.md` |
-| **Hidden holdout** | A blind agent, given the pack cold, installs it correctly into a repo that already has content — or correctly refuses. | `holdouts/HLD-0001-blind-rubric.md` |
+| **Hidden holdout** | A blind agent, given the pack cold, installs it correctly into a repo that already has content — or correctly refuses. | `holdouts/HLD-0001-blind-rubric.md` (rubric) + `holdouts/HLD-0001-verify.sh` (seeded check of the discriminating criteria) |
 
 ## 9. Open questions for the owner
 
