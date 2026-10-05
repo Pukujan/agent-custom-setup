@@ -1,0 +1,23 @@
+name: Stay on the mesh
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "29 * * * *"
+  workflow_dispatch:
+
+jobs:
+  require:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    uses: Pukujan/agent-stack-train/.github/workflows/require-mesh.yml@main
+    with:
+      component: agent-custom-setup
+
+  update:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    uses: Pukujan/agent-stack-train/.github/workflows/require-mesh.yml@main
+    with:
+      component: agent-custom-setup
+      write: true

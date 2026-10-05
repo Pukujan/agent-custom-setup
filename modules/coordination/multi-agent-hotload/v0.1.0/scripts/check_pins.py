@@ -59,15 +59,10 @@ NUMBER_WORDS = {
 }
 # Projection keys are terse; map them onto the manifest's `pins` block.
 KEY_ALIASES = {"acs": "acs_hotload_module"}
-# Code projections carry the pin as a named constant; read it, do not grep the
-# file (its comments legitimately mention historical versions).
-CONSTANT_FILES = {
-    "modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py": {
-        "cgm.version": "CGM_PIN_VERSION",
-        "cgm.commit": "CGM_PIN_REVISION",
-        "pcm.commit": "PCM_PIN_REVISION_PREFIX",
-    }
-}
+# Version commits are not copied into these files. stack-mesh.json is the
+# requirement, and the hotloader reads it. A projection may still record the
+# module count and the ACS module id.
+CONSTANT_FILES: dict[str, dict[str, str]] = {}
 
 
 def console_safe(text: str) -> str:

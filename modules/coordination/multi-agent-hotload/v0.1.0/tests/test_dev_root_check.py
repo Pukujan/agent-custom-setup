@@ -354,8 +354,8 @@ def test_prompt_inject_render_carries_dev_root_rule():
     hc = _load("hotload_check")
     md = hc.render_prompt_inject_md(
         {"acs_prompt_inject": {"instruction": "x", "system_block": "y"}},
-        pin_sha=hc.CGM_PIN_REVISION,
-        pin_version=hc.CGM_PIN_VERSION,
+        pin_sha=hc.mesh_component("content-generation-modules")["commit"],
+        pin_version=hc.mesh_component("content-generation-modules")["version"],
     )
     assert "dev root hygiene" in md
     assert hc.DEV_ROOT_RULE in md

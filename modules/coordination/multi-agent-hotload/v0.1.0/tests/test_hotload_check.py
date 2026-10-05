@@ -249,9 +249,10 @@ def test_example_pins_are_full_stacks():
     data = json.loads(
         (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
     )
-    assert data["pins"]["cgm"]["version"] == "0.5.12"
-    assert data["pins"]["cgm"]["revision"].startswith("6831f91e")
-    assert data["pins"]["pcm"]["revision"].startswith("4e23854")
+    requires = mod.load_requires()
+    assert data["pins"]["cgm"]["version"] == requires["content-generation-modules"]["version"]
+    assert data["pins"]["cgm"]["revision"] == requires["content-generation-modules"]["commit"]
+    assert data["pins"]["pcm"]["revision"] == requires["project-continuity-modules"]["commit"]
     assert set(mod.REQUIRED_CGM_MODULES).issubset(
         {
             (m[len("modules/") :] if str(m).startswith("modules/") else str(m))
@@ -296,12 +297,14 @@ def test_cli_ok_with_cgm_validate():
     assert "acs_prompt_inject.system_block" in proc.stdout or "BOOT PASTE" in proc.stdout or "system_block" in proc.stdout
 
 
-def test_cgm_pin_constants_057():
+def test_old_pcm_revision_is_refused():
     mod = _load_mod()
-    assert mod.CGM_PIN_VERSION == "0.5.12"
-    assert mod.CGM_PIN_REVISION.startswith("6831f91e")
-    assert mod.CGM_PIN_REVISION == "6831f91e165b62d719c05eb492f7375fa932b560"
-    assert mod.CGM_PIN_REVISION_PREFIX == "6831f91e"
+    data = json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
+    data["pins"]["pcm"]["revision"] = "4e2385474b4af9249ca009cbdcb38c4498932475"
+    errors = mod.validate_pins(data)
+    assert any("older version is refused" in error for error in errors), errors
 
 
 def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):
@@ -314,9 +317,10 @@ def test_apply_acs_prompt_inject_writes_file(tmp_path: Path):
     mod = _load_mod()
     # ensure pin SHA matches (caller responsibility in live install)
     sha = mod.cgm_checkout_sha(cgm)
-    if sha is None or not sha.startswith(mod.CGM_PIN_REVISION_PREFIX):
+    expected = mod.mesh_component("content-generation-modules")["commit"]
+    if sha is None or not mod.commits_match(sha, expected):
         import pytest
-        pytest.skip(f"CGM checkout HEAD={sha} not at pin {mod.CGM_PIN_REVISION}")
+        pytest.skip(f"CGM checkout HEAD={sha} is not the mesh commit {expected}")
     out_root = tmp_path
     text, notes = mod.apply_acs_prompt_inject(cgm, out_root)
     assert text and ("ALWAYS-ON" in text or "MUST load" in text or "human-sounding-writing" in text)

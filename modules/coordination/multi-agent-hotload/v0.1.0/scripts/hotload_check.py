@@ -145,11 +145,35 @@ REQUIRED_PCM_FEATURES = (
     "leaf_parent_dependency_receipts",
 )
 
-CGM_PIN_VERSION = "0.5.12"
-CGM_PIN_REVISION_PREFIX = "6831f91e"
-PCM_PIN_REVISION_PREFIX = "4e23854"
-CGM_PIN_REVISION = "6831f91e165b62d719c05eb492f7375fa932b560"
 CGM_HELPER_REPO = "https://github.com/Pukujan/content-generation-modules"
+MESH_FILE = MODULE_ROOT.parents[3] / "stack-mesh.json"
+
+
+def load_requires() -> dict:
+    """Versions the four repos must use. Written from stack-releases.json."""
+    try:
+        data = json.loads(MESH_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"stack-mesh.json unreadable at {MESH_FILE}: {exc}") from exc
+    requires = data.get("requires") if isinstance(data, dict) else None
+    if not isinstance(requires, dict):
+        raise RuntimeError(f"{MESH_FILE} has no requires object")
+    return requires
+
+
+def mesh_component(name: str) -> dict:
+    requires = load_requires()
+    entry = requires.get(name)
+    if not isinstance(entry, dict) or "version" not in entry or "commit" not in entry:
+        raise RuntimeError(f"{MESH_FILE} is missing version and commit for {name}")
+    return entry
+
+
+def commits_match(head: str, expected: str) -> bool:
+    head, expected = head.lower(), expected.lower()
+    return bool(head) and bool(expected) and (
+        head == expected or head.startswith(expected) or expected.startswith(head)
+    )
 
 
 def dependency_location_problem(path: Path, dev_root: Path | None = None) -> str | None:
@@ -252,13 +276,14 @@ def validate_cgm_live(
     *,
     require: bool = True,
 ) -> list[str]:
-    """Fail install unless CGM pin SHA is checked out and validate_content_system prints VALID."""
+    """Fail install unless the CGM checkout is the mesh version and validate_content_system prints VALID."""
     errors: list[str] = []
+    expected = mesh_component("content-generation-modules")
     if cgm_root is None:
         if require:
             errors.append(
                 "CGM checkout not found: set CGM_ROOT or pass --cgm-root to a "
-                f"content-generation-modules tree pinned at {CGM_PIN_REVISION} (0.5.12)"
+                f"content-generation-modules tree at {expected['version']} {expected['commit']}"
             )
         return errors
 
@@ -266,31 +291,23 @@ def validate_cgm_live(
     if not sha:
         errors.append(f"CGM_ROOT={cgm_root} is not a git checkout (rev-parse HEAD failed)")
         return errors
-    if not (
-        sha.startswith(CGM_PIN_REVISION_PREFIX)
-        or sha.lower() == CGM_PIN_REVISION.lower()
-        or CGM_PIN_REVISION.lower().startswith(sha.lower()[:12])
-    ):
-        # Accept exact full SHA match or prefix match on pinned commit
-        if sha.lower() != CGM_PIN_REVISION.lower() and not sha.lower().startswith(
-            CGM_PIN_REVISION_PREFIX.lower()
-        ):
-            errors.append(
-                f"CGM checkout HEAD={sha} must be pinned at {CGM_PIN_REVISION} "
-                f"(helper_version {CGM_PIN_VERSION}); got wrong revision"
-            )
-            return errors
+    if not commits_match(sha, expected["commit"]):
+        errors.append(
+            f"CGM checkout HEAD={sha} must be {expected['version']} at {expected['commit']}; "
+            "an older version is refused"
+        )
+        return errors
 
-    # Confirm helper system-version.json reports pinned version + eight modules
+    # Confirm helper system-version.json reports the mesh version + eight modules
     try:
         version = load_json(cgm_root / "system-version.json")
     except Exception as exc:  # noqa: BLE001
         errors.append(f"CGM system-version.json unreadable: {exc}")
         return errors
-    if not isinstance(version, dict) or str(version.get("version")) != CGM_PIN_VERSION:
+    if not isinstance(version, dict) or str(version.get("version")) != expected["version"]:
         errors.append(
-            f"CGM system-version.json version must be {CGM_PIN_VERSION} at pin "
-            f"{CGM_PIN_REVISION}"
+            f"CGM system-version.json version must be {expected['version']} at "
+            f"{expected['commit']}"
         )
     mods = version.get("modules") if isinstance(version, dict) else None
     if not isinstance(mods, list) or set(mods) != set(REQUIRED_CGM_MODULES):
@@ -466,8 +483,11 @@ def apply_acs_prompt_inject(cgm_root: Path, pack_root: Path) -> tuple[str | None
     instruction = str(inject["instruction"]).strip()
     out = pack_root / "PROMPT_INJECT.md"
     try:
+        cgm_req = mesh_component("content-generation-modules")
         out.write_text(
-            render_prompt_inject_md(routing, pin_sha=CGM_PIN_REVISION, pin_version=CGM_PIN_VERSION),
+            render_prompt_inject_md(
+                routing, pin_sha=cgm_req["commit"], pin_version=cgm_req["version"]
+            ),
             encoding="utf-8",
         )
         notes.append(f"acs_prompt_inject: wrote {out} (system_block boot paste)")
@@ -497,11 +517,12 @@ def validate_pins(data: object) -> list[str]:
     if not isinstance(pcm, dict):
         errors.append("pins.pcm: required (FULL PCM stack)")
     else:
+        pcm_req = mesh_component("project-continuity-modules")
         rev = str(pcm.get("revision") or "")
-        if not rev.startswith(PCM_PIN_REVISION_PREFIX):
+        if not commits_match(rev, pcm_req["commit"]):
             errors.append(
-                f"pins.pcm.revision: must pin FULL PCM at {PCM_PIN_REVISION_PREFIX}… "
-                "(CLI 0.6.0); slim/unpinned PCM is incomplete"
+                f"pins.pcm.revision: must be {pcm_req['version']} at {pcm_req['commit']}; "
+                f"got {rev or '(none)'}; an older version is refused"
             )
         feats = pcm.get("required_features")
         if not isinstance(feats, list):
@@ -518,15 +539,17 @@ def validate_pins(data: object) -> list[str]:
     if not isinstance(cgm, dict):
         errors.append("pins.cgm: required (FULL CGM 0.5.12 stack)")
     else:
+        cgm_req = mesh_component("content-generation-modules")
         ver = str(cgm.get("version") or "")
-        if ver != CGM_PIN_VERSION:
+        if ver != cgm_req["version"]:
             errors.append(
-                f"pins.cgm.version: must be {CGM_PIN_VERSION} (FULL stack; not 0.5.0 HSW-only)"
+                f"pins.cgm.version: must be {cgm_req['version']} (FULL stack; an older version is refused)"
             )
         rev = str(cgm.get("revision") or "")
-        if not rev.startswith(CGM_PIN_REVISION_PREFIX):
+        if not commits_match(rev, cgm_req["commit"]):
             errors.append(
-                f"pins.cgm.revision: must pin FULL CGM at {CGM_PIN_REVISION_PREFIX}… (0.5.12)"
+                f"pins.cgm.revision: must be {cgm_req['version']} at {cgm_req['commit']}; "
+                f"got {rev or '(none)'}; an older version is refused"
             )
         mods = cgm.get("modules")
         if not isinstance(mods, list):
@@ -687,7 +710,8 @@ def run(
     print(f"  assignment={example_path}")
     print(f"  cgm_root={resolved_cgm}")
     print(f"  adopter_root={resolved_adopter}")
-    print(f"  cgm_pin={CGM_PIN_VERSION}@{CGM_PIN_REVISION}")
+    cgm_req = mesh_component("content-generation-modules")
+    print(f"  cgm_pin={cgm_req['version']}@{cgm_req['commit']}")
     print("  install_surface=FULL PCM + FULL CGM 0.5.12 + this runtime")
     print("  cgm_validate=VALID (validate_content_system.py)")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
