@@ -135,7 +135,7 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 | `scripts/hotload_check.py` | Validate pack + assignment |
 | `scripts/check_pins.py` | Fail if the pack's own projections drift |
 | `scripts/watchdog_check.py` | Agent-less watchdog skeleton |
-| `scripts/dev_root_check.py` | Flag (and optionally clean up) anything in the dev root that is not a single main checkout |
+| `scripts/dev_root_check.py` | Check the dev root layout (`<project>/main` + `<project>/worktrees/<task>`, or a legacy flat checkout), clean up strays, and plan flat-to-project migrations |
 | `workflow-stubs/watchdog.yml` | GH Action stub (copy into consuming repos) |
 | `formal/install.tla` | Model-checked state machine (safety + idempotence + fail-closed) |
 | `holdouts/HLD-0001-blind-rubric.md` | Hidden holdout: blind install into a non-empty repo |

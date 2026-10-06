@@ -38,12 +38,15 @@ REQUIRED_FILES = (
 
 # ACS-owned boot rule, appended to PROMPT_INJECT.md next to the CGM system_block.
 DEV_ROOT_RULE = (
-    "Dev root hygiene (ACS): the dev root (ACS_DEV_ROOT; default D:\\development on "
-    "Windows, ~/development elsewhere) holds exactly one main checkout per repo. Never "
-    "create git worktrees, dependency or sibling clones, scratch folders, or caches "
-    "there. Put them under the ACS cache instead: %LOCALAPPDATA%\\acs\\{deps,scratch,"
-    "worktrees} on Windows, ~/.cache/acs/{deps,scratch,worktrees} on macOS/Linux "
-    "(ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py."
+    "Dev root hygiene (ACS): each repo gets one project folder in the dev root "
+    "(ACS_DEV_ROOT; default D:\\development on Windows, ~/development elsewhere). Put the "
+    "main checkout at <project>/main and task worktrees at <project>/worktrees/<task>. "
+    "Never put a worktree directly in the dev root or inside the main checkout. A legacy "
+    "flat checkout (<dev root>/<repo>) is still accepted; migrate it before adding "
+    "worktrees (dev_root_check.py --migrate <repo>). Dependency clones, scratch folders "
+    "and caches never go in the dev root: use %LOCALAPPDATA%\\acs\\{deps,scratch} on "
+    "Windows or ~/.cache/acs/{deps,scratch} on macOS/Linux (ACS_CACHE_DIR overrides). "
+    "Check with scripts/dev_root_check.py."
 )
 
 
@@ -190,7 +193,7 @@ def dependency_location_problem(path: Path, dev_root: Path | None = None) -> str
         return None
     return (
         f"dependency checkout {path} is inside the dev root {root} but is not one of its "
-        f"main checkouts; move it under {dev_root_check.cache_subdir('deps')} "
+        f"main checkouts (<repo> or <project>/main); move it under {dev_root_check.cache_subdir('deps')} "
         "(see dev_root_check.py)"
     )
 
@@ -643,7 +646,7 @@ def check_dev_root_layout(dev_root: Path) -> list[str]:
     if msgs:
         msgs.append(
             f"dev_root: {len(report['findings'])} entr{'y' if len(report['findings']) == 1 else 'ies'} "
-            f"in {dev_root} are not single main checkouts; run "
+            f"in {dev_root} do not fit the project-folder layout; run "
             "scripts/dev_root_check.py --clean to plan a fix"
         )
     return msgs

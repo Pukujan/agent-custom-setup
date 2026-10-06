@@ -64,17 +64,19 @@ Cross-repo help stays at the ticket/proposal layer until that foreign project's 
 
 ## Dev root hygiene (binding)
 
-The dev root (`ACS_DEV_ROOT`; default `D:\development` on Windows, `~/development` elsewhere) holds one main checkout per repo and nothing else. Same strength as Working-repo scope.
+The dev root (`ACS_DEV_ROOT`; default `D:\development` on Windows, `~/development` elsewhere) holds one entry per repo. Same strength as Working-repo scope.
 
 | Rule | Binding |
 | --- | --- |
-| **MUST** | Keep a single main checkout of each repo directly under the dev root |
-| **MUST NOT** | Create git worktrees, dependency or sibling clones, pinned copies, scratch folders, or caches inside the dev root |
-| **MUST** | Put those under the ACS cache: `%LOCALAPPDATA%\acs\{deps,scratch,worktrees}` on Windows, `~/.cache/acs/{deps,scratch,worktrees}` on macOS/Linux (`ACS_CACHE_DIR` overrides) |
+| **MUST** | Give each repo one project folder: the primary checkout at `<project>/main`, task worktrees at `<project>/worktrees/<task>`, nothing else in the folder |
+| **MAY** | Keep a legacy flat checkout (`<dev root>/<repo>`) for a repo without worktrees; migrate it (`dev_root_check.py --migrate <repo>`) before adding any |
+| **MUST NOT** | Put a worktree directly in the dev root or inside a main checkout |
+| **MUST NOT** | Put dependency or sibling clones, pinned copies, scratch folders, or caches in the dev root |
+| **MUST** | Put those under the ACS cache: `%LOCALAPPDATA%\acs\{deps,scratch}` on Windows, `~/.cache/acs/{deps,scratch}` on macOS/Linux (`ACS_CACHE_DIR` overrides) |
 | **MUST** | Before ending a session, remove the worktrees and scratch you created, after pushing any real work to a branch |
 | **MUST NOT** | Delete or move a checkout that has uncommitted, unpushed, or stashed work in order to tidy up |
 
-`scripts/dev_root_check.py` reports every top-level entry that is not a single main checkout and prints JSON; `--clean` plans a fix and only acts with `--yes`. `hotload_check` runs it and warns (or fails with `--strict-dev-root`).
+`scripts/dev_root_check.py` reports every entry that does not fit this layout and prints JSON; `--clean` plans a fix and `--migrate <repo>` plans the move from a flat checkout to a project folder, and both only act with `--yes`. `hotload_check` runs the check and warns (or fails with `--strict-dev-root`).
 
 ## External research gate (binding)
 

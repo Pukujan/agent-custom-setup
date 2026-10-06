@@ -52,7 +52,7 @@ Filenames: use scripts/human_filename (speakable basenames; optional safe_twin) 
 Owned by ACS, not CGM. Paste it at boot together with the system_block.
 
 ```
-Dev root hygiene (ACS): the dev root (ACS_DEV_ROOT; default D:\development on Windows, ~/development elsewhere) holds exactly one main checkout per repo. Never create git worktrees, dependency or sibling clones, scratch folders, or caches there. Put them under the ACS cache instead: %LOCALAPPDATA%\acs\{deps,scratch,worktrees} on Windows, ~/.cache/acs/{deps,scratch,worktrees} on macOS/Linux (ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py.
+Dev root hygiene (ACS): each repo gets one project folder in the dev root (ACS_DEV_ROOT; default D:\development on Windows, ~/development elsewhere). Put the main checkout at <project>/main and task worktrees at <project>/worktrees/<task>. Never put a worktree directly in the dev root or inside the main checkout. A legacy flat checkout (<dev root>/<repo>) is still accepted; migrate it before adding worktrees (dev_root_check.py --migrate <repo>). Dependency clones, scratch folders and caches never go in the dev root: use %LOCALAPPDATA%\acs\{deps,scratch} on Windows or ~/.cache/acs/{deps,scratch} on macOS/Linux (ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py.
 ```
 
 ## Instruction (MUST paste/apply into system or task prompts)
