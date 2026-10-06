@@ -33,6 +33,8 @@ COMPONENTS = {
     "agent-custom-setup",
     "observational-issue-ops",
 }
+# This pack's own component name; it requires its siblings by commit, not itself.
+SELF = "agent-custom-setup"
 
 
 def _load(path: Path) -> dict:
@@ -100,6 +102,12 @@ def test_pack_is_not_behind_the_live_train():
     for name, entry in sorted(certified.items()):
         local = requires.get(name) or {}
         assert local.get("version") == entry.get("version"), f"{name}: version is behind the train"
+        if name == SELF:
+            # A repository does not pin itself by commit: it cannot require a
+            # commit it has not written yet, and a mesh that did would fail the
+            # moment it merged. Its own consistency is its declared version
+            # (checked above) plus its own gates. See agent-stack-train#11.
+            continue
         assert local.get("commit") == entry.get("commit"), f"{name}: commit is behind the train"
 
 
