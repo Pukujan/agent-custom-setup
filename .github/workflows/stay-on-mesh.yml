@@ -1,5 +1,15 @@
 name: Stay on the mesh
 
+# The called workflow (require-mesh.yml) rewrites stack-mesh.json and opens a
+# pull request, so it needs write scope. A reusable workflow cannot request more
+# than the caller grants, and this repository's default token is read-only, so
+# without this block every run — the PR check and the scheduled sync alike —
+# dies at startup before any job begins. That is exactly how a stale mesh
+# survived for weeks with nothing reporting it.
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   pull_request:
   push:
