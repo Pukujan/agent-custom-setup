@@ -117,7 +117,7 @@ def _stub_externals(monkeypatch, mod) -> None:
 
     monkeypatch.setattr(mod, "git_head", fake_git_head)
     monkeypatch.setattr(mod, "run_script", lambda argv: 0)
-    monkeypatch.setattr(mod, "oio_platform_supported", lambda: (True, ""))
+    monkeypatch.setattr(mod, "oio_platform_supported", lambda *_: (True, ""))
 
 
 def _adopter(tmp_path: Path, *, with_adapter: bool = True) -> Path:
@@ -368,7 +368,7 @@ def test_run_partial_when_oio_unsupported(tmp_path: Path, monkeypatch):
     mod = _load_mod()
     _stub_externals(monkeypatch, mod)
     monkeypatch.setattr(
-        mod, "oio_platform_supported", lambda: (False, "os.O_NOFOLLOW is unavailable")
+        mod, "oio_platform_supported", lambda *_: (False, "os.O_NOFOLLOW is unavailable")
     )
     acs_root = _fake_acs_root(tmp_path)
     pcm, cgm = _fake_checkouts(tmp_path)
@@ -466,7 +466,7 @@ def test_run_fails_closed_when_hotload_check_fails(tmp_path: Path, monkeypatch):
 
     monkeypatch.setattr(mod, "git_head", lambda root: {
         "pcm-ck": PCM_SHA, "cgm-ck": CGM_SHA, "oio-ck": OIO_SHA}.get(Path(root).name, ACS_SHA))
-    monkeypatch.setattr(mod, "oio_platform_supported", lambda: (True, ""))
+    monkeypatch.setattr(mod, "oio_platform_supported", lambda *_: (True, ""))
     calls = {"n": 0}
 
     def run_script(argv):
@@ -495,17 +495,39 @@ def test_build_stack_manifest_empty_pins():
     }
 
 
-def test_oio_platform_probe_matches_capabilities():
+def test_oio_platform_probe_comes_from_the_pinned_installer(tmp_path: Path):
+    """The verdict is OIO's, not a copy of its precondition kept here.
+
+    A local copy is what went stale: it kept reporting Windows unsupported
+    after OIO gained a Windows backend, so an install that would have succeeded
+    reported PARTIAL. This asserts ACS reads the installer's answer instead.
+    """
     mod = _load_mod()
-    supported, why = mod.oio_platform_supported()
-    expected = (
-        {os.open, os.mkdir, os.stat, os.unlink, os.rename}.issubset(os.supports_dir_fd)
-        and hasattr(os, "O_NOFOLLOW")
-        and hasattr(os, "O_DIRECTORY")
-    )
-    assert supported is expected
-    if not supported:
-        assert why
+
+    supported = tmp_path / "supports.py"
+    supported.write_text('import sys; print("supported: fake backend"); sys.exit(0)', encoding="utf-8")
+    assert mod.oio_platform_supported(supported) == (True, "")
+
+    refuses = tmp_path / "refuses.py"
+    refuses.write_text('import sys; print("unsupported: no dir_fd"); sys.exit(1)', encoding="utf-8")
+    ok, why = mod.oio_platform_supported(refuses)
+    assert ok is False
+    assert "no dir_fd" in why
+
+
+def test_oio_platform_probe_defers_when_the_installer_cannot_answer(tmp_path: Path):
+    """An installer too old to carry the probe is not guessed about.
+
+    Such a checkout predates the backend the probe describes, so ACS attempts
+    the install and lets OIO fail closed on its own terms.
+    """
+    mod = _load_mod()
+    old = tmp_path / "old.py"
+    old.write_text("import sys; sys.exit(2)", encoding="utf-8")
+    assert mod.oio_platform_supported(old) == (True, "")
+
+    missing = tmp_path / "absent.py"
+    assert mod.oio_platform_supported(missing) == (True, "")
 
 
 def test_module_has_no_hardcoded_pins():

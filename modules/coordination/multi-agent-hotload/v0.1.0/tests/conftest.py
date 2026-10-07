@@ -154,7 +154,7 @@ def stub_externals(monkeypatch, installer):
         monkeypatch.setattr(
             installer,
             "oio_platform_supported",
-            lambda: (True, "") if oio_supported else (False, "os.O_NOFOLLOW is unavailable"),
+            lambda *_: (True, "") if oio_supported else (False, "os.O_NOFOLLOW is unavailable"),
         )
 
     return _stub
