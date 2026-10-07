@@ -503,8 +503,19 @@ def apply_acs_prompt_inject(cgm_root: Path, pack_root: Path) -> tuple[str | None
     return (system_block or instruction), notes
 
 
-def validate_pins(data: object) -> list[str]:
-    """Require FULL PCM + FULL CGM pins (Alex binding: no slim subsets)."""
+def validate_pins(data: object, *, against_mesh: bool = True) -> list[str]:
+    """Require FULL PCM + FULL CGM pins (Alex binding: no slim subsets).
+
+    ``against_mesh`` compares the pinned revision and version with
+    ``stack-mesh.json``. The pack's own example is checked with it off: that
+    file is a template whose pin-bearing fields
+    ``acs_install.build_assignment`` rebuilds from ``pins.json`` and the mesh
+    before an adopter sees them, so its revision is a placeholder. Comparing a
+    placeholder with live upstream coupled the template to the train -- every
+    sibling re-certification moved the mesh, the example went stale, and a pull
+    request that changed nothing else failed. The shape checks (FULL PCM
+    features, all eight CGM modules, the human-output contract) run either way.
+    """
     errors: list[str] = []
     if not isinstance(data, dict):
         return ["assignment must be an object"]
@@ -517,13 +528,14 @@ def validate_pins(data: object) -> list[str]:
     if not isinstance(pcm, dict):
         errors.append("pins.pcm: required (FULL PCM stack)")
     else:
-        pcm_req = mesh_component("project-continuity-modules")
-        rev = str(pcm.get("revision") or "")
-        if not commits_match(rev, pcm_req["commit"]):
-            errors.append(
-                f"pins.pcm.revision: must be {pcm_req['version']} at {pcm_req['commit']}; "
-                f"got {rev or '(none)'}; an older version is refused"
-            )
+        if against_mesh:
+            pcm_req = mesh_component("project-continuity-modules")
+            rev = str(pcm.get("revision") or "")
+            if not commits_match(rev, pcm_req["commit"]):
+                errors.append(
+                    f"pins.pcm.revision: must be {pcm_req['version']} at {pcm_req['commit']}; "
+                    f"got {rev or '(none)'}; an older version is refused"
+                )
         feats = pcm.get("required_features")
         if not isinstance(feats, list):
             errors.append("pins.pcm.required_features: required list of FULL PCM features")
@@ -539,18 +551,19 @@ def validate_pins(data: object) -> list[str]:
     if not isinstance(cgm, dict):
         errors.append("pins.cgm: required (FULL CGM 0.5.12 stack)")
     else:
-        cgm_req = mesh_component("content-generation-modules")
-        ver = str(cgm.get("version") or "")
-        if ver != cgm_req["version"]:
-            errors.append(
-                f"pins.cgm.version: must be {cgm_req['version']} (FULL stack; an older version is refused)"
-            )
-        rev = str(cgm.get("revision") or "")
-        if not commits_match(rev, cgm_req["commit"]):
-            errors.append(
-                f"pins.cgm.revision: must be {cgm_req['version']} at {cgm_req['commit']}; "
-                f"got {rev or '(none)'}; an older version is refused"
-            )
+        if against_mesh:
+            cgm_req = mesh_component("content-generation-modules")
+            ver = str(cgm.get("version") or "")
+            if ver != cgm_req["version"]:
+                errors.append(
+                    f"pins.cgm.version: must be {cgm_req['version']} (FULL stack; an older version is refused)"
+                )
+            rev = str(cgm.get("revision") or "")
+            if not commits_match(rev, cgm_req["commit"]):
+                errors.append(
+                    f"pins.cgm.revision: must be {cgm_req['version']} at {cgm_req['commit']}; "
+                    f"got {rev or '(none)'}; an older version is refused"
+                )
         mods = cgm.get("modules")
         if not isinstance(mods, list):
             errors.append("pins.cgm.modules: required list of all eight CGM module ids")
@@ -581,7 +594,9 @@ def validate_pins(data: object) -> list[str]:
     return errors
 
 
-def validate_assignment(schema_path: Path, assignment_path: Path) -> list[str]:
+def validate_assignment(
+    schema_path: Path, assignment_path: Path, *, against_mesh: bool = True
+) -> list[str]:
     errors: list[str] = []
     schema = load_json(schema_path)
     data = load_json(assignment_path)
@@ -593,7 +608,7 @@ def validate_assignment(schema_path: Path, assignment_path: Path) -> list[str]:
         loc = ".".join(str(p) for p in err.path) or "<root>"
         errors.append(f"{loc}: {err.message}")
     errors.extend(validate_failover_watchdog(data))
-    errors.extend(validate_pins(data))
+    errors.extend(validate_pins(data, against_mesh=against_mesh))
     return errors
 
 
@@ -670,7 +685,12 @@ def run(
     schema_path = root / "schema" / "assignment.schema.json"
     example_path = assignment or (root / "examples" / "assignment.example.json")
     if schema_path.is_file() and example_path.is_file():
-        problems.extend(validate_assignment(schema_path, example_path))
+        # A real assignment (--assignment) must pin the mesh commit. The pack's
+        # own example is a template whose pins build_assignment rebuilds; see
+        # validate_pins.
+        problems.extend(
+            validate_assignment(schema_path, example_path, against_mesh=assignment is not None)
+        )
     elif not example_path.is_file():
         problems.append(f"assignment not found: {example_path}")
 
