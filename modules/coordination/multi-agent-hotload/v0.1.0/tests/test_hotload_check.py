@@ -26,13 +26,49 @@ def test_required_files_exist():
     assert mod.check_required_files(MODULE_ROOT) == []
 
 
-def test_example_validates_against_schema():
+def test_example_is_a_template_not_a_mesh_pin():
+    """The shipped example is validated for shape, not for currency.
+
+    ``acs_install.build_assignment`` rebuilds every pin-bearing field from
+    ``pins.json`` and ``stack-mesh.json``, so the example's revision is a
+    placeholder. Comparing it with live upstream coupled a template to the
+    train: a sibling re-certification moved the mesh, the placeholder went
+    stale, and a pull request that changed nothing else failed.
+    """
     mod = _load_mod()
     errors = mod.validate_assignment(
         MODULE_ROOT / "schema" / "assignment.schema.json",
         MODULE_ROOT / "examples" / "assignment.example.json",
+        against_mesh=False,
     )
     assert errors == [], errors
+
+def test_pack_check_validates_the_example_as_a_template(tmp_path: Path, monkeypatch):
+    """run() over the pack's own root must not gate the example on the mesh."""
+    mod = _load_mod()
+    seen: list[bool] = []
+    real = mod.validate_pins
+
+    def spy(data, *, against_mesh=True):
+        seen.append(against_mesh)
+        return real(data, against_mesh=against_mesh)
+
+    monkeypatch.setattr(mod, "validate_pins", spy)
+    rc = mod.run(MODULE_ROOT, skip_cgm_validate=True, dev_root=tmp_path)
+    assert rc == 0
+    assert seen == [False]
+
+def test_real_assignment_is_still_mesh_checked(tmp_path: Path):
+    """The same example, offered as a real assignment, is refused when stale."""
+    mod = _load_mod()
+    data = json.loads(
+        (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    )
+    data["pins"]["pcm"]["revision"] = "4e2385474b4af9249ca009cbdcb38c4498932475"
+    path = tmp_path / "assignment.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    rc = mod.run(MODULE_ROOT, path, skip_cgm_validate=True, dev_root=tmp_path)
+    assert rc == 1
 
 
 def test_lease_ttl_accepts_default_30(tmp_path: Path):

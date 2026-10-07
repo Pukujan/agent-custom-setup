@@ -1,11 +1,11 @@
 # PROMPT_INJECT — acs_prompt_inject (CGM 0.5.12)
 
 Generated / refreshed by `hotload_check` after full adapter `VALID`.
-Source: CGM `docs/writing-routing.json` → `acs_prompt_inject` @ `62340f3de702f6d2a7d97b9e16465b98360976a3`.
+Source: CGM `docs/writing-routing.json` → `acs_prompt_inject` @ `78385ff2ba31051128208ddc7f08dc5de0f0b570`.
 
-Also see: CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/62340f3de702f6d2a7d97b9e16465b98360976a3/docs/ACS_VERIFY.md) and [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/62340f3de702f6d2a7d97b9e16465b98360976a3/docs/writing-routing.json).
+Also see: CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/78385ff2ba31051128208ddc7f08dc5de0f0b570/docs/ACS_VERIFY.md) and [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/78385ff2ba31051128208ddc7f08dc5de0f0b570/docs/writing-routing.json).
 
-**Pin:** CGM `0.5.12` @ `62340f3de702f6d2a7d97b9e16465b98360976a3` (main). After any future CGM merge that moves the tip, re-pin ACS hotload to the new main SHA.
+**Pin:** CGM `0.5.12` @ `78385ff2ba31051128208ddc7f08dc5de0f0b570` (main). After any future CGM merge that moves the tip, re-pin ACS hotload to the new main SHA.
 
 ## application
 

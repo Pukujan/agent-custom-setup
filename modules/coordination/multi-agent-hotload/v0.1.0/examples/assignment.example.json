@@ -79,7 +79,7 @@
   "pins": {
     "pcm": {
       "repo": "https://github.com/Pukujan/project-continuity-modules",
-      "revision": "851bcf72eb618e6fe4f49c3f0b8e26fefb90410f",
+      "revision": "776b468db56cbbe3e251b2583d41f1f0caebd9ba",
       "cli_version": "0.7.0",
       "protocol": "0.1.0-draft",
       "role": "full_stack",
@@ -97,7 +97,7 @@
     },
     "cgm": {
       "repo": "https://github.com/Pukujan/content-generation-modules",
-      "revision": "62340f3de702f6d2a7d97b9e16465b98360976a3",
+      "revision": "78385ff2ba31051128208ddc7f08dc5de0f0b570",
       "version": "0.5.12",
       "role": "full_stack",
       "modules": [
