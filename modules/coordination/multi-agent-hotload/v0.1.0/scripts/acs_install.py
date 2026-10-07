@@ -15,10 +15,12 @@ Prerequisites (the installer fails closed without all of them):
 * Python deps the validators need (``jsonschema``).
 
 ``--oio-root`` points at an observational-issue-ops checkout at the mesh commit.
-Without it (or where OIO's no-follow installer cannot run, i.e. Windows today)
-the install is **PARTIAL**: the coordination surface is written and valid, OIO is
+Without it (or where the pinned OIO installer reports it cannot run here) the
+install is **PARTIAL**: the coordination surface is written and valid, OIO is
 reported as the one remaining step, and the exit code is non-zero -- never a
-fake success.
+fake success. Whether OIO can run is asked of the pinned installer
+(``--check-platform``), not decided here, so this installer cannot go stale
+against OIO's own platform support.
 
 What it does, in order:
 
@@ -308,20 +310,29 @@ def build_stack_manifest(mesh_doc: dict, project_name: str) -> dict:
     }
 
 
-def oio_platform_supported() -> tuple[bool, str]:
-    """Whether OIO's no-follow, descriptor-relative installer can run here.
+def oio_platform_supported(installer: Path) -> tuple[bool, str]:
+    """Ask the pinned OIO installer whether this platform can host it.
 
-    OIO refuses symlink/reparse-point redirection with ``dir_fd`` + ``O_NOFOLLOW``
-    operations. Windows lacks them, so OIO cannot install there yet; the install
-    is reported PARTIAL rather than faked (SPEC.md section 6).
+    The verdict comes from OIO's own platform dispatch, not from a copy of its
+    precondition kept here. A copy is what went stale: this check kept
+    reporting Windows unsupported after OIO gained a Windows backend, so an
+    install that would have succeeded reported PARTIAL instead. When the pinned
+    installer cannot answer at all — it predates the probe, and so predates the
+    backend the probe would describe — this returns supported and lets OIO fail
+    closed on its own terms rather than substituting a guess here.
     """
-    required = {os.open, os.mkdir, os.stat, os.unlink, os.rename}
-    missing = sorted(f.__name__ for f in required - set(os.supports_dir_fd))
-    if missing:
-        return False, "os.supports_dir_fd lacks " + ", ".join(missing)
-    for flag in ("O_NOFOLLOW", "O_DIRECTORY"):
-        if not hasattr(os, flag):
-            return False, f"os.{flag} is unavailable"
+    try:
+        probe = subprocess.run(
+            [sys.executable, str(installer), "--check-platform"],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return True, ""
+    if probe.returncode == 1:
+        reason = (probe.stdout or probe.stderr).strip()
+        return False, reason or "the pinned OIO installer reports this platform unsupported"
     return True, ""
 
 
@@ -605,14 +616,15 @@ def run(args: argparse.Namespace) -> int:
             f"{OIO_COMPONENT} at {short(oio_req.get('commit', ''))} and re-run"
         )
     else:
-        supported, why = oio_platform_supported()
         installer = oio_root / OIO_INSTALLER_REL
-        if not supported:
-            partials.append(f"OIO not installed: {why} (Windows port pending; see OIO issues)")
-        elif not installer.is_file():
+        if not installer.is_file():
             problems.append(f"OIO checkout at {oio_root} has no {OIO_INSTALLER_REL.as_posix()}")
         else:
-            oio_install = "pending"
+            supported, why = oio_platform_supported(installer)
+            if not supported:
+                partials.append(f"OIO not installed: {why}")
+            else:
+                oio_install = "pending"
 
     # 6. Build the coordination surface; keep existing files unless --force.
     try:
