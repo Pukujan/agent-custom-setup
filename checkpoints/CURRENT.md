@@ -4,6 +4,8 @@
 
 This is an as-of projection; live GitHub issues own progression. Link the owning leaf, parent ancestry and dependencies for active work.
 
+**Page handoff (2026-10-07).** Agents in this repository resume the public-page work from https://github.com/Pukujan/agent-custom-setup/issues/83 (`ACS-0053`, branch `task/ACS-0053-page-handoff-here`). They do not resume from app-builder-automation #58 or from a local folder. The old page content is scrapped. Active task remains `ACS-0009`.
+
 ## Program state
 
 Phase: ACS narrowed to **execution coordination only**. The JEV decision tooling, the oh-my-pi runtime, the reader/benchmark evals, and the [CC] setup have moved out to their own repos (`Pukujan/jev-dump`, `Pukujan/claude-code-launcher`). `registry.json` registers exactly one module (`multi-agent-hotload` @ 0.1.0); `PROJECT.md` carries the layer-ownership table; `POLICY.md`, the root `README.md`, and the pack docs describe the coordination product. CI enforcement live (required `gates` + protection). Open gaps are the coordination runtime implementation (#60) and the JEV/dump-side issues now living in their new repos.
