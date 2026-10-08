@@ -49,6 +49,8 @@ def preflight(expectation: Path, task_id: str, repository: str,
             or result.get("task_id") != task_id
             or result.get("repository") != repository
             or result.get("issue_number") != record.get("issue_number")
+            or (status == "CURRENT" and result.get("expected_revision") != record.get("expected_issue_updated_at"))
+            or (status == "CURRENT" and result.get("observed_revision") != record.get("expected_issue_updated_at"))
             or (status == "CURRENT" and proc.returncode != EXIT_CURRENT)
             or (status in ("STALE", "REVIEW_REQUIRED") and proc.returncode != EXIT_REVIEW)
             or (status == "UNKNOWN" and proc.returncode != EXIT_UNKNOWN)
