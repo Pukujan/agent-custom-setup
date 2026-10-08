@@ -163,6 +163,34 @@ Refs app-builder-automation #58 as history only. This does not close #5, #60, #6
 
 No checkpoints yet.
 
+### 2026-10-08 01:28:08 UTC — session-01a11838
+
+<!-- continuity:checkpoint {"agent":"session-01a11838","blocked":["The owner has not accepted replacement sentences."],"changed":["docs/issues/2026-10-07-ACS-0053-page-handoff-here.md","tasks/TASK-ACS-0053-page-handoff-here.md","checkpoints/CURRENT.md",".continuity/packs/ACS-0053.md"],"completed":["Filed the page handoff on this repository and pushed the task, current pointer, and context pack."],"decisions":["Agents in this repository resume from this GitHub issue.","They do not resume from app-builder-automation or from a local folder.","Keep ACS-0009 as the active checkpoint task."],"evidence":["https://github.com/Pukujan/agent-custom-setup/issues/83"],"next_action":"Wait for the owner to accept new sentences, then commit the replacement page to this repository.","protocol_version":"0.1.0-draft","schema":"project-continuity.checkpoint.v1","task_id":"ACS-0053","timestamp":"2026-10-08T01:28:08Z"} -->
+<!-- continuity:checkpoint-operation {"payload_sha256":"bea21e4f83d6a1a7b2d4db063268eac5a615dfc2d4a05cac4deca4bcce9f1e56","request_id":"3002f4a509b241fb839b83384aac3c50","schema":"project-continuity.checkpoint-operation.v1","task_id":"ACS-0053"} -->
+
+Completed:
+- Filed the page handoff on this repository and pushed the task, current pointer, and context pack.
+
+Evidence:
+- https://github.com/Pukujan/agent-custom-setup/issues/83
+
+Decisions:
+- Agents in this repository resume from this GitHub issue.
+- They do not resume from app-builder-automation or from a local folder.
+- Keep ACS-0009 as the active checkpoint task.
+
+Changed:
+- docs/issues/2026-10-07-ACS-0053-page-handoff-here.md
+- tasks/TASK-ACS-0053-page-handoff-here.md
+- checkpoints/CURRENT.md
+- .continuity/packs/ACS-0053.md
+
+Blocked/uncertain:
+- The owner has not accepted replacement sentences.
+
+Next:
+- Wait for the owner to accept new sentences, then commit the replacement page to this repository.
+
 ## Handoff
 
 Read the live issue, then PROJECT, CURRENT, and this task. Do not resume from another repository. Checkpoint before stopping.
