@@ -50,6 +50,12 @@ ACS installs them together; it does **not** replace or vendor PCM/CGM/OIO source
 - PR-only to `main`; never force-push; never print secrets
 - **ACS is SoT**; Desktop is deploy mirror only
 
+## Optional freshness preflight for decision-dependent tasks (not yet certified)
+
+The existing lease/claim checks establish *who may coordinate work*, not whether an earlier plan still matches the live issue. For a task carrying an explicit reviewed PCM decision-precondition record, the operator may run the read-only [ACS/PCM decision preflight](DECISION_PREFLIGHT.md) at resume and immediately before a consequential action. CURRENT is a **revision-match signal only**; it never substitutes for the decision boss, owner acceptance, source verification or CI. STALE/REVIEW_REQUIRED/UNKNOWN means pause that guarded action and reconcile with current issue authority before resuming. Do not silently refresh the expected revision merely to pass the check.
+
+This adapter is opt-in until its PCM counterpart is merged and certified through the train. Existing adopters are not required to call it; it does not alter hotload install states or global behavior. No decision-graph data, standalone truth store or automatic agent adjudication is introduced.
+
 ## Working-repo scope (binding)
 
 Adopters using ACS / this multi-agent hotloader may only write code on **their own working repo** — the GitHub repo they hot-loaded into / own as the adopter project.
