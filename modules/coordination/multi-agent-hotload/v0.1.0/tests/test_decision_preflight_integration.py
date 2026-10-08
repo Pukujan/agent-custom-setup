@@ -93,7 +93,10 @@ def test_guarded_action_runs_only_after_current(
 def test_missing_pcm_dependency_blocks_guarded_action(
     isolated_pcm: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ):
-    monkeypatch.setenv("PYTHONPATH", str(tmp_path / "no-pcm-installed"))
+    empty_package = tmp_path / "no-pcm-installed" / "continuity"
+    empty_package.mkdir(parents=True)
+    (empty_package / "__init__.py").write_text("", encoding="utf-8")
+    monkeypatch.setenv("PYTHONPATH", str(empty_package.parent))
     result = subprocess.run(
         [sys.executable, str(SCRIPT), "--expect", str(isolated_pcm),
          "--task", "ACS-0015", "--repo", "Pukujan/agent-custom-setup"],
