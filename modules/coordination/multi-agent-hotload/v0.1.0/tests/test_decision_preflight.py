@@ -43,6 +43,8 @@ def _pcm_result(status: str, code: int) -> SimpleNamespace:
             "task_id": "ACS-0015",
             "repository": "Pukujan/agent-custom-setup",
             "issue_number": 85,
+            "expected_revision": "2026-10-08T11:00:00Z",
+            "observed_revision": "2026-10-08T11:00:00Z",
         })
     )
 
@@ -83,6 +85,19 @@ def test_unavailable_pcm_module_fails_closed(tmp_path):
         runner=lambda *a, **k: SimpleNamespace(returncode=1, stdout="", stderr="No module")
     )
     assert result["status"] == "UNKNOWN"
+
+
+def test_current_requires_expected_revision_proof(tmp_path):
+    mod = _load()
+    record = _expectation(tmp_path)
+    for field in ("expected_revision", "observed_revision"):
+        result = _pcm_result("CURRENT", 0)
+        data = json.loads(result.stdout)
+        data[field] = "2026-10-08T11:00:01Z"
+        result.stdout = json.dumps(data)
+        output = mod.preflight(record, "ACS-0015", "Pukujan/agent-custom-setup",
+                               runner=lambda *a, **kw: result)
+        assert output["status"] == "UNKNOWN"
 
 
 def test_task_or_repository_mismatch_rejects_before_invocation(tmp_path):
