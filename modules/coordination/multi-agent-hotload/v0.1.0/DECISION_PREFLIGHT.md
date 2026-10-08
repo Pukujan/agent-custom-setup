@@ -45,6 +45,10 @@ This is a conditional integration, not a claim that the pack automatically block
 
 Matching current state does not imply that a marketed story is persuasive, a product design is valid, or an agent is authorized to write. Every layer retains its own acceptance.
 
+## Layered verification requirements
+
+The current adapter tests establish only the optional command boundary: matching task/revision allows the explicitly guarded next action; stale, changed, or unknown results block it. A [PCM+ACS verification protocol](https://github.com/Pukujan/project-continuity-modules/blob/task/PCM-0070-decision-preflight/docs/plans/DECISION_FRESHNESS_VERIFICATION.md) separately requires a *real* GitHub issue transition, blind agent-resumption trials, and finally an actual enforcement hook on consequential ACS actions before system-wide effectiveness can be claimed. Neither the existing lease checks nor the present optional adapter guarantees that all workers invoke this preflight. Do not confuse a green test suite with that stronger safety property.
+
 ## Verification and limits
 
 Run the new test module with the pack suite:
