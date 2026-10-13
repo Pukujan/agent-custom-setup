@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "project": "Example three-lane hotload",
   "recorded_at": "2026-09-27T00:00:00-04:00",
-  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease default 30 minutes (15–120); watchdog agent-less ~10m. After vacancy, GitHub-canonical claim_queue is FIFO; old boss rejoins at end. FULL PCM + FULL CGM 0.5.12 required — not a slim HSW/writing-direction-only subset.",
+  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease default 30 minutes (15–120); watchdog agent-less ~10m. After vacancy, the claim-file claim_queue is FIFO; old boss rejoins at end. The claim file is the authoritative seat store. FULL PCM + FULL CGM 0.5.12 required — not a slim HSW/writing-direction-only subset.",
   "role_fill": {
     "mode": "join_continue_order",
     "seed_is_hint_only": true,

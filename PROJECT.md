@@ -23,7 +23,7 @@ Required CI and GitHub auto-merge are mandatory. Verify protection, required rev
 Run multi-agent work on one repository honestly. ACS owns **execution coordination**:
 turning logged tickets into workable tasks, decomposing them, and keeping several
 agents on one repo from colliding — join-order roles, a boss lease with FIFO
-failover, a GitHub-canonical claim queue, an agent-less watchdog, and proposals.
+failover, a claim-file FIFO claim queue, an agent-less watchdog, and proposals.
 The product it ships is the **multi-agent hotload pack**; ACS pins PCM and CGM as
 external authorities and vendors neither.
 
