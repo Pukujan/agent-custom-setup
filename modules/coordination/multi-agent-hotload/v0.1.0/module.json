@@ -109,6 +109,14 @@
       "role": "formal-model-config"
     },
     {
+      "path": "formal/seat.tla",
+      "role": "formal-state-machine"
+    },
+    {
+      "path": "formal/seat.cfg",
+      "role": "formal-model-config"
+    },
+    {
       "path": "formal/README.md",
       "role": "formal-run-notes"
     },

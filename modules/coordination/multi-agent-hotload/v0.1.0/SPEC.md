@@ -193,7 +193,7 @@ Each claim above is backed by more than one kind of test:
 | **Differential** | The adopter's `stack-manifest.json` agrees with the **live** train (`check_manifest.py`); the pack's `stack-mesh.json` sits at the certified commits (`mesh.py --check`). | `tests/test_install_manifest.py` (offline shape) + the train's `check-adopter.yml` / `require-mesh.yml` (live) |
 | **Protocol** | The seat state machine matches ROLES.md step for step: lease, FIFO queue, zombie rejection, append-only history — driven by scripted fake agents, no model. | `tests/test_coordination.py` (parametrised over both `ClaimStore` implementations) |
 | **Failure paths** | Duplicate delivery, simultaneous claimants, zombie wake, restart mid-claim, clock regression, corrupt/absent claim. | `tests/test_coordination_failures.py` |
-| **Formal** | The state machine's safety (no write outside target, no clobber of foreign/edited content, idempotence, fail-closed) is model-checked. | `formal/install.tla` + `formal/README.md` |
+| **Formal** | The install state machine's safety (no write outside target, no clobber of foreign/edited content, idempotence, fail-closed) and the seat protocol's safety (at most one boss lease, FIFO claim queue, append-only history, watchdog never appoints, no zombie action, monotonic time) are model-checked. | `formal/install.tla` + `formal/seat.tla` + `formal/README.md` |
 | **Hidden holdout** | A blind agent, given the pack cold, installs it correctly into a repo that already has content — or correctly refuses. | `holdouts/HLD-0001-blind-rubric.md` |
 
 ## 9. Open questions for the owner
