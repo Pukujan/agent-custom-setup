@@ -139,6 +139,7 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 | `scripts/dev_root_check.py` | Flag (and optionally clean up) anything in the dev root that is not a single main checkout |
 | `workflow-stubs/watchdog.yml` | GH Action stub (copy into consuming repos) |
 | `formal/install.tla` | Model-checked state machine (safety + idempotence + fail-closed) |
+| `formal/seat.tla` | Model-checked seat protocol (one boss lease, FIFO queue, append-only history, watchdog never appoints) |
 | `holdouts/HLD-0001-blind-rubric.md` | Hidden holdout: blind install into a non-empty repo |
 | `holdouts/HLD-0002-seat-protocol-blind-rubric.md` | Hidden holdout: blind agents coordinate seats (Pass 3) |
 | `holdouts/HLD-0002-harness.py` | Build / prompt / score harness for the HLD-0002 sandbox |
