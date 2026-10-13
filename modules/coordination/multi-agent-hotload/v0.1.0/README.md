@@ -140,6 +140,9 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 | `workflow-stubs/watchdog.yml` | GH Action stub (copy into consuming repos) |
 | `formal/install.tla` | Model-checked state machine (safety + idempotence + fail-closed) |
 | `holdouts/HLD-0001-blind-rubric.md` | Hidden holdout: blind install into a non-empty repo |
+| `holdouts/HLD-0002-seat-protocol-blind-rubric.md` | Hidden holdout: blind agents coordinate seats (Pass 3) |
+| `holdouts/HLD-0002-harness.py` | Build / prompt / score harness for the HLD-0002 sandbox |
+| `holdouts/HLD-0002-run-2026-10-13.md` | Executed HLD-0002 run: raw artifacts + per-criterion score |
 | `tests/` | PDD/SDD/TDD/metamorphic/differential tests (see [SPEC.md](SPEC.md) §8) |
 
 ## Version source (do not vendor, do not copy pins)

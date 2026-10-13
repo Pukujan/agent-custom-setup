@@ -195,6 +195,7 @@ Each claim above is backed by more than one kind of test:
 | **Failure paths** | Duplicate delivery, simultaneous claimants, zombie wake, restart mid-claim, clock regression, corrupt/absent claim. | `tests/test_coordination_failures.py` |
 | **Formal** | The state machine's safety (no write outside target, no clobber of foreign/edited content, idempotence, fail-closed) is model-checked. | `formal/install.tla` + `formal/README.md` |
 | **Hidden holdout** | A blind agent, given the pack cold, installs it correctly into a repo that already has content — or correctly refuses. | `holdouts/HLD-0001-blind-rubric.md` |
+| **Live multi-agent run** | Blind agents coordinate seats cold; the observable record (claim file, as-of history, queue order) matches ROLES.md — zombie refusal, clean refusal of a late claimant, fail-closed on a corrupt claim. | `holdouts/HLD-0002-seat-protocol-blind-rubric.md` + `holdouts/HLD-0002-run-2026-10-13.md` |
 
 ## 9. Open questions for the owner
 
