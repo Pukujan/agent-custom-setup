@@ -25,6 +25,16 @@ Each relation is a different oracle from the example suite, and each can fail
 independently, so this is a second opinion on the runtime rather than a
 restatement of it. Deterministic injected clock, no LLM, no network; the
 local-file cases are sequential (concurrency is the failure suite's job).
+
+Two oracles are deliberately asymmetric. Idempotent replay compares the store's
+**raw bytes** — the strongest available check, since the record must be left
+untouched — while renaming and time translation compare **normalised claims**,
+because the raw bytes legitimately embed the very ids and stamps being
+transformed. Store equivalence holds *within one session*: it bridges the two
+``ClaimStore`` implementations (JSON round-trip, atomic ``O_EXCL`` writes, key
+handling), not their durability — the local-file store survives a restart and
+the in-memory one does not, which is exactly why the local file is the seat of
+record.
 """
 
 from __future__ import annotations
@@ -212,6 +222,31 @@ def test_shifting_every_timestamp_preserves_every_decision(seat_protocol, tmp_pa
     assert [k for k, _ in shifted] == [k for k, _ in original]
 
 
+@pytest.mark.parametrize("kind", STORE_KINDS)
+def test_shifting_every_timestamp_backwards_also_preserves_every_decision(
+    seat_protocol, tmp_path, clock, kind
+):
+    """The negative direction: the relation is symmetric in the sign of Δ.
+
+    A fresh store records no stamps before the script runs, so a backward
+    shift is not a clock regression — it is the same relative timeline placed
+    earlier on the absolute clock. An implementation that leaked an absolute
+    anchor (an epoch floor, a "must be after install time" check) could pass
+    the forward direction and fail here.
+    """
+    delta = timedelta(minutes=397)
+    base = clock.now
+    original = run_script(
+        seat_protocol, make_machine(seat_protocol, kind, tmp_path, "b0"), STEPS, base
+    )
+    shifted = run_script(
+        seat_protocol, make_machine(seat_protocol, kind, tmp_path, "b1"), STEPS, base - delta
+    )
+    assert shifted == shift_trace(seat_protocol, original, -delta)
+    assert final_claim(shifted)["last_heartbeat"] != final_claim(original)["last_heartbeat"]
+    assert [k for k, _ in shifted] == [k for k, _ in original]
+
+
 def test_a_shift_across_the_ttl_boundary_keeps_the_verdict(seat_protocol, tmp_path, clock):
     """A lease that has just lapsed stays lapsed under any translation of now."""
     delta = timedelta(minutes=100000)  # a long way away; still relative
@@ -322,6 +357,13 @@ def test_join_replay_appoints_once(machine, clock):
 # (e) Monotonic history: extends, never shrinks, never rewrites
 
 
+def history_delta(before: list, after: list) -> list:
+    """What a transition appended (its length-``before`` tail, if it extended)."""
+    if len(after) < len(before) or after[: len(before)] != before:
+        pytest.fail("history was rewritten or shrunk (prefix-extension violated)")
+    return after[len(before):]
+
+
 def test_history_prefix_extends_across_every_successful_operation(machine, clock):
     base = clock.now
     previous: list = []
@@ -333,6 +375,49 @@ def test_history_prefix_extends_across_every_successful_operation(machine, clock
         previous = history
     # the seat changed three times: appoint A, end A's term, appoint B
     assert [e["boss_agent_id"] for e in previous] == [A, A, B]
+
+
+def test_history_appends_exactly_on_seat_change_and_nowhere_else(machine, clock):
+    """Append-completeness, the direction prefix-extension alone cannot see.
+
+    The monotonic relation proves history never shrinks or rewrites; it cannot
+    prove history *grows when it must* — a runtime that silently stopped
+    appending would pass it forever. So each step's delta is checked against the
+    transition's shape: a seat change appends (at least one entry — a
+    ``take_seat`` over a stale lease appends two: the vacancy then the
+    appointment), and a transition that does not move the seat appends nothing.
+    """
+    base = clock.now
+    previous: list = []
+    for op, agent, offset in SUCCESS_STEPS:
+        before = machine.status()
+        invoke(machine, op, agent, base + timedelta(minutes=offset))
+        after = machine.status()
+        appended = history_delta(previous, after["as_of_history"])
+        seat_changed = (before["who_is_boss_now"], before["status"]) != (
+            after["who_is_boss_now"],
+            after["status"],
+        )
+        if seat_changed:
+            assert appended, f"{op} moved the seat without appending history"
+        else:
+            assert not appended, f"{op} appended history without moving the seat"
+        previous = after["as_of_history"]
+    # non-vacuity: the script really did change the seat (three entries total)
+    assert len(previous) == 3
+
+
+def test_each_appended_entry_records_the_seat_that_changed(machine, clock):
+    """The delta's *content*: a seat change appends the incoming holder with an
+    open term, a vacancy appends the outgoing holder with a closed term."""
+    machine.join(A, clock.now)                       # appoint A: open term
+    machine.expire(clock.advance(31))                # end A's term: closed
+    machine.enqueue(B, clock.advance(1))
+    machine.take_seat(B, clock.advance(1))           # appoint B: open term
+    history = machine.status()["as_of_history"]
+    assert (history[0]["boss_agent_id"], history[0]["ended_at"]) == (A, None)
+    assert history[1]["boss_agent_id"] == A and history[1]["ended_at"] is not None
+    assert (history[2]["boss_agent_id"], history[2]["ended_at"]) == (B, None)
 
 
 def test_a_refused_operation_never_touches_history(machine, seat_protocol, clock):
@@ -352,17 +437,24 @@ def test_a_refused_operation_never_touches_history(machine, seat_protocol, clock
 # (f) Store equivalence: the metamorphic bridge between the two stores
 
 
-def test_the_two_stores_agree_on_an_identical_script(seat_protocol, tmp_path, clock):
+@pytest.mark.parametrize(
+    "steps", [STEPS, SUCCESS_STEPS], ids=["mixed-outcomes", "all-success"]
+)
+def test_the_two_stores_agree_on_an_identical_script(seat_protocol, tmp_path, clock, steps):
     """Same operations, same clock, different persistence -> same claim.
 
-    The script includes a lease expiry, a front-of-queue appointment and two
-    refusals, so the bridge is load-bearing: a store that dropped a field or
-    ordered a write differently would diverge here.
+    Run over two scripts so the bridge covers both a run with refusals
+    (``mixed-outcomes``: a zombie boss-action, a held-seat enqueue) and one in
+    which every step succeeds. A store that dropped a field or ordered a write
+    differently would diverge on at least one. Equivalence holds *within a
+    session*: the local-file store additionally survives a restart and the
+    in-memory store does not — that durability is the local store's whole
+    point, not something this relation claims.
     """
     local = make_machine(seat_protocol, "local_file", tmp_path, "local")
     memory = make_machine(seat_protocol, "in_memory", tmp_path, "memory")
-    local_trace = run_script(seat_protocol, local, STEPS, clock.now)
-    memory_trace = run_script(seat_protocol, memory, STEPS, clock.now)
+    local_trace = run_script(seat_protocol, local, steps, clock.now)
+    memory_trace = run_script(seat_protocol, memory, steps, clock.now)
     assert local_trace == memory_trace
 
     local_claim = seat_protocol.normalise_claim(local.store.read_raw())
