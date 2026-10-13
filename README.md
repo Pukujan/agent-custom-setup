@@ -129,6 +129,17 @@ ACS grounds every public claim in versioned repository artifacts:
 - **No upstream replacement:** ACS does not replace Project Continuity Modules
   (PCM) or Content Generation Modules; it pins them as external authorities and
   never vendors their source.
+- **Issue intake is adopted, not duplicated:** the issue-log form
+  (`.github/ISSUE_TEMPLATE/observational-issue.yml`), the triage workflow
+  (`.github/workflows/issue-triage.yml` + `.github/scripts/oio_triage.py`),
+  the ontology, and the schemas under `.oio/` are OIO-managed files, installed
+  by OIO's canonical installer
+  (`.github/scripts/oio_installer.py`, from the `stack-mesh.json` commit for
+  `observational-issue-ops`). They are never hand-edited; OIO's installer
+  refuses to overwrite a locally modified managed file. Updates come from
+  rerunning the pinned installer, not from copying files into ACS. The
+  project's own meanings — priority definitions and the account map — live in
+  the adopter-owned extension `.oio/ontology/project.json`.
 - **Coordination, not decision-making:** the boss ACCEPT/REJECT gate is a
   governance rule, not an automated judge; final authority always belongs to the
   human operator.
