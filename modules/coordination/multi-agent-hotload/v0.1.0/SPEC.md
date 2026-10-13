@@ -189,12 +189,15 @@ Each claim above is backed by more than one kind of test:
 | **PDD** (acceptance) | A fresh adopter reaches `READY`; a conflicted repo is refused with a clear report. | `tests/test_install_acceptance.py` |
 | **SDD** (spec/semantics) | The state machine's states and transitions match this document. | `tests/test_install_states.py` |
 | **TDD** (unit) | Each gate (§4) classifies each path kind correctly. | `tests/test_install_gates.py` |
-| **Metamorphic** | Reordering components, or rerunning install, does not change the final tree; an added foreign file cannot be overwritten. | `tests/test_install_metamorphic.py` |
+| **Metamorphic (install)** | Reordering components, or rerunning install, does not change the final tree; an added foreign file cannot be overwritten. | `tests/test_install_metamorphic.py` |
 | **Differential** | The adopter's `stack-manifest.json` agrees with the **live** train (`check_manifest.py`); the pack's `stack-mesh.json` sits at the certified commits (`mesh.py --check`). | `tests/test_install_manifest.py` (offline shape) + the train's `check-adopter.yml` / `require-mesh.yml` (live) |
 | **Protocol** | The seat state machine matches ROLES.md step for step: lease, FIFO queue, zombie rejection, append-only history — driven by scripted fake agents, no model. | `tests/test_coordination.py` (parametrised over both `ClaimStore` implementations) |
 | **Failure paths** | Duplicate delivery, simultaneous claimants, zombie wake, restart mid-claim, clock regression, corrupt/absent claim. | `tests/test_coordination_failures.py` |
+| **Scenario (BDD)** | The ROLES.md narratives a human can name: an empty room appoints its first boss; a dethroned boss is refused and re-queued at the end; two claimants resolve FIFO; the watchdog never appoints. | `tests/test_coordination_scenarios.py` |
+| **Metamorphic (seat)** | Renaming every agent through a bijection, shifting every timestamp (either direction), replaying an operation, or running the same script on the other `ClaimStore` leaves every decision and the history's meaning unchanged; a seat change appends to the history and a non-change does not. | `tests/test_coordination_metamorphic.py` |
 | **Formal** | The install state machine's safety (no write outside target, no clobber of foreign/edited content, idempotence, fail-closed) and the seat protocol's safety (at most one boss lease, FIFO claim queue, append-only history, watchdog never appoints, no zombie action, monotonic time) are model-checked. | `formal/install.tla` + `formal/seat.tla` + `formal/README.md` |
 | **Hidden holdout** | A blind agent, given the pack cold, installs it correctly into a repo that already has content — or correctly refuses. | `holdouts/HLD-0001-blind-rubric.md` |
+| **Live multi-agent run** | Blind agents coordinate seats cold; the observable record (claim file, as-of history, queue order) matches ROLES.md — zombie refusal, clean refusal of a late claimant, fail-closed on a corrupt claim. | `holdouts/HLD-0002-seat-protocol-blind-rubric.md` + `holdouts/HLD-0002-run-2026-10-13.md` |
 
 ## 9. Open questions for the owner
 
