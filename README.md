@@ -169,10 +169,11 @@ python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/acs_install.py \
 
 # 2. Validate a hotload install (schema-only here; a real install drops
 #    --skip-cgm-validate and passes --cgm-root <a CGM checkout at the commit
-#    stack-mesh.json requires>)
+#    stack-mesh.json requires>. Without --assignment the pack's example is
+#    checked as a template: its pin revisions are reserved placeholders,
+#    rebuilt from stack-mesh.json by a real install.)
 python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
   --adopter-root . \
-  --assignment modules/coordination/multi-agent-hotload/v0.1.0/examples/assignment.example.json \
   --skip-cgm-validate
 
 # 3. Fail-closed pin drift check across every declared projection

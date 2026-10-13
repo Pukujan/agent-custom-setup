@@ -79,8 +79,11 @@ def test_lease_ttl_accepts_default_30(tmp_path: Path):
     assert good["boss_failover"]["lease_ttl_minutes"] == 30
     path = tmp_path / "ok.json"
     path.write_text(json.dumps(good), encoding="utf-8")
+    # Template mode: the example's pin revisions are reserved placeholders, so
+    # mesh comparison is not part of this test. Currency is covered by
+    # test_real_assignment_is_still_mesh_checked.
     errors = mod.validate_assignment(
-        MODULE_ROOT / "schema" / "assignment.schema.json", path
+        MODULE_ROOT / "schema" / "assignment.schema.json", path, against_mesh=False
     )
     assert errors == [], errors
 
@@ -281,20 +284,48 @@ def test_pins_require_full_pcm_features(tmp_path: Path):
 
 
 def test_example_pins_are_full_stacks():
+    """The template requires the full stack, by shape, not by currency.
+
+    Pin revisions in the example are reserved placeholders (see
+    test_example_pins_are_reserved_placeholders), so nothing here compares
+    against the live mesh — that coupling failed every train advance.
+    """
     mod = _load_mod()
     data = json.loads(
         (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
     )
-    requires = mod.load_requires()
-    assert data["pins"]["cgm"]["version"] == requires["content-generation-modules"]["version"]
-    assert data["pins"]["cgm"]["revision"] == requires["content-generation-modules"]["commit"]
-    assert data["pins"]["pcm"]["revision"] == requires["project-continuity-modules"]["commit"]
+    errors = mod.validate_pins(data, against_mesh=False)
+    assert errors == [], errors
+    assert data["pins"]["pcm"].get("required_features"), "PCM pin must carry required_features"
     assert set(mod.REQUIRED_CGM_MODULES).issubset(
         {
             (m[len("modules/") :] if str(m).startswith("modules/") else str(m))
             for m in data["pins"]["cgm"]["modules"]
         }
     )
+
+
+def test_example_pins_are_reserved_placeholders():
+    """The example must never name a live mesh commit.
+
+    ``mesh.py --write`` (in the train) rewrites stack-mesh.json but not this
+    example; a real commit pasted here goes stale at the next train advance
+    and fails the pack's gates inside the bot's mesh/sync pull request — the
+    failure that blocked agent-custom-setup#89 and #95. This guard trips at
+    PR time instead.
+    """
+    mod = _load_mod()
+    zero = "0" * 40
+    raw = (MODULE_ROOT / "examples" / "assignment.example.json").read_text(encoding="utf-8")
+    data = json.loads(raw)
+    assert data["pins"]["pcm"]["revision"] == zero
+    assert data["pins"]["cgm"]["revision"] == zero
+    for component, entry in mod.load_requires().items():
+        commit = entry.get("commit", "")
+        assert commit not in raw, (
+            f"assignment.example.json embeds the live mesh commit of {component}; "
+            "pin revisions are reserved placeholders rebuilt at install time"
+        )
 
 
 def test_cli_ok_with_cgm_validate():
