@@ -9,6 +9,8 @@ name: Stay on the mesh
 permissions:
   contents: write
   pull-requests: write
+  # Approving the sync pull request's held runs (require-mesh.yml) needs this.
+  actions: write
 
 on:
   pull_request:
