@@ -48,6 +48,11 @@ make decisions on the agents' behalf.
 
 - **Not ticket logging.** The issue form, filer stamp, triage and prioritization
   belong to OIO (Observational Issue Ops). ACS *runs* tickets; it does not file them.
+  ACS does carry an *installed* OIO intake surface — the issue form, the triage
+  workflow, the ontology, and the schemas under `.oio/` — placed by OIO's own
+  installer from the `stack-mesh.json` commit for `observational-issue-ops`. Those
+  files are OIO-managed and are never hand-edited or hand-copied; updating them
+  means rerunning the pinned installer (see `README.md`, Operational Boundaries).
 - **Not decision-making.** Adjudication / tie-breaking between agents is JEV's
   intended job; JEV is not strong enough for it yet and is parked (see `jev-dump`).
 - **Not continuity, narrative, or versions.** Those belong to PCM, CGM, and the
