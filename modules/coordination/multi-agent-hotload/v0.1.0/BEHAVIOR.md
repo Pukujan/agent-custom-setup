@@ -11,7 +11,7 @@ When told to load the agent hot-loader into a working repo, wire **all four** as
 1. **FULL PCM** — continuity/checkpoints **and** PR-only + required CI + branch-protection/auto-merge preference + fail-closed gates + receipts. Still not proposals/ACCEPT. See [adopter-enforcement](https://github.com/Pukujan/project-continuity-modules/blob/main/docs/adopter-enforcement.md).
 2. **FULL CGM 0.5.12** — all eight modules + `human_output_contract` (not HSW + writing-direction only). README → writing-direction; posts/papers → hsw.
 3. **OIO** — the observational issue-log surface (ontology, issue form, triage workflow, `AGENTS.md` guidance block). A component that cannot be installed is reported **PARTIAL**, never OK.
-4. **This runtime** — join-order roles, boss lease (minutes), GitHub-canonical claim queue, agent-less watchdog, proposals → claim → PR
+4. **This runtime** — join-order roles, boss lease (minutes), claim-file FIFO claim queue, agent-less watchdog, proposals → claim → PR (executed by `scripts/seat_protocol.py`)
 
 ACS installs them together; it does **not** replace or vendor PCM/CGM/OIO source. ACS and **all** hotloader adopters must use the full stacks.
 
@@ -27,10 +27,10 @@ ACS installs them together; it does **not** replace or vendor PCM/CGM/OIO source
 
 - Authoritative seat is a **lease** (default **30 minutes**, configurable **15–120 minutes**)
 - Agents emit check-in / heartbeat **stamps** only
-- After vacancy: claimants form a **FIFO `claim_queue`** on the **GitHub-canonical** claim; **front** takes next boss
+- After vacancy: claimants form a **FIFO `claim_queue`** on the claim file (the authoritative seat store); **front** takes next boss
 - **Returning / old boss** joins from the **end of the queue** — **no automatic reclaim**
 - Keep **as-of history** (who was boss at T) separate from who-is-boss-now
-- **Zombie rule:** on every wake, re-read GitHub claim. If vacant or not you → reject boss-only actions; drop to worker or re-queue at end; optional issue comment `lost lease → rejoining queue`; **no out-of-band DM**
+- **Zombie rule:** on every wake, re-read the claim file. If vacant or not you → reject boss-only actions; drop to worker or re-queue at end; optional issue comment `lost lease → rejoining queue`; **no out-of-band DM**
 
 ## Agent-less watchdog (~10m)
 
@@ -42,7 +42,7 @@ ACS installs them together; it does **not** replace or vendor PCM/CGM/OIO source
 
 ## Progress and delivery
 
-- **GitHub is primary** progress truth (commits on claim branch, PR updates, dated progress comments, claim / `claim_queue`)
+- **GitHub is primary** progress truth (commits on claim branch, PR updates, dated progress comments); the claim file is the seat of record
 - Local telemetry secondary only — never sole cross-machine truth
 - Flow: propose → boss ACCEPT/REJECT → claim branch → PR
 - Parent/child ticket **notes only** — no full DAG engine

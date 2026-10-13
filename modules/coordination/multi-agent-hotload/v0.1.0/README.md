@@ -5,7 +5,7 @@
 1. **FULL PCM** — continuity/checkpoints **plus** PR-only workflow, required CI gates, branch-protection + auto-merge preference, fail-closed gates, issue receipts
 2. **FULL CGM 0.5.12** — all eight modules + `human_output_contract` (not HSW + writing-direction only)
 3. **OIO** — the observational issue-log surface (ontology, issue form, triage workflow, `AGENTS.md` guidance block)
-4. **This runtime** — join-order roles, boss lease (**minutes**, default 30), GitHub-canonical claim queue, agent-less watchdog (~10m), proposals, claim → PR
+4. **This runtime** — join-order roles, boss lease (**minutes**, default 30), claim-file FIFO claim queue, agent-less watchdog (~10m), proposals, claim → PR (executed by `scripts/seat_protocol.py`)
 
 Component versions are **not** restated here. They come from the release train (`agent-stack-train`) through this pack's `stack-mesh.json`; the adopter follows the train through its own `stack-manifest.json` (empty pins). See [SPEC.md](SPEC.md) §1. Pin and reference PCM/CGM/OIO only — **do not copy** their source into ACS. A slim subset is an **incomplete install** for ACS and every hotloader adopter.
 
@@ -44,13 +44,13 @@ Assignment list may **seed** order; live join/continue order **fills** roles. Se
 | | Boss lease / failover | Watchdog |
 | --- | --- | --- |
 | Cadence | **Minutes** (default **30**; range **15–120**) | ~**10 minutes** |
-| Runner | Agents emit check-in stamps; after vacancy, FIFO `claim_queue` on GitHub | **Cron / GitHub Action / script only** — no LLM, no peer agent |
+| Runner | Agents emit check-in stamps; after vacancy, FIFO `claim_queue` on the claim file | **Cron / GitHub Action / script only** — no LLM, no peer agent |
 | Effect | Vacant seat after TTL; **front of queue** takes boss; old boss rejoins at **end** | Liveness flags; may write `vacant` in claim file after lease TTL |
 | Must not | Auto-reclaim for returning boss; skip zombie re-read | Make product decisions or appoint a new boss agent |
 
 **Watchdog ≠ failover.** Schema separates `lease_ttl_minutes`, `claim_queue`, `watchdog_interval_minutes`, and `idle_window`.
 
-**Zombie:** on wake, re-read GitHub claim. If vacant/not you → reject boss actions; worker or re-queue; optional issue comment `lost lease → rejoining queue`; no out-of-band DM.
+**Zombie:** on wake, re-read the claim file. If vacant/not you → reject boss actions; worker or re-queue; optional issue comment `lost lease → rejoining queue`; no out-of-band DM.
 
 Progress signals: **GitHub primary** (commits on claim branch, PR updates, dated progress comments, claim/`claim_queue`). Optional local telemetry secondary only.
 
@@ -106,8 +106,8 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 1. **Join/continue order fills roles** (first = decision boss; next = coder1…). Seed list optional; live fill wins.
 2. Decision boss **may also do tasks**; deciding wins on conflict.
 3. Boss seat is a **lease in minutes** (default 30; 15–120) with check-in stamps; missed check-in past TTL vacates the seat.
-4. After vacancy: **GitHub-canonical FIFO `claim_queue`**; front takes boss; returning boss joins at **end**.
-5. **Zombie:** re-read GitHub claim on wake; reject boss actions if not named; worker or re-queue; optional issue comment; no DM.
+4. After vacancy: **FIFO `claim_queue`** on the claim file; front takes boss; returning boss joins at **end**.
+5. **Zombie:** re-read the claim file on wake; reject boss actions if not named; worker or re-queue; optional issue comment; no DM.
 6. **Watchdog is agent-less** (cron/Action/script, ~10m); agents only emit stamps.
 7. Reuse **FULL PCM** and **FULL CGM 0.5.12** as pins — never vendor their trees; never ship a slim subset.
 8. Human-readable titles under the CGM stack (README → writing-direction; other prose → hsw).
@@ -134,7 +134,8 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 | `scripts/acs_install.py` | Gated conductor: plan → classify → write → validate → install OIO |
 | `scripts/hotload_check.py` | Validate pack + assignment |
 | `scripts/check_pins.py` | Fail if the pack's own projections drift |
-| `scripts/watchdog_check.py` | Agent-less watchdog skeleton |
+| `scripts/seat_protocol.py` | Seat state machine: the ROLES.md lease/queue/zombie/history rules as code + CLI |
+| `scripts/watchdog_check.py` | Agent-less watchdog skeleton (delegates vacancy + lease check to `seat_protocol.py`) |
 | `scripts/dev_root_check.py` | Flag (and optionally clean up) anything in the dev root that is not a single main checkout |
 | `workflow-stubs/watchdog.yml` | GH Action stub (copy into consuming repos) |
 | `formal/install.tla` | Model-checked state machine (safety + idempotence + fail-closed) |

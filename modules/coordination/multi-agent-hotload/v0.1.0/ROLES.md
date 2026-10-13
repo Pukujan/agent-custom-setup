@@ -2,6 +2,10 @@
 
 Binding owner rules for multi-agent work coordinated through this ACS pack.
 
+## Authoritative seat store
+
+**The authoritative seat store is the local claim file named in the assignment (`boss_failover.check_in.claim_file_path`, default `.coord/boss_claim.json`) — not GitHub.** The pack is offline by design: no script in it performs GitHub I/O, so a claim that lived on GitHub would be a store nothing reads or writes. The record's shape and every transition are defined by `scripts/seat_protocol.py`, whose `ClaimStore` interface is the seam where a GitHub-backed store could replace the local-file store without touching the state machine. GitHub remains primary for progress signals (commits, PRs, dated comments) and for the proposal board ([PROPOSALS.md](PROPOSALS.md)); it is not the seat of record. `issue_comment` check-ins are a *publication* mechanism for humans, not a second authority: the claim file decides who holds the seat.
+
 ## Role fill order (binding)
 
 **Tool identity does not assign roles.** Grok, Claude, Codex, or any other harness may hold any seat. What matters is **who opens the hot-loaded working repo and continues**:
@@ -17,7 +21,7 @@ An assignment document may **seed** a preferred agent list. Seeding is a hint fo
 - Sole arbiter of proposals: comments ACCEPT or REJECT (see [PROPOSALS.md](PROPOSALS.md)).
 - **May also implement tasks** on accepted work.
 - If "decide" and "do" conflict in the same moment, **deciding wins** — rule first, then optionally execute.
-- Holds the authoritative seat only under a valid **lease** (minutes — see below) **and** while GitHub-canonical `who_is_boss_now` / claim file names them.
+- Holds the authoritative seat only under a valid **lease** (minutes — see below) **and** while the claim file's `who_is_boss_now` names them.
 - Uses human-readable titles (FULL CGM (README→writing-direction; prose→hsw)).
 
 ## Workers (coder1, coder2, …)
@@ -40,28 +44,32 @@ The authoritative seat is a **lease**, not a forever label. Failover TTL is meas
 | Field | Meaning |
 | --- | --- |
 | `lease_ttl_minutes` | How long a check-in stays valid. **Default 30.** Projects set **15–120**. |
-| `check_in.mechanism` | `issue_comment` (preferred shared) or `claim_file` (repo-local path named in assignment). |
+| `check_in.mechanism` | `claim_file` (the authoritative store) or `issue_comment` (a human-readable publication of check-ins on the owning issue; the claim file stays authoritative). |
 | `check_in.interval_hint_minutes` | How often the sitting boss should renew (typically ≤ TTL). |
-| `claim_queue` | **GitHub-canonical FIFO** of `agent_id`s waiting after vacancy. **Front takes next boss.** |
+| `claim_queue` | **FIFO** of `agent_id`s waiting after vacancy, in the claim file. **Front takes next boss.** |
 | `standby` | Optional preferred `agent_id` hints when enqueueing. Live `claim_queue` order wins. |
 | `grace_minutes` | Short window for old boss to refute a takeover proposal **after lease TTL expiry** (optional path). Not the failover TTL itself. |
 | `as_of_history` | Append-only notes of who was boss at time T. **Separate** from who-is-boss-now. Never rewrite history to match the current seat. |
-| `who_is_boss_now` | Current holder or `null` if vacant. **Authoritative with the claim file.** |
+| `who_is_boss_now` | Current holder or `null` if vacant. **Authoritative on the claim file.** |
 
 ### Vacancy, queue, and claim
 
 1. Sitting boss renews check-in while active.
 2. Missed check-in past **lease TTL (minutes)** → seat **vacant** (watchdog may write `vacant`; it does not appoint).
-3. Claimants form a **queue** on the GitHub-canonical claim (`claim_queue`). Next continuer takes boss from the **front**.
+3. Claimants form a **queue** on the claim file (`claim_queue`). Next continuer takes boss from the **front**.
 4. **Returning / old boss:** if they come alive again, they join from the **end of the queue** — **no automatic reclaim** of boss.
-5. Optional: a worker proposes takeover; if old boss is past lease and does not refute within grace, accept and record as-of — still must not silently skip FIFO without an accepted queue-reorder proposal.
+5. Optional: a worker proposes takeover; if old boss is past lease and does not refute within grace, accept and record as-of — still must not silently skip FIFO without an accepted queue-reorder proposal. *(Optional path — not implemented in v0.1.0.)*
 6. Append as-of history on seat change; never rewrite past entries.
 
 Who-is-boss-now is the agent named on the live claim inside TTL. As-of history answers "who was boss at T?" without mutating current seat state.
 
+### Who performs each operation (the runtime)
+
+`scripts/seat_protocol.py` executes every rule above as code, and its CLI is the defined agent operation surface: `join`, `renew`, `enqueue`, `take-seat`, `expire`, `zombie-reject`, `boss-action`. **Appointment is an agent operation** — the claimant at the front of the queue runs `take-seat`; no automated actor (and never the watchdog) appoints. The watchdog's only seat-facing power is `expire`, which writes `vacant` and appends history without appointing or reordering the queue. Re-delivering the same check-in (`enqueue`) is idempotent: a queued agent is never added twice.
+
 ### Zombie boss (binding)
 
-On every wake, **re-read the GitHub claim** (`who_is_boss_now` / claim file + `claim_queue`).
+On every wake, **re-read the claim file** (`who_is_boss_now` + `claim_queue`).
 
 If you still believe you are boss but the claim says **vacant** or **names someone else**:
 
@@ -82,7 +90,7 @@ Automated **no-agent watchdog** (~every **10 minutes**, `watchdog_interval_minut
 | Stale heartbeat + no activity past `idle_window` | seat **at risk** (flag) |
 | Past `lease_ttl_minutes` with no valid check-in | seat **vacant** → claimants enqueue; front of queue takes boss |
 
-**Progress signals:** GitHub is primary (commits on claim branch, PR updates, dated progress comments, claim/`claim_queue`). Optional local telemetry is secondary only — never sole cross-machine truth.
+**Progress signals:** GitHub is primary (commits on claim branch, PR updates, dated progress comments). Optional local telemetry is secondary only — never sole cross-machine truth.
 
 Schema fields `lease_ttl_minutes`, `claim_queue`, `watchdog_interval_minutes`, and `idle_window` are distinct on purpose. See [HOTLOAD.md](HOTLOAD.md).
 
@@ -98,7 +106,7 @@ Claims, branches, PRs, and boss actions (ACCEPT/REJECT) are **only** on the hot-
 | CGM | **Full** 0.5.12 stack (eight modules + contracts) for titles/README/UX — **not** ownership |
 | Tool brand (Grok/Claude/Codex/…) | Irrelevant to seat assignment |
 | Watchdog | Liveness flags only — not failover |
-| Local SQLite / device DBs | Execution aids — GitHub issues / claim win on disagreement |
+| Local SQLite / device DBs | Execution aids — GitHub issues / claim file win on disagreement |
 | Out-of-band DM | **Forbidden** for lease handoff |
 | ACS this pack | Install surface that hot-loads FULL PCM + FULL CGM 0.5.12 + these role rules |
 
@@ -110,6 +118,6 @@ Claims, branches, PRs, and boss actions (ACCEPT/REJECT) are **only** on the hot-
 | 2nd | `agent-b@workstation` | coder1 |
 | 3rd | `agent-c@laptop` | coder2 |
 
-If boss lease expires (**minutes**) and the seat is vacant, `agent-b@workstation` and `agent-c@laptop` enqueue; the **front** of `claim_queue` takes boss. If `agent-a@primary` wakes later as a zombie, they **re-read GitHub claim**, reject boss actions, and join the **end** of the queue (or work as a worker). A 10-minute stale watchdog flag alone does **not** hand the seat over.
+If boss lease expires (**minutes**) and the seat is vacant, `agent-b@workstation` and `agent-c@laptop` enqueue; the **front** of `claim_queue` takes boss. If `agent-a@primary` wakes later as a zombie, they **re-read the claim file**, reject boss actions, and join the **end** of the queue (or work as a worker). A 10-minute stale watchdog flag alone does **not** hand the seat over.
 
 See `examples/assignment.example.json` for `boss_failover` and `watchdog` shape.

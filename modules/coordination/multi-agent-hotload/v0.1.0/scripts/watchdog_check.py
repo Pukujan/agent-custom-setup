@@ -3,7 +3,9 @@
 
 Run via cron, GitHub Action, or plain script — NEVER via an LLM or peer agent.
 Reads claim heartbeat + optional GitHub stamps. Writes vacant after lease TTL.
-No product decisions. No boss appointment. Claimants enqueue via GitHub-canonical queue.
+No product decisions. No boss appointment. Claimants enqueue on the claim
+queue via the seat runtime (scripts/seat_protocol.py); the watchdog never
+appoints and never reorders the queue.
 """
 
 from __future__ import annotations
@@ -15,6 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import seat_protocol  # noqa: E402  (sibling script; stdlib only)
 
 
 def parse_dt(value: str | None) -> datetime | None:
@@ -40,12 +44,18 @@ def evaluate(
     idle_window_minutes: float,
     now: datetime | None = None,
 ) -> str:
-    """Return noop | nudge_keep_boss | flag_at_risk | vacant."""
+    """Return noop | nudge_keep_boss | flag_at_risk | vacant.
+
+    The liveness tiering (fresh / nudge / at-risk) is watchdog-only; the
+    lease decision itself (past TTL means the lease is gone) is delegated to
+    the seat runtime's ``evaluate_lease`` so there is exactly one lease
+    implementation in the pack.
+    """
     now = now or datetime.now(timezone.utc)
     age_m = minutes_since(last_heartbeat, now)
     if age_m is None:
         return "vacant"
-    if age_m <= lease_ttl_minutes:
+    if seat_protocol.evaluate_lease(last_heartbeat, lease_ttl_minutes, now):
         # Within lease: distinguish fresh vs stale-idle vs stale-with-activity
         if age_m <= idle_window_minutes:
             return "noop"
@@ -57,23 +67,41 @@ def evaluate(
 
 
 def load_claim(path: Path) -> dict:
+    """Read the claim; an absent file is a fresh vacant record.
+
+    A present-but-corrupt file fails closed (named reason) rather than being
+    treated as vacant: overwriting a record we failed to parse would lose the
+    seat state the protocol is supposed to protect.
+    """
     if not path.is_file():
-        return {"status": "vacant", "last_heartbeat": None, "claim_queue": []}
-    with path.open(encoding="utf-8-sig") as fh:
-        data = json.load(fh)
-    return data if isinstance(data, dict) else {"status": "vacant", "claim_queue": []}
+        return {
+            "status": "vacant",
+            "who_is_boss_now": None,
+            "last_heartbeat": None,
+            "claim_queue": [],
+        }
+    try:
+        return seat_protocol.normalise_claim(path.read_bytes())
+    except seat_protocol.CorruptClaimFileError:
+        raise
 
 
-def write_vacant(path: Path, claim: dict) -> None:
-    claim = dict(claim)
-    claim["status"] = "vacant"
-    claim["vacated_at"] = datetime.now(timezone.utc).isoformat()
-    claim["who_is_boss_now"] = None
-    # Preserve claim_queue; agents enqueue via GitHub-canonical updates — watchdog never appoints.
-    if "claim_queue" not in claim or not isinstance(claim.get("claim_queue"), list):
-        claim["claim_queue"] = []
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(claim, indent=2) + "\n", encoding="utf-8")
+def write_vacant(path: Path, claim: dict, *, now: datetime | None = None) -> None:
+    """Write the seat vacant after lease TTL, via the seat runtime.
+
+    Delegates to ``SeatMachine.expire`` so the one seat-changing path the
+    watchdog owns goes through the same state machine as every agent
+    transition — including appending as-of history (ROLES.md step 6), which
+    this function previously skipped. The runtime expires the seat only when
+    the recorded heartbeat is actually past TTL; it never appoints, never
+    reorders ``claim_queue``, and is idempotent when the seat is already
+    vacant. Unknown keys on the record are preserved.
+    """
+    ttl = float(claim.get("lease_ttl_minutes") or 30.0)
+    machine = seat_protocol.SeatMachine(
+        seat_protocol.LocalFileClaimStore(path), lease_ttl_minutes=ttl
+    )
+    machine.expire(now or datetime.now(timezone.utc))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -129,8 +157,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  lease_ttl_minutes={ttl} idle_window_minutes={idle}")
     print(f"  claim_file={claim_path}")
     if decision == "vacant" and not args.dry_run:
+        # The runtime's expire appends as-of history (append-only) and never
+        # appoints; the lease TTL lives on the record so the seat state
+        # machine and this liveness pass agree on one TTL.
+        claim["lease_ttl_minutes"] = ttl
         write_vacant(claim_path, claim)
-        print("  wrote status=vacant (agents enqueue on GitHub claim_queue; watchdog does not appoint)")
+        print("  wrote status=vacant (agents enqueue on the claim queue; watchdog does not appoint)")
     return 0
 
 

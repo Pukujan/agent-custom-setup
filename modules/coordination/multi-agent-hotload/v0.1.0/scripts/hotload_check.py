@@ -32,6 +32,7 @@ REQUIRED_FILES = (
     "scripts/acs_install.py",
     "scripts/hotload_check.py",
     "scripts/watchdog_check.py",
+    "scripts/seat_protocol.py",
     "scripts/dev_root_check.py",
     "workflow-stubs/watchdog.yml",
 )
@@ -735,7 +736,7 @@ def run(
     print("  install_surface=FULL PCM + FULL CGM 0.5.12 + this runtime")
     print("  cgm_validate=VALID (validate_content_system.py)")
     print("  watchdog=agent-less ~10m; lease_ttl=minutes (default 30)")
-    print("  claim_queue=FIFO after vacancy; zombie re-reads GitHub claim")
+    print("  claim_queue=FIFO after vacancy; zombie re-reads the claim file")
     for note in inject_notes:
         print(f"  {note}")
     print(

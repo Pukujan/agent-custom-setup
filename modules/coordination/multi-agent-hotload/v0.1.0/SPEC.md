@@ -48,7 +48,7 @@ Install is complete only when **all** of the following hold, as **full stacks**:
 2. **FULL CGM** at the train's certified revision — all eight modules including
    `human-output-naming`, plus the `human_output_contract`.
 3. **The coordination runtime** — join-order roles, boss lease (minutes),
-   GitHub-canonical FIFO claim queue, agent-less watchdog, proposals → claim → PR.
+   claim-file FIFO claim queue (executed by scripts/seat_protocol.py), agent-less watchdog, proposals → claim → PR.
 4. **OIO** — the observational issue-log surface (ontology, issue form, triage
    workflow, `AGENTS.md` guidance block) installed into the adopter.
 5. The adopter follows the train via `stack-manifest.json` and a
@@ -191,6 +191,8 @@ Each claim above is backed by more than one kind of test:
 | **TDD** (unit) | Each gate (§4) classifies each path kind correctly. | `tests/test_install_gates.py` |
 | **Metamorphic** | Reordering components, or rerunning install, does not change the final tree; an added foreign file cannot be overwritten. | `tests/test_install_metamorphic.py` |
 | **Differential** | The adopter's `stack-manifest.json` agrees with the **live** train (`check_manifest.py`); the pack's `stack-mesh.json` sits at the certified commits (`mesh.py --check`). | `tests/test_install_manifest.py` (offline shape) + the train's `check-adopter.yml` / `require-mesh.yml` (live) |
+| **Protocol** | The seat state machine matches ROLES.md step for step: lease, FIFO queue, zombie rejection, append-only history — driven by scripted fake agents, no model. | `tests/test_coordination.py` (parametrised over both `ClaimStore` implementations) |
+| **Failure paths** | Duplicate delivery, simultaneous claimants, zombie wake, restart mid-claim, clock regression, corrupt/absent claim. | `tests/test_coordination_failures.py` |
 | **Formal** | The state machine's safety (no write outside target, no clobber of foreign/edited content, idempotence, fail-closed) is model-checked. | `formal/install.tla` + `formal/README.md` |
 | **Hidden holdout** | A blind agent, given the pack cold, installs it correctly into a repo that already has content — or correctly refuses. | `holdouts/HLD-0001-blind-rubric.md` |
 

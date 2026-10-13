@@ -57,7 +57,7 @@
       "claim": "Roles fill by live join order, the boss holds a minute-scale lease with FIFO failover, and the watchdog is liveness-only - all written down as binding.",
       "source": "modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md",
       "status": "shipped",
-      "supports": "ROLES.md specifies join-order role fill, the lease TTL (default 30 minutes, range 15-120), the GitHub-canonical FIFO claim queue, the returning-boss-rejoins-at-end rule, the zombie-boss rule, and that the ~10-minute watchdog flags a stale seat without appointing a boss.",
+      "supports": "ROLES.md specifies join-order role fill, the lease TTL (default 30 minutes, range 15-120), the claim-file FIFO claim queue (the local claim file is the authoritative seat store), the returning-boss-rejoins-at-end rule, the zombie-boss rule, and that the ~10-minute watchdog flags a stale seat without appointing a boss.",
       "limits": "A written process is a commitment, not an enforcement mechanism; it relies on agents and operators reading the same document.",
       "recorded_at": "2026-10-04T00:00:00Z",
       "cite_in_readme": false,

@@ -44,6 +44,18 @@ jobs:
           python -m pip install pytest jsonschema
           python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 
+      - name: Exercise the agent-less watchdog
+        # Liveness only: reads a fixture claim whose lease has lapsed and
+        # writes vacant + as-of history into a temp claim file. The watchdog
+        # never appoints a boss (scripts/seat_protocol.py owns that rule).
+        run: |
+          mkdir -p /tmp/coord
+          printf '{"status":"held","who_is_boss_now":"ci-probe@runner","last_heartbeat":"2020-01-01T00:00:00+00:00","claim_queue":[],"as_of_history":[]}' > /tmp/coord/boss_claim.json
+          python modules/coordination/multi-agent-hotload/v0.1.0/scripts/watchdog_check.py \
+            --claim-file /tmp/coord/boss_claim.json | grep -q "watchdog_check: vacant"
+          grep -q '"status": "vacant"' /tmp/coord/boss_claim.json
+          grep -q '"as_of_history"' /tmp/coord/boss_claim.json
+
       - name: No committed secrets (tracked tree)
         run: |
           if git grep -nIE 'sk-or-[A-Za-z0-9]|yolo_[A-Za-z0-9]{4,}|api[_-]?key["'"'"']?[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9]{20}'; then

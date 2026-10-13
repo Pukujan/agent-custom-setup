@@ -119,7 +119,7 @@
             },
             "claim_file_path": {
               "type": "string",
-              "description": "Required when mechanism is claim_file; also authoritative for zombie rejection"
+              "description": "The authoritative seat record (claim file path); zombie rejection reads this file"
             },
             "issue_url": {
               "type": "string",
@@ -132,7 +132,7 @@
           "items": {
             "type": "string"
           },
-          "description": "FIFO of agent_ids waiting to take boss after vacancy. Front takes next. Old boss rejoining appends at end — no auto-reclaim."
+          "description": "FIFO of agent_ids waiting to take boss after vacancy, in the authoritative claim file. Front takes next. Old boss rejoining appends at end — no auto-reclaim."
         },
         "standby": {
           "type": "array",
@@ -180,7 +180,7 @@
             "string",
             "null"
           ],
-          "description": "Current lease holder agent_id, or null if vacant. Authoritative with claim file — zombies must re-queue."
+          "description": "Current lease holder agent_id, or null if vacant. Authoritative on the claim file — zombies must re-queue."
         }
       }
     },
