@@ -17,8 +17,8 @@ permissions:
 
 jobs:
   oio-drift:
-    uses: Pukujan/observational-issue-ops/.github/workflows/oio-status-drift.yml@ff4e30cf5c89442290544d61e376462a83d88f76
+    uses: Pukujan/observational-issue-ops/.github/workflows/oio-status-drift.yml@305adc5d09920d28e603a1b317108637cc30a624
     with:
-      oio_ref: ff4e30cf5c89442290544d61e376462a83d88f76
+      oio_ref: 305adc5d09920d28e603a1b317108637cc30a624
     secrets:
       CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}
