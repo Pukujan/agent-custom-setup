@@ -32,8 +32,8 @@ python scripts/validate_content_system.py --root <cgm-checkout> --adapter <targe
 ## Boss lease + claim queue
 
 - Lease failover is in **minutes** (default **30**; range **15–120** via `lease_ttl_minutes`).
-- After vacancy, **GitHub-canonical `claim_queue`** is FIFO; front takes boss; returning boss joins at end.
-- Zombie: re-read GitHub claim on wake; reject boss actions if not named; optional issue comment `lost lease → rejoining queue`; no out-of-band DM.
+- After vacancy, the claim-file **`claim_queue`** is FIFO; front takes boss; returning boss joins at end. The claim file is the authoritative seat store (`scripts/seat_protocol.py` executes the transitions).
+- Zombie: re-read the claim file on wake; reject boss actions if not named; optional issue comment `lost lease → rejoining queue`; no out-of-band DM.
 - Keep as-of history append-only.
 
 ## Watchdog

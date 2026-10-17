@@ -23,7 +23,7 @@ Required CI and GitHub auto-merge are mandatory. Verify protection, required rev
 Run multi-agent work on one repository honestly. ACS owns **execution coordination**:
 turning logged tickets into workable tasks, decomposing them, and keeping several
 agents on one repo from colliding — join-order roles, a boss lease with FIFO
-failover, a GitHub-canonical claim queue, an agent-less watchdog, and proposals.
+failover, a claim-file FIFO claim queue, an agent-less watchdog, and proposals.
 The product it ships is the **multi-agent hotload pack**; ACS pins PCM and CGM as
 external authorities and vendors neither.
 
@@ -48,6 +48,11 @@ make decisions on the agents' behalf.
 
 - **Not ticket logging.** The issue form, filer stamp, triage and prioritization
   belong to OIO (Observational Issue Ops). ACS *runs* tickets; it does not file them.
+  ACS does carry an *installed* OIO intake surface — the issue form, the triage
+  workflow, the ontology, and the schemas under `.oio/` — placed by OIO's own
+  installer from the `stack-mesh.json` commit for `observational-issue-ops`. Those
+  files are OIO-managed and are never hand-edited or hand-copied; updating them
+  means rerunning the pinned installer (see `README.md`, Operational Boundaries).
 - **Not decision-making.** Adjudication / tie-breaking between agents is JEV's
   intended job; JEV is not strong enough for it yet and is parked (see `jev-dump`).
 - **Not continuity, narrative, or versions.** Those belong to PCM, CGM, and the

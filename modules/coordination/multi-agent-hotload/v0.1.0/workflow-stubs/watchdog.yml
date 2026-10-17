@@ -2,7 +2,7 @@
 # Copy into a consuming repo as .github/workflows/boss-watchdog.yml if desired.
 # No secrets embedded. Uses default GITHUB_TOKEN only if you enable gh API steps.
 # Watchdog != failover. Lease TTL is in minutes (assignment boss_failover.lease_ttl_minutes; default 30).
-# After vacancy, agents enqueue on GitHub-canonical claim_queue — this job does not appoint a boss.
+# After vacancy, agents enqueue on the claim-file claim_queue (scripts/seat_protocol.py) — this job does not appoint a boss.
 
 name: boss-seat-watchdog
 
@@ -25,10 +25,12 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run agent-less watchdog skeleton
-        # Point --assignment at the project's live assignment JSON once installed.
+        # The adopter's installed assignment lives at .coord/assignment.json
+        # (written by acs_install.py). This job writes the claim file when a
+        # lease has lapsed: status=vacant + an as-of history entry, via
+        # scripts/seat_protocol.py. It never appoints a boss.
         # Optional: compute latest commit/PR stamp and pass --github-last-activity.
         run: |
           python modules/coordination/multi-agent-hotload/v0.1.0/scripts/watchdog_check.py \
-            --assignment modules/coordination/multi-agent-hotload/v0.1.0/examples/assignment.example.json \
-            --dry-run
-        # Remove --dry-run in consuming repos when claim file writes are intended.
+            --assignment .coord/assignment.json
+        # To only observe without writing, add --dry-run.

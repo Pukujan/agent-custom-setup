@@ -11,7 +11,7 @@ Install is complete only when all four are wired as **full stacks** (slim subset
 1. **FULL PCM** — continuity/checkpoints **and** GitHub-owned progression: PR-only to default branch, required CI gates, adopter branch-protection + auto-merge preference, fail-closed on missing/failed/skipped gates, leaf/parent receipts (see SPEC §8 / TARGET_ADOPTION). Still **not** the proposal/ACCEPT layer.
 2. **FULL CGM 0.5.12** — all eight modules + `human_output_contract` docs (not HSW + writing-direction only). Route README/product entry via `writing-direction`; posts/papers/HTML reports/compare/appendable via `human-sounding-writing` (hsw, default ON); basenames via `human-output-naming` (hon).
 3. **OIO** — the observational issue-log surface: ontology, issue form, triage workflow, and the `AGENTS.md` guidance block merged into a delimited region. The ACS installer invokes OIO's own installer; a component that cannot run makes the install **PARTIAL**, never a fake OK.
-4. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR
+4. **This runtime** — join-order roles, boss **lease** failover, **claim queue**, **watchdog** liveness, proposals, claim → PR. Checkable artifact: `scripts/seat_protocol.py` executes the seat state machine, and `python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests/test_coordination.py -q` passes
 
 Missing any of the four, or substituting a thin PCM/CGM subset, is an **incomplete install** reported as such with a non-zero exit. [SPEC.md](SPEC.md) is the normative install contract — the state machine, the per-artifact gate, and the platform matrix.
 
@@ -124,7 +124,7 @@ Check out [Pukujan/observational-issue-ops](https://github.com/Pukujan/observati
 
 1. [ROLES.md](ROLES.md) — **live join/continue order** fills roles (first = decision boss, next = coder1…). Tool identity does not matter. Assignment may seed; live fill wins.
 2. Assignment document — start from `examples/assignment.example.json`. Must include required **`boss_failover`** (lease TTL in **minutes**, default **30**, range **15–120**) and **`watchdog`** (~**10m** agent-less). **Watchdog ≠ failover.**
-3. Establish or renew the boss **lease check-in** (issue comment or claim file per assignment). On every wake, **re-read the GitHub-canonical claim** (`who_is_boss_now` / claim file + `claim_queue`).
+3. Establish or renew the boss **lease check-in** (claim file per assignment; `issue_comment` only publishes it). On every wake, **re-read the claim file** (`who_is_boss_now` + `claim_queue`) — the authoritative seat store. Seat transitions are operations in `scripts/seat_protocol.py` (`join`, `renew`, `enqueue`, `take-seat`, `expire`, `zombie-reject`, `boss-action`); appointment is an agent operation, never the watchdog's.
 4. [PROPOSALS.md](PROPOSALS.md) — propose → boss ACCEPT/REJECT → claim branch → PR.
 5. Know your current role from join order + whether the boss lease is still valid for **you**.
 
@@ -139,7 +139,7 @@ Do **not** treat the watchdog interval as the boss failover TTL. Short leases (t
 
 #### Progress signals
 
-- **Primary (cross-machine truth):** GitHub — commits on the claim branch, PR updates, dated progress comments on the owning issue, and the **GitHub-canonical claim / `claim_queue`**.
+- **Primary (cross-machine truth):** GitHub — commits on the claim branch, PR updates, dated progress comments on the owning issue. The seat of record is the claim file (`.coord/boss_claim.json` by default).
 - **Secondary only:** optional local telemetry (PCM checkpoint mtime, last git activity in the checkout). Never sole cross-machine truth. **No out-of-band DM** for lease handoff.
 
 #### Combined logic
@@ -147,14 +147,14 @@ Do **not** treat the watchdog interval as the boss failover TTL. Short leases (t
 1. **Fresh heartbeat** (check-in within idle/watch expectations) → noop.
 2. **Stale heartbeat + recent git/PR activity** → nudge check-in; **keep boss**.
 3. **Stale heartbeat + no activity past `idle_window`** → seat **at risk** (flag only).
-4. **After `lease_ttl_minutes` with no valid check-in** → seat **vacant**; claimants **enqueue** on the GitHub-canonical `claim_queue`; **front of queue** takes boss next.
+4. **After `lease_ttl_minutes` with no valid check-in** → seat **vacant**; claimants **enqueue** on the claim-file `claim_queue`; **front of queue** takes boss next.
 
 ### 7. Boss lease check (every session) + zombie rule
 
 Before acting as decision boss:
 
 1. Read `boss_failover.lease_ttl_minutes` (default **30**; range **15–120**).
-2. **Re-read GitHub claim** (`who_is_boss_now` / claim file + `claim_queue`). That record is authoritative.
+2. **Re-read the claim file** (`who_is_boss_now` + `claim_queue`). That record is authoritative.
 3. If last check-in is within TTL **and** `who_is_boss_now` is you → you remain boss; renew check-in when you continue.
 4. If past TTL → seat vacant. Claimants join the **queue**; next continuer takes boss from the **front**. Append as-of history (who was boss at T); do not rewrite who-is-boss-now into old history.
 5. **Returning / old boss:** if the previous boss comes alive again, they join from the **end of the queue** — **no automatic reclaim**.
@@ -241,7 +241,7 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 - [ ] OIO checked out at the `stack-mesh.json` commit and installed (`--oio-root`); a component that cannot run is reported PARTIAL, not OK
 - [ ] Adopter `stack-manifest.json` written with **empty pins** (follows the train); a `check_manifest.py` CI step added
 - [ ] Join order understood; I know boss / coderN for this session
-- [ ] Re-read GitHub claim / `who_is_boss_now` / `claim_queue` on wake
+- [ ] Re-read the claim file / `who_is_boss_now` / `claim_queue` on wake
 - [ ] Boss lease checked or renewed (or enqueued after vacancy) — lease is **minutes** (default 30)
 - [ ] If zombie: reject boss actions; worker or re-queue; optional issue comment; no DM
 - [ ] Watchdog understood as **liveness only** (~10m), not failover

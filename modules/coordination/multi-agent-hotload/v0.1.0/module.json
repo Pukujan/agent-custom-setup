@@ -1,7 +1,7 @@
 {
   "id": "multi-agent-hotload",
   "name": "Multi-agent hotload coordination",
-  "purpose": "Install surface: hot-load the FULL stack — PCM (continuity + GitHub governance), CGM 0.5.12 (eight modules + human_output_contract), and OIO (observational issue-log surface) — plus the coordination runtime (join-order roles, 30m-default boss lease, GitHub claim queue, agent-less ~10m watchdog, proposals/claim/PR). Component versions come from the release train via stack-mesh.json.",
+  "purpose": "Install surface: hot-load the FULL stack — PCM (continuity + GitHub governance), CGM 0.5.12 (eight modules + human_output_contract), and OIO (observational issue-log surface) — plus the coordination runtime (join-order roles, 30m-default boss lease, claim-file FIFO claim queue (executed by scripts/seat_protocol.py), agent-less ~10m watchdog, proposals/claim/PR). Component versions come from the release train via stack-mesh.json.",
   "harness": "coordination",
   "created": "2026-09-27",
   "updated": "2026-10-05",
@@ -89,6 +89,10 @@
       "role": "agentless-watchdog"
     },
     {
+      "path": "scripts/seat_protocol.py",
+      "role": "seat-runtime"
+    },
+    {
       "path": "scripts/dev_root_check.py",
       "role": "dev-root-hygiene-check"
     },
@@ -102,6 +106,14 @@
     },
     {
       "path": "formal/install.cfg",
+      "role": "formal-model-config"
+    },
+    {
+      "path": "formal/seat.tla",
+      "role": "formal-state-machine"
+    },
+    {
+      "path": "formal/seat.cfg",
       "role": "formal-model-config"
     },
     {
@@ -151,6 +163,14 @@
     {
       "path": "tests/test_dev_root_check.py",
       "role": "tests"
+    },
+    {
+      "path": "tests/test_coordination.py",
+      "role": "tests-protocol"
+    },
+    {
+      "path": "tests/test_coordination_failures.py",
+      "role": "tests-failure-paths"
     }
   ],
   "secrets_policy": {
@@ -171,5 +191,5 @@
     "agent-stack-train stack-releases.json — the certified version set the adopter's stack-manifest.json follows (empty pins)",
     "Python 3 + jsonschema for hotload_check"
   ],
-  "summary": "Hot-load the FULL stack (PCM + CGM 0.5.12 + OIO) + this runtime. Versions come from the release train via stack-mesh.json; the adopter's stack-manifest.json carries empty pins and follows the train. The installer is a gated conductor: it classifies every existing path, refuses to clobber foreign/edited content, and reports a PARTIAL install (never a fake OK) when a component such as OIO cannot be installed. Join order fills roles. Boss lease default 30m (15–120). GitHub-canonical claim_queue after vacancy; returning boss joins end. Agent-less watchdog ~10m. Slim subsets are incomplete installs."
+  "summary": "Hot-load the FULL stack (PCM + CGM 0.5.12 + OIO) + this runtime. Versions come from the release train via stack-mesh.json; the adopter's stack-manifest.json carries empty pins and follows the train. The installer is a gated conductor: it classifies every existing path, refuses to clobber foreign/edited content, and reports a PARTIAL install (never a fake OK) when a component such as OIO cannot be installed. Join order fills roles. Boss lease default 30m (15–120). claim-file claim_queue after vacancy (scripts/seat_protocol.py executes the seat state machine); returning boss joins end. Agent-less watchdog ~10m. Slim subsets are incomplete installs."
 }

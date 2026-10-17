@@ -6,6 +6,12 @@ same fake world: a fixture ACS root, fake PCM/CGM/OIO checkouts, and stubbed
 external checkers. Keeping that world here means the tests assert behaviour, not
 scaffolding.
 
+The seat-protocol fixtures at the bottom of this file (``seat_protocol``,
+``claim_store``, ``clock``) are the same idea for the coordination runtime:
+``claim_store`` is parametrised over the local-file store and the in-memory
+store, so the protocol suite proves the state machine against the interface
+rather than against one implementation.
+
 No network and no pinned checkouts are needed; everything is offline and
 cross-platform (Windows, macOS, Linux).
 """
@@ -14,6 +20,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+from datetime import datetime, timedelta, timezone
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
@@ -21,6 +28,7 @@ import pytest
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = MODULE_ROOT / "scripts" / "acs_install.py"
+SEAT_PROTOCOL = MODULE_ROOT / "scripts" / "seat_protocol.py"
 MODULE_REL = "modules/coordination/multi-agent-hotload/v0.1.0"
 
 PCM_SHA = "a" * 40
@@ -178,3 +186,60 @@ def run_args(installer):
         return installer.argparse.Namespace(**base)
 
     return _make
+
+
+# ---------------------------------------------------------------------------
+# Seat-protocol fixtures (tests/test_coordination*.py)
+
+
+def load_seat_protocol():
+    """Load ``scripts/seat_protocol.py`` the way the pack loads its scripts."""
+    spec = spec_from_file_location("seat_protocol", SEAT_PROTOCOL)
+    assert spec and spec.loader
+    mod = module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+@pytest.fixture
+def seat_protocol():
+    """A freshly loaded seat_protocol module (function-scoped)."""
+    return load_seat_protocol()
+
+
+@pytest.fixture(params=["local_file", "in_memory"])
+def claim_store(seat_protocol, tmp_path, request):
+    """The seat store under test, parametrised over both implementations.
+
+    Running the same suite against the local-file store and the in-memory
+    store is what proves the state machine is written against the
+    ``ClaimStore`` interface rather than one implementation — the abstraction
+    the authoritative-store question rests on.
+    """
+    if request.param == "local_file":
+        return seat_protocol.LocalFileClaimStore(tmp_path / "boss_claim.json")
+    return seat_protocol.InMemoryClaimStore()
+
+
+@pytest.fixture
+def machine(seat_protocol, claim_store):
+    """A SeatMachine over the parametrised store at the default 30m lease."""
+    return seat_protocol.SeatMachine(claim_store, lease_ttl_minutes=30)
+
+
+@pytest.fixture
+def clock():
+    """A deterministic clock: starts 2026-10-13T12:00Z, ``advance`` moves it."""
+
+    class _Clock:
+        def __init__(self):
+            self.now = datetime(2026, 10, 13, 12, 0, tzinfo=timezone.utc)
+
+        def advance(self, minutes: float) -> datetime:
+            self.now = self.now + timedelta(minutes=minutes)
+            return self.now
+
+        def at(self, minutes: float = 0.0) -> datetime:
+            return self.now + timedelta(minutes=minutes)
+
+    return _Clock()

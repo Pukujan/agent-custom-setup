@@ -49,11 +49,12 @@ command that fails closed on a partial install.
 is the user-facing entry point. An adopter repo loads `HOTLOAD.md` and gets a
 complete, pinned install:
 
-- **Full-stack wiring** — PCM CLI 0.6.0 (@ `4e23854…`: PR-only delivery, required
-  CI gates, protection/auto-merge preference, leaf/parent receipts) plus the full
-  Content Generation Modules contract 0.5.12 (@ `6831f91e…`: all eight modules
-  including human-output-naming), joined to the coordination runtime. A slim
-  subset fails the install on purpose.
+- **Full-stack wiring** — PCM (CLI and commit at [`stack-mesh.json`](stack-mesh.json):
+  PR-only delivery, required CI gates, protection/auto-merge preference,
+  leaf/parent receipts) plus the full Content Generation Modules contract (all
+  eight modules including human-output-naming, at the commit `stack-mesh.json`
+  requires), joined to the coordination runtime. A slim subset fails the install
+  on purpose.
 - **Coordination rules** — join-order roles, a boss **lease** with FIFO failover,
   a **claim queue**, and a **watchdog** that flags stale seats without making
   decisions ([`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md)).
@@ -119,7 +120,7 @@ ACS grounds every public claim in versioned repository artifacts:
 
 | Claim | Source | Status | What this supports | What this leaves unproven |
 | --- | --- | --- | --- | --- |
-| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; pins PCM CLI 0.6.0 and Content Generation Modules 0.5.12; `hotload_check.py` fails closed on missing/stale pins. | Does not guarantee adopter agents honor every rule; enforcement depends on the adopter's own CI and branch protection. |
+| **The hotloader installs the full stack** | [`HOTLOAD.md`](modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md) | Shipped | Shipped via PR #12; the pack's module shape is [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) and the component versions and commits are [`stack-mesh.json`](stack-mesh.json); `hotload_check.py` fails closed on missing/stale pins. | Does not guarantee adopter agents honor every rule; enforcement depends on the adopter's own CI and branch protection. |
 | **Pin drift is caught, not assumed** | [`pins.json`](modules/coordination/multi-agent-hotload/v0.1.0/pins.json) + [`check_pins.py`](modules/coordination/multi-agent-hotload/v0.1.0/scripts/check_pins.py) | Shipped | The checker scans every declared projection for the pinned PCM/CGM commits, version families, and the "eight modules" count; CI runs it on every candidate. | It verifies that declared projections agree; it cannot see a surface nobody declared. |
 | **Roles, lease, and queue are specified** | [`ROLES.md`](modules/coordination/multi-agent-hotload/v0.1.0/ROLES.md) | Shipped | Join-order fill, boss lease (default 30m, range 15–120m), FIFO claim queue, watchdog-as-liveness-only, and the zombie rule are written down as binding. | A specification is not an enforcement mechanism; adherence is a process commitment. |
 | **Proposals gate the path to PR** | [`PROPOSALS.md`](modules/coordination/multi-agent-hotload/v0.1.0/PROPOSALS.md) | Shipped | Propose → boss ACCEPT/REJECT → claim → PR; no direct commits to the protected default branch. | Relies on the adopter enabling branch protection and required checks. |
@@ -129,6 +130,17 @@ ACS grounds every public claim in versioned repository artifacts:
 - **No upstream replacement:** ACS does not replace Project Continuity Modules
   (PCM) or Content Generation Modules; it pins them as external authorities and
   never vendors their source.
+- **Issue intake is adopted, not duplicated:** the issue-log form
+  (`.github/ISSUE_TEMPLATE/observational-issue.yml`), the triage workflow
+  (`.github/workflows/issue-triage.yml` + `.github/scripts/oio_triage.py`),
+  the ontology, and the schemas under `.oio/` are OIO-managed files, installed
+  by OIO's canonical installer
+  (`.github/scripts/oio_installer.py`, from the `stack-mesh.json` commit for
+  `observational-issue-ops`). They are never hand-edited; OIO's installer
+  refuses to overwrite a locally modified managed file. Updates come from
+  rerunning the pinned installer, not from copying files into ACS. The
+  project's own meanings — priority definitions and the account map — live in
+  the adopter-owned extension `.oio/ontology/project.json`.
 - **Coordination, not decision-making:** the boss ACCEPT/REJECT gate is a
   governance rule, not an automated judge; final authority always belongs to the
   human operator.
@@ -156,10 +168,12 @@ python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/acs_install.py \
   --cgm-root /path/to/content-generation-modules
 
 # 2. Validate a hotload install (schema-only here; a real install drops
-#    --skip-cgm-validate and passes --cgm-root <checkout at 6831f91e…>)
+#    --skip-cgm-validate and passes --cgm-root <a CGM checkout at the commit
+#    stack-mesh.json requires>. Without --assignment the pack's example is
+#    checked as a template: its pin revisions are reserved placeholders,
+#    rebuilt from stack-mesh.json by a real install.)
 python3 modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py \
   --adopter-root . \
-  --assignment modules/coordination/multi-agent-hotload/v0.1.0/examples/assignment.example.json \
   --skip-cgm-validate
 
 # 3. Fail-closed pin drift check across every declared projection

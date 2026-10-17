@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "project": "Example three-lane hotload",
   "recorded_at": "2026-09-27T00:00:00-04:00",
-  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease default 30 minutes (15–120); watchdog agent-less ~10m. After vacancy, GitHub-canonical claim_queue is FIFO; old boss rejoins at end. FULL PCM + FULL CGM 0.5.12 required — not a slim HSW/writing-direction-only subset.",
+  "notes": "Seed list is a hint. Live join/continue order fills roles. Tool identity irrelevant. Boss lease default 30 minutes (15–120); watchdog agent-less ~10m. After vacancy, the claim-file claim_queue is FIFO; old boss rejoins at end. The claim file is the authoritative seat store. FULL PCM + FULL CGM 0.5.12 required — not a slim HSW/writing-direction-only subset.",
   "role_fill": {
     "mode": "join_continue_order",
     "seed_is_hint_only": true,
@@ -79,7 +79,7 @@
   "pins": {
     "pcm": {
       "repo": "https://github.com/Pukujan/project-continuity-modules",
-      "revision": "776b468db56cbbe3e251b2583d41f1f0caebd9ba",
+      "revision": "0000000000000000000000000000000000000000",
       "cli_version": "0.7.0",
       "protocol": "0.1.0-draft",
       "role": "full_stack",
@@ -93,11 +93,11 @@
         "fail_closed_on_missing_gates",
         "leaf_parent_dependency_receipts"
       ],
-      "notes": "Full PCM for adopters. Continuity/checkpoints yes; still NOT the proposal/ACCEPT layer (that stays GitHub + PROPOSALS.md). Pin commit SHA; do not silently follow moving main. Do not vendor PCM source into ACS."
+      "notes": "The pin revision is a RESERVED PLACEHOLDER (all-zero), rebuilt from stack-mesh.json by acs_install.build_assignment; never pin a real commit here. Full PCM for adopters. Continuity/checkpoints yes; still NOT the proposal/ACCEPT layer (that stays GitHub + PROPOSALS.md). Pin commit SHA; do not silently follow moving main. Do not vendor PCM source into ACS."
     },
     "cgm": {
       "repo": "https://github.com/Pukujan/content-generation-modules",
-      "revision": "78385ff2ba31051128208ddc7f08dc5de0f0b570",
+      "revision": "0000000000000000000000000000000000000000",
       "version": "0.5.12",
       "role": "full_stack",
       "modules": [
@@ -140,7 +140,7 @@
         "html_reports_compare_appendable": "human-sounding-writing / hsw (MUST; default ON; no per-report opt-in)",
         "generated_artifact_filenames": "human-output-naming / hon (MUST; basenames + legends)"
       },
-      "notes": "FULL CGM 0.5.12 required for ACS and all hotloader adopters. Eight modules including human-output-naming. Not HSW+writing-direction only. MUST load modules per writing-routing.json (README→writing-direction; human-facing prose/HTML/compare/appendable→hsw default ON; basenames→hon). Pin SHA; validate with scripts/validate_content_system.py (full adapter); then apply acs_prompt_inject (application, human_facing_default, routes, apply_checklist). Do not vendor CGM source into ACS."
+      "notes": "The pin revision is a RESERVED PLACEHOLDER (all-zero), rebuilt from stack-mesh.json by acs_install.build_assignment; never pin a real commit here. FULL CGM 0.5.12 required for ACS and all hotloader adopters. Eight modules including human-output-naming. Not HSW+writing-direction only. MUST load modules per writing-routing.json (README→writing-direction; human-facing prose/HTML/compare/appendable→hsw default ON; basenames→hon). Pin SHA; validate with scripts/validate_content_system.py (full adapter); then apply acs_prompt_inject (application, human_facing_default, routes, apply_checklist). Do not vendor CGM source into ACS."
     }
   },
   "ticket_links": {
