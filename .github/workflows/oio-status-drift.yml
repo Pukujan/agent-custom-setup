@@ -1,0 +1,24 @@
+name: OIO lifecycle status drift audit
+
+# Caller for OIO's report-only lifecycle audit. The scheduled run checks the
+# default branch daily; a manual dispatch runs the same check on demand.
+#
+# The reusable workflow is pinned to the certified OIO 0.2.0 commit, not a
+# moving branch, so the audit changes only when ACS upgrades the pin.
+
+on:
+  schedule:
+    - cron: "41 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  oio-drift:
+    uses: Pukujan/observational-issue-ops/.github/workflows/oio-status-drift.yml@ff4e30cf5c89442290544d61e376462a83d88f76
+    with:
+      oio_ref: ff4e30cf5c89442290544d61e376462a83d88f76
+    secrets:
+      CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}

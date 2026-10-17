@@ -1,0 +1,26 @@
+name: OIO close on merge
+
+# Caller for OIO's reusable close contract. `pull_request: closed` fires for
+# both merged and abandoned pull requests, so the job guard checks the merged
+# flag before the reusable workflow runs.
+#
+# The reusable workflow is pinned to the certified OIO 0.2.0 commit, not a
+# moving branch, so ACS's close behaviour changes only when it upgrades the pin.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  oio-close:
+    if: github.event.pull_request.merged == true
+    uses: Pukujan/observational-issue-ops/.github/workflows/close-on-merge.yml@ff4e30cf5c89442290544d61e376462a83d88f76
+    with:
+      oio_ref: ff4e30cf5c89442290544d61e376462a83d88f76
+    secrets:
+      CROSS_REPO_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}
