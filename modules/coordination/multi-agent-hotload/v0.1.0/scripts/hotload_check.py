@@ -48,6 +48,59 @@ DEV_ROOT_RULE = (
 )
 
 
+# Agent wiring (Refs #112). Claude Code reads only CLAUDE.md, so an installed
+# adopter must carry a CLAUDE.md that imports AGENTS.md and an AGENTS.md block
+# that names the hotload rules. acs_install.py writes both; this checks them.
+BOOT_START = "<!-- acs:boot:start -->"
+BOOT_END = "<!-- acs:boot:end -->"
+CLAUDE_IMPORT = "@AGENTS.md"
+BOOT_BLOCK_ANCHORS = ("HOTLOAD.md", "Dev root hygiene")
+LOCK_REL = Path(".coord") / "hotload.lock.json"
+
+
+def check_agent_wiring(adopter: Path) -> list[str]:
+    """Fail when an installed adopter's rules would not reach Claude Code.
+
+    Only a tree carrying ``.coord/hotload.lock.json`` is an installed adopter;
+    the ACS repository itself and bare pack runs are not checked.
+    """
+    if not (adopter / LOCK_REL).is_file():
+        return []
+    errors: list[str] = []
+    claude = adopter / "CLAUDE.md"
+    try:
+        claude_lines = [ln.strip() for ln in claude.read_text(encoding="utf-8").splitlines()]
+    except OSError:
+        claude_lines = None
+    if claude_lines is None:
+        errors.append(
+            f"agent wiring: CLAUDE.md missing in {adopter}; Claude Code reads only "
+            f"CLAUDE.md, so write it with a line '{CLAUDE_IMPORT}' (re-run acs_install.py)"
+        )
+    elif CLAUDE_IMPORT not in claude_lines:
+        errors.append(
+            f"agent wiring: CLAUDE.md has no '{CLAUDE_IMPORT}' line, so AGENTS.md rules "
+            "never reach Claude Code (re-run acs_install.py)"
+        )
+    try:
+        agents = (adopter / "AGENTS.md").read_text(encoding="utf-8")
+    except OSError:
+        agents = ""
+    start, end = agents.find(BOOT_START), agents.find(BOOT_END)
+    if agents.count(BOOT_START) != 1 or agents.count(BOOT_END) != 1 or not 0 <= start < end:
+        errors.append(
+            "agent wiring: AGENTS.md has no single acs:boot block "
+            f"({BOOT_START} ... {BOOT_END}); the hotload rules are not in front of agents "
+            "(re-run acs_install.py)"
+        )
+    else:
+        block = agents[start:end]
+        for anchor in BOOT_BLOCK_ANCHORS:
+            if anchor not in block:
+                errors.append(f"agent wiring: acs:boot block in AGENTS.md does not mention '{anchor}'")
+    return errors
+
+
 def check_required_files(root: Path) -> list[str]:
     return [rel for rel in REQUIRED_FILES if not (root / rel).is_file()]
 
@@ -696,6 +749,7 @@ def run(
         problems.append(f"assignment not found: {example_path}")
 
     resolved_adopter = discover_adopter_root(adopter_root)
+    problems.extend(check_agent_wiring(resolved_adopter))
     resolved_cgm = discover_cgm_root(cgm_root, dev_root=resolved_dev_root)
     if resolved_cgm is not None:
         where = dependency_location_problem(resolved_cgm, resolved_dev_root)

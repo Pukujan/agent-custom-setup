@@ -234,6 +234,16 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 ```
 
 
+## Agent wiring (Claude Code reads only CLAUDE.md)
+
+Writing the rules into this pack does not put them in front of an agent. `acs_install.py` therefore also wires the adopter:
+
+- `CLAUDE.md` gets an `@AGENTS.md` line, so Claude Code loads `AGENTS.md`. An existing `CLAUDE.md` keeps all of its content; the line is appended only when it is missing.
+- `AGENTS.md` gets one block between `<!-- acs:boot:start -->` and `<!-- acs:boot:end -->`: a link to this file, the CGM always-on writing block (inlined from the verified CGM checkout, or a pinned link when that file is unreadable) and the dev root rule. Re-running the installer refreshes only that block; everything outside the markers is untouched. Unbalanced markers stop the install instead of guessing.
+- `hotload_check.py` fails (exit 1) for an installed adopter (one with `.coord/hotload.lock.json`) when `CLAUDE.md` lacks the import or `AGENTS.md` lacks the block, so `READY` cannot coexist with inactive rules.
+
+Not wired here: the watchdog workflow and a `SessionStart` hook in `.claude/settings.json` (see issue #112).
+
 ## Minimal session checklist
 
 - [ ] FULL PCM checked out at the `stack-mesh.json` commit — continuity **and** PR-only + required gates + protection/auto-merge preference
@@ -252,4 +262,5 @@ python -m pytest modules/coordination/multi-agent-hotload/v0.1.0/tests -q
 - [ ] Working-repo scope: code/claims/PRs/boss actions only on this hot-loaded repo; foreign repos = proposed issue only
 - [ ] Dev root hygiene: one main checkout per repo in the dev root; worktrees, deps, scratch and caches go under the ACS cache (`dev_root_check.py` is clean)
 - [ ] External research gate: see BEHAVIOR.md (MUST on first use / bump / failure; MUST NOT for trivial known-pattern edits)
+- [ ] Agent wiring: `CLAUDE.md` imports `@AGENTS.md` and `AGENTS.md` carries the `acs:boot` block (`hotload_check.py` passes)
 - [ ] No secrets in commits, logs, or comments

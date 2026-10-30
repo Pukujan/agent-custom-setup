@@ -38,6 +38,10 @@ What it does, in order:
    ``stack-manifest.json``. ``--dry-run`` writes nothing.
 5. Runs the pack's ``hotload_check.py`` (which validates the adopter's adapter);
    on failure the writes are rolled back.
+   It also wires the rules in front of Claude Code (Refs #112): a ``CLAUDE.md``
+   with an ``@AGENTS.md`` import line, and one marker-delimited ``acs:boot``
+   block in ``AGENTS.md`` (HOTLOAD.md pointer, the CGM always-on writing block,
+   the dev-root rule). Existing content outside the markers is never touched.
 6. Invokes the pinned OIO installer to add the issue-log surface, then its
    ``--check``. OIO is transactional on its own; a failure leaves the PARTIAL
    state above rather than rolling back the validated coordination surface.
@@ -74,6 +78,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import hotload_check  # noqa: E402  (sibling script; owns the wiring markers and rules)
+
 # v0.1.0 -> multi-agent-hotload -> coordination -> modules -> repo root
 REPO_ROOT = MODULE_ROOT.parents[3]
 DEFAULT_MANIFEST = MODULE_ROOT / "pins.json"
@@ -407,6 +414,125 @@ def assignment_drift(adopter: Path, requires: dict) -> list[str]:
     return drift
 
 
+ACS_BLOB = "https://github.com/Pukujan/agent-custom-setup/blob"
+HOTLOAD_DOC_REL = "modules/coordination/multi-agent-hotload/v0.1.0/HOTLOAD.md"
+CGM_BLOB = "https://github.com/Pukujan/content-generation-modules/blob"
+
+
+def cgm_system_block(cgm_root: Path | None) -> str:
+    """The CGM always-on writing block from the verified checkout, or ''."""
+    if cgm_root is None:
+        return ""
+    routing = hotload_check.load_writing_routing(cgm_root.expanduser())
+    inject = (routing or {}).get("acs_prompt_inject")
+    if not isinstance(inject, dict):
+        return ""
+    return str(inject.get("system_block") or "").strip()
+
+
+def render_boot_block(requires: dict, system_block: str) -> str:
+    """The managed ``acs:boot`` block for the adopter's AGENTS.md (no trailing newline)."""
+    acs_commit = (requires.get("agent-custom-setup") or {}).get("commit") or "main"
+    cgm_commit = (requires.get("content-generation-modules") or {}).get("commit") or "main"
+    if system_block:
+        writing = (
+            "Always-on writing rule (CGM). Apply it before any human-facing output:\n\n"
+            "```\n" + system_block + "\n```"
+        )
+    else:
+        writing = (
+            "Always-on writing rule (CGM): apply `acs_prompt_inject.system_block` from "
+            f"{CGM_BLOB}/{cgm_commit}/docs/writing-routing.json before any human-facing output."
+        )
+    return "\n".join(
+        [
+            hotload_check.BOOT_START,
+            "## Hotload rules (ACS)",
+            "",
+            "Managed by `acs_install.py`; re-running it refreshes this block. Edit outside the markers.",
+            "",
+            f"Follow [HOTLOAD.md]({ACS_BLOB}/{acs_commit}/{HOTLOAD_DOC_REL}) at session start: "
+            "check in on the coordination seat (`.coord/`, `seat_protocol.py`) before writing code.",
+            "",
+            writing,
+            "",
+            hotload_check.DEV_ROOT_RULE,
+            hotload_check.BOOT_END,
+        ]
+    )
+
+
+def _splice(existing: str, addition: str, start: str, end: str) -> str | None:
+    """Replace the marked region of ``existing`` or append ``addition``; None if malformed."""
+    nl = "\r\n" if "\r\n" in existing else "\n"
+    addition = addition.replace("\n", nl)
+    n_start, n_end = existing.count(start), existing.count(end)
+    if n_start == 0 and n_end == 0:
+        if not existing:
+            return addition + nl
+        sep = "" if existing.endswith(nl) else nl
+        return existing + sep + nl + addition + nl
+    if n_start != 1 or n_end != 1 or existing.index(start) > existing.index(end):
+        return None
+    i, j = existing.index(start), existing.index(end) + len(end)
+    return existing[:i] + addition + existing[j:]
+
+
+def plan_agent_wiring(adopter: Path, block: str) -> tuple[list[tuple[Path, str]], list[str]]:
+    """Compute CLAUDE.md / AGENTS.md updates without writing. Returns (changes, refusals)."""
+    changes: list[tuple[Path, str]] = []
+    refusals: list[str] = []
+    root_r = adopter.resolve()
+    for rel in ("CLAUDE.md", "AGENTS.md"):
+        path = adopter / rel
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            refusals.append(f"{rel}: not a regular file (symlink or directory); refusing")
+            continue
+        if path.parent.resolve() != root_r:
+            refusals.append(f"{rel}: refusing to write outside adopter root")
+            continue
+        try:
+            existing = path.read_text(encoding="utf-8") if path.exists() else ""
+        except (OSError, UnicodeDecodeError) as exc:
+            refusals.append(f"{rel}: unreadable as UTF-8 ({exc}); refusing")
+            continue
+        if rel == "CLAUDE.md":
+            if hotload_check.CLAUDE_IMPORT in [ln.strip() for ln in existing.splitlines()]:
+                continue
+            nl = "\r\n" if "\r\n" in existing else "\n"
+            sep = "" if (not existing or existing.endswith(nl)) else nl
+            new = existing + sep + hotload_check.CLAUDE_IMPORT + nl
+        else:
+            new = _splice(existing, block, hotload_check.BOOT_START, hotload_check.BOOT_END)
+            if new is None:
+                refusals.append(
+                    f"{rel}: acs:boot markers are unbalanced or repeated; fix by hand, then re-run"
+                )
+                continue
+            if new == existing:
+                continue
+        changes.append((path, new))
+    return changes, refusals
+
+
+def write_text_atomic(path: Path, text: str, *, root: Path) -> None:
+    """Text twin of ``write_json_atomic`` (same root guard, newline bytes kept as given)."""
+    root_r = root.resolve()
+    if path.parent.resolve() != root_r:
+        raise ValueError(f"refusing to write outside adopter root: {path}")
+    fd, tmp = tempfile.mkstemp(prefix=path.name + ".", dir=str(path.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as fh:
+            fh.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
 def write_json_atomic(path: Path, data: object, *, root: Path) -> None:
     """Write JSON via a temp file in the same dir, then replace (no partial file).
 
@@ -654,6 +780,11 @@ def run(args: argparse.Namespace) -> int:
     to_write, kept, refusals = gate_plan(targets, adopter, force=args.force)
     problems.extend(refusals)
 
+    wiring, wiring_refusals = plan_agent_wiring(
+        adopter, render_boot_block(requires, cgm_system_block(args.cgm_root))
+    )
+    problems.extend(wiring_refusals)
+
     # 7. Report the plan.
     say("acs_install: plan")
     say(f"  state={reported_state}")
@@ -670,6 +801,8 @@ def run(args: argparse.Namespace) -> int:
         say(f"  write {path.relative_to(adopter)}")
     for path, _ in kept:
         say(f"  keep  {path.relative_to(adopter)} (exists; --force to overwrite)")
+    for path, _ in wiring:
+        say(f"  write {path.relative_to(adopter)} (agent wiring)")
     if oio_install == "pending":
         say("  oio   install the OIO issue-log surface (invoke the pinned installer)")
 
@@ -686,10 +819,13 @@ def run(args: argparse.Namespace) -> int:
         return 0
 
     # 8. Write, then validate the whole stack with the pack's own checker.
-    saved = snapshot([path for path, _ in to_write])
-    for path, data in to_write:
+    saved = snapshot([path for path, _ in to_write] + [path for path, _ in wiring])
+    for path, data in [*to_write, *wiring]:
         try:
-            write_json_atomic(path, data, root=adopter)
+            if isinstance(data, str):
+                write_text_atomic(path, data, root=adopter)
+            else:
+                write_json_atomic(path, data, root=adopter)
         except (ValueError, OSError) as exc:
             rollback(saved)
             say(f"acs_install: FAIL (rolled back)\n  - {exc}")
@@ -750,6 +886,7 @@ def run(args: argparse.Namespace) -> int:
 
     say(f"acs_install: OK (state={final_state})")
     say(f"  wrote {ASSIGNMENT_REL.as_posix()}, {LOCK_REL.as_posix()} and {MANIFEST_REL.as_posix()}")
+    say("  wired CLAUDE.md (@AGENTS.md) and the acs:boot block in AGENTS.md")
     say("  next: EDIT the assignment's agents list + check_in to match your seats/issue.")
     say("  next: add the train check to CI:")
     say("        uses: Pukujan/agent-stack-train/.github/workflows/check-adopter.yml@main")
