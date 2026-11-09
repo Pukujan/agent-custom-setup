@@ -44,7 +44,9 @@ DEV_ROOT_RULE = (
     "create git worktrees, dependency or sibling clones, scratch folders, or caches "
     "there. Put them under the ACS cache instead: %LOCALAPPDATA%\\acs\\{deps,scratch,"
     "worktrees} on Windows, ~/.cache/acs/{deps,scratch,worktrees} on macOS/Linux "
-    "(ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py."
+    "(ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py. When a task ends "
+    "or its PR merges, remove its cache worktree and scratch folder with "
+    "scripts/cache_gc.py finish <paths>; scripts/cache_gc.py gc lists idle ones."
 )
 
 

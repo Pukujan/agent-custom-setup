@@ -97,6 +97,10 @@
       "role": "dev-root-hygiene-check"
     },
     {
+      "path": "scripts/cache_gc.py",
+      "role": "cache-cleanup"
+    },
+    {
       "path": "workflow-stubs/watchdog.yml",
       "role": "gh-action-stub"
     },
@@ -162,6 +166,10 @@
     },
     {
       "path": "tests/test_dev_root_check.py",
+      "role": "tests"
+    },
+    {
+      "path": "tests/test_cache_gc.py",
       "role": "tests"
     },
     {
