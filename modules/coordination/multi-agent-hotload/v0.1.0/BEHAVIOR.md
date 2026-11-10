@@ -71,10 +71,12 @@ The dev root (`ACS_DEV_ROOT`; default `D:\development` on Windows, `~/developmen
 | **MUST** | Keep a single main checkout of each repo directly under the dev root |
 | **MUST NOT** | Create git worktrees, dependency or sibling clones, pinned copies, scratch folders, or caches inside the dev root |
 | **MUST** | Put those under the ACS cache: `%LOCALAPPDATA%\acs\{deps,scratch,worktrees}` on Windows, `~/.cache/acs/{deps,scratch,worktrees}` on macOS/Linux (`ACS_CACHE_DIR` overrides) |
-| **MUST** | Before ending a session, remove the worktrees and scratch you created, after pushing any real work to a branch |
+| **MUST** | When a task ends or its PR merges, remove the worktrees and scratch you created with `scripts/cache_gc.py finish <paths>`, after pushing any real work to a branch |
 | **MUST NOT** | Delete or move a checkout that has uncommitted, unpushed, or stashed work in order to tidy up |
 
 `scripts/dev_root_check.py` reports every top-level entry that is not a single main checkout and prints JSON; `--clean` plans a fix and only acts with `--yes`. `hotload_check` runs it and warns (or fails with `--strict-dev-root`).
+
+`scripts/cache_gc.py gc` lists cache worktrees and scratch folders idle for `--days` days and removes them only with `--yes`; it keeps anything with a running process inside, uncommitted, untracked, unpushed or stashed git work, a worktree lock, or an `.acs-keep` file, and says why.
 
 ## External research gate (binding)
 

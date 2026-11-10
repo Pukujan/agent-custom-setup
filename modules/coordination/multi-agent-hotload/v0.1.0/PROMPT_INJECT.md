@@ -1,11 +1,11 @@
-# PROMPT_INJECT — acs_prompt_inject (CGM 0.5.12)
+# PROMPT_INJECT — acs_prompt_inject (CGM 0.5.13)
 
 Generated / refreshed by `hotload_check` after full adapter `VALID`.
-Source: CGM `docs/writing-routing.json` → `acs_prompt_inject` @ `4cea25e028e0ad9a5a66f4c30855fe9db069ba58`.
+Source: CGM `docs/writing-routing.json` → `acs_prompt_inject` @ `c47740d71ca68be6a782b24dd8f28b905c620506`.
 
-Also see: CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/4cea25e028e0ad9a5a66f4c30855fe9db069ba58/docs/ACS_VERIFY.md) and [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/4cea25e028e0ad9a5a66f4c30855fe9db069ba58/docs/writing-routing.json).
+Also see: CGM [`docs/ACS_VERIFY.md`](https://github.com/Pukujan/content-generation-modules/blob/c47740d71ca68be6a782b24dd8f28b905c620506/docs/ACS_VERIFY.md) and [`docs/writing-routing.json`](https://github.com/Pukujan/content-generation-modules/blob/c47740d71ca68be6a782b24dd8f28b905c620506/docs/writing-routing.json).
 
-**Pin:** CGM `0.5.12` @ `4cea25e028e0ad9a5a66f4c30855fe9db069ba58` (main). After any future CGM merge that moves the tip, re-pin ACS hotload to the new main SHA.
+**Pin:** CGM `0.5.13` @ `c47740d71ca68be6a782b24dd8f28b905c620506` (main). After any future CGM merge that moves the tip, re-pin ACS hotload to the new main SHA.
 
 ## application
 
@@ -52,7 +52,7 @@ Filenames: use scripts/human_filename (speakable basenames; optional safe_twin) 
 Owned by ACS, not CGM. Paste it at boot together with the system_block.
 
 ```
-Dev root hygiene (ACS): the dev root (ACS_DEV_ROOT; default D:\development on Windows, ~/development elsewhere) holds exactly one main checkout per repo. Never create git worktrees, dependency or sibling clones, scratch folders, or caches there. Put them under the ACS cache instead: %LOCALAPPDATA%\acs\{deps,scratch,worktrees} on Windows, ~/.cache/acs/{deps,scratch,worktrees} on macOS/Linux (ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py.
+Dev root hygiene (ACS): the dev root (ACS_DEV_ROOT; default D:\development on Windows, ~/development elsewhere) holds exactly one main checkout per repo. Never create git worktrees, dependency or sibling clones, scratch folders, or caches there. Put them under the ACS cache instead: %LOCALAPPDATA%\acs\{deps,scratch,worktrees} on Windows, ~/.cache/acs/{deps,scratch,worktrees} on macOS/Linux (ACS_CACHE_DIR overrides). Check with scripts/dev_root_check.py. When a task ends or its PR merges, remove its cache worktree and scratch folder with scripts/cache_gc.py finish <paths>; scripts/cache_gc.py gc lists idle ones.
 ```
 
 ## Instruction (MUST paste/apply into system or task prompts)

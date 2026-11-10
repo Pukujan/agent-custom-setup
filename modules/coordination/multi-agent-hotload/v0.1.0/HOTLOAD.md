@@ -48,6 +48,22 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/dev_root_check.py
 
 `--clean` never touches a repo, or a folder containing one, that has uncommitted changes, commits that are not on any remote, or stashes. Push or stash-pop that work first. Clean linked worktrees are removed with `git worktree remove` and `git worktree prune`; everything else is moved into the cache rather than deleted.
 
+### Cleaning up the cache
+
+The cache is not a dumping ground. Every worktree and scratch folder an agent makes there must be removed when its task ends, or the disk fills up (one machine lost 12 GB in a day to half-gigabyte scratch copies).
+
+- **MUST** run `scripts/cache_gc.py finish <worktree> <scratch-folder>` when a task's pull request merges or the task ends, from outside those folders. It runs `git worktree remove` on the worktree and deletes the scratch folder.
+- **MAY** run `scripts/cache_gc.py gc` at any time to list entries of `scratch/` and `worktrees/` idle for `--days` days (default 7). It removes them only with `--yes`.
+- To hold an entry, lock the worktree (`git worktree lock --reason "<why; release YYYY-MM-DD>"`) or put an `.acs-keep` file at the top of the scratch folder.
+
+Both commands print what they removed, what they kept and why. They never remove an entry that has a running process inside it (`lsof -d cwd`; no `lsof`, no removal), a git checkout with uncommitted or untracked changes, commits not on any remote (unless GitHub shows a merged pull request at exactly that commit), stashes in a full clone, a lock or `.acs-keep`, or that git cannot read. Each entry is checked again right before removal, and nothing outside `<cache>/scratch` and `<cache>/worktrees` is touched (`deps/` stays).
+
+```bash
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/cache_gc.py finish ~/.cache/acs/worktrees/widget-fix-123 ~/.cache/acs/scratch/widget-probe
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/cache_gc.py gc               # dry run
+python modules/coordination/multi-agent-hotload/v0.1.0/scripts/cache_gc.py gc --days 3 --yes  # act
+```
+
 See [BEHAVIOR.md](BEHAVIOR.md) — Dev root hygiene.
 
 ## External research gate

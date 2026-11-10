@@ -137,6 +137,7 @@ python modules/coordination/multi-agent-hotload/v0.1.0/scripts/hotload_check.py 
 | `scripts/seat_protocol.py` | Seat state machine: the ROLES.md lease/queue/zombie/history rules as code + CLI |
 | `scripts/watchdog_check.py` | Agent-less watchdog skeleton (delegates vacancy + lease check to `seat_protocol.py`) |
 | `scripts/dev_root_check.py` | Flag (and optionally clean up) anything in the dev root that is not a single main checkout |
+| `scripts/cache_gc.py` | Remove a finished task's cache worktree and scratch folder (`finish`), or idle ones (`gc`, dry run unless `--yes`), keeping anything with unsaved git work or a running process |
 | `workflow-stubs/watchdog.yml` | GH Action stub (copy into consuming repos) |
 | `formal/install.tla` | Model-checked state machine (safety + idempotence + fail-closed) |
 | `formal/seat.tla` | Model-checked seat protocol (one boss lease, FIFO queue, append-only history, watchdog never appoints) |

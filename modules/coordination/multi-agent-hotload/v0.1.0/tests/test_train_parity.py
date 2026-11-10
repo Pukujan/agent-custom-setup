@@ -35,6 +35,10 @@ COMPONENTS = {
 }
 # This pack's own component name; it requires its siblings by commit, not itself.
 SELF = "agent-custom-setup"
+# The train also certifies the stack release itself: the one checkout that holds
+# every component, which one-checkout adopters pin alone. It contains this pack,
+# so the pack's mesh never requires it (see agent-stack-train scripts/check_manifest.py).
+STACK_RELEASE = "agent-stack-train"
 
 
 def _load(path: Path) -> dict:
@@ -96,7 +100,7 @@ def test_pack_is_not_behind_the_live_train():
     train = _live_train()
     if train is None:
         pytest.skip("release train unreachable; live differential needs the network")
-    certified = train.get("certified", {})
+    certified = {k: v for k, v in train.get("certified", {}).items() if k != STACK_RELEASE}
     requires = _load(MESH_FILE).get("requires", {})
     assert set(certified) == COMPONENTS
     for name, entry in sorted(certified.items()):
